@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Control Elements Afloat | Maritime Operational Technology Security</title>
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface2: #eaf3f6; --border: #ccdce4;
+    --text: #0d1b26; --text-muted: #52697a; --accent: #0e7490; --accent2: #155e75; --on-accent: #ffffff;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10); --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b; --header-text: #ffffff; --card-hover: #e8f2f4;
+    --tag-gov: #6a1b9a; --tag-gov-bg: #f3e5f5;
+    --tag-found: #b45309; --tag-found-bg: #fff3e0;
+    --tag-ops: #2e7d32; --tag-ops-bg: #e8f5e9;
+    --tag-proto: #1565c0; --tag-proto-bg: #e3f0fd;
+    --tag-tools: #5c6bc0; --tag-tools-bg: #ede7f6;
+    --tag-safety: #b45309; --tag-safety-bg: #fdf3e3;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c; --surface: #101d2e; --surface2: #16283d; --border: #223349;
+    --text: #e6eef5; --text-muted: #8fa3b8; --accent: #22d3ee; --accent2: #67e8f9; --on-accent: #04222a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16; --header-text: #e6eef5; --card-hover: #16283d;
+    --tag-gov: #ce93d8; --tag-gov-bg: #1f0d2a;
+    --tag-found: #ffcc80; --tag-found-bg: #2a1a00;
+    --tag-ops: #a5d6a7; --tag-ops-bg: #0d2010;
+    --tag-proto: #90caf9; --tag-proto-bg: #0d1f35;
+    --tag-tools: #9fa8da; --tag-tools-bg: #1a1a35;
+    --tag-safety: #fbbf24; --tag-safety-bg: #2a1c05;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .skip-link { position: absolute; left: -999px; top: auto; }
+  .skip-link:focus { position: fixed; left: 12px; top: 12px; z-index: 400; background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 1180px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; display: none; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+  .icon-btn:hover { background: rgba(255,255,255,0.22); }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero { background: linear-gradient(135deg, #0a1a2b 0%, #103a4d 60%, #6a1b9a33 100%); color: #fff; padding: 30px 24px; }
+  .hero-inner { max-width: 1180px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+  .hero p { opacity: 0.82; font-size: 0.92rem; max-width: 74ch; line-height: 1.55; }
+
+  .page-shell { max-width: 1180px; margin: 0 auto; padding: 26px 24px 64px; display: grid; grid-template-columns: 250px 1fr; gap: 30px; align-items: start; }
+  .toc-sidebar { position: sticky; top: 82px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); max-height: calc(100vh - 100px); overflow-y: auto; }
+  .toc-sidebar h5 { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 14px 0 6px; }
+  .toc-sidebar h5:first-child { margin-top: 0; }
+  .toc-sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .toc-sidebar a { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 6px 8px; border-radius: 6px; }
+  .toc-sidebar a:hover { background: var(--surface2); color: var(--text); }
+  .toc-overlay { display: none; }
+
+  main.content { min-width: 0; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--tag-gov); text-decoration: none; margin-bottom: 18px; }
+  .back-link:hover { text-decoration: underline; }
+
+  .page-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .ctrl-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 0.78rem; font-weight: 700; padding: 7px 12px; border-radius: 20px; cursor: pointer; }
+  .ctrl-btn:hover { background: var(--surface2); }
+
+  .quickfacts { background: var(--surface); border: 2px solid var(--tag-gov); border-radius: 14px; padding: 18px 20px; margin-bottom: 32px; box-shadow: var(--shadow); }
+  .quickfacts h4 { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--tag-gov); margin-bottom: 12px; }
+  .fact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .fact-tile { background: var(--surface2); border-radius: 10px; padding: 10px 12px; }
+  .fact-tile .fact-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 4px; }
+  .fact-tile .fact-value { font-size: 0.86rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+
+  section.numsec { margin-bottom: 44px; padding-top: 8px; scroll-margin-top: 88px; }
+  .numsec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .numsec-num { font-size: 0.78rem; font-weight: 800; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 3px 9px; flex-shrink: 0; }
+  .numsec-head h3 { font-size: 1.2rem; font-weight: 800; }
+  .numsec > p { font-size: 0.92rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 14px; max-width: 82ch; }
+  .numsec h4.sub-head { font-size: 0.95rem; font-weight: 800; margin: 20px 0 10px; color: var(--text); }
+
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 8px 0 4px; }
+  .concept-item { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--tag-gov); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .concept-item h4 { font-size: 0.86rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .concept-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0; }
+
+  .howto-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+  .howto-list li { display: flex; gap: 12px; }
+  .howto-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--tag-gov-bg); color: var(--tag-gov); font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; }
+  .howto-list p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; }
+  .howto-list strong { color: var(--text); }
+
+  .cmp-table { width: 100%; border-collapse: collapse; margin: 10px 0 4px; font-size: 0.84rem; }
+  .cmp-table th, .cmp-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; line-height: 1.5; }
+  .cmp-table th { background: var(--surface2); font-weight: 800; color: var(--text); }
+  .cmp-table td.attr { font-weight: 700; color: var(--tag-gov); white-space: nowrap; }
+  .cmp-table td { color: var(--text-muted); }
+  .table-scroll { overflow-x: auto; border-radius: 10px; }
+  .sl-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; border-radius: 6px; background: var(--tag-gov-bg); color: var(--tag-gov); font-weight: 800; font-size: 0.76rem; padding: 0 6px; }
+
+  .stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 14px 0 6px; }
+  .stage-card { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+  .stage-band { padding: 10px 16px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+  .stage-card.general   .stage-band { background: var(--tag-found-bg); color: var(--tag-found); }
+  .stage-card.policies  .stage-band { background: var(--tag-ops-bg); color: var(--tag-ops); }
+  .stage-card.system    .stage-band { background: var(--tag-proto-bg); color: var(--tag-proto); }
+  .stage-card.component .stage-band { background: var(--tag-tools-bg); color: var(--tag-tools); }
+  .stage-card h5 { padding: 12px 16px 0; font-size: 0.94rem; font-weight: 800; }
+  .stage-card .stage-body { padding: 8px 16px 16px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; }
+
+  .sub-card { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; background: var(--surface); }
+  .sub-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface2); border: none; text-align: left; padding: 12px 14px; cursor: pointer; font-family: inherit; color: var(--text); }
+  .sub-toggle:hover { background: var(--card-hover); }
+  .sub-toggle-left { display: flex; align-items: center; gap: 10px; }
+  .sub-caret { color: var(--tag-gov); font-size: 0.85rem; flex-shrink: 0; width: 1em; display: inline-block; }
+  .sub-title { font-weight: 700; font-size: 0.86rem; }
+  .sub-chip { font-size: 0.66rem; font-weight: 700; color: var(--tag-gov); background: var(--tag-gov-bg); border-radius: 10px; padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; white-space: nowrap; }
+  .sub-chip.general   { color: var(--tag-found); background: var(--tag-found-bg); }
+  .sub-chip.policies  { color: var(--tag-ops); background: var(--tag-ops-bg); }
+  .sub-chip.system    { color: var(--tag-proto); background: var(--tag-proto-bg); }
+  .sub-chip.component { color: var(--tag-tools); background: var(--tag-tools-bg); }
+  .sub-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .sub-body.open { max-height: 1400px; }
+  .sub-body-inner { padding: 4px 16px 16px; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; }
+  .sub-body-inner strong { color: var(--text); }
+  .sub-body-inner ul { margin: 6px 0 0 18px; }
+  .sub-body-inner li { margin-bottom: 4px; }
+  .part-num { display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+
+  .teaching-note { background: var(--surface2); border: 2px solid var(--accent); border-radius: 14px; padding: 18px 20px; margin-top: 6px; }
+  .teaching-note h4 { font-size: 0.95rem; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+  .teaching-note p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px; }
+  .safety-flag { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety); border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; }
+
+  .exercise-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 8px; }
+  .exercise-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .exercise-card h5 { font-size: 0.88rem; font-weight: 800; margin-bottom: 6px; color: var(--tag-gov); }
+  .exercise-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; }
+
+  .reading-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .reading-list a { font-size: 0.88rem; font-weight: 600; color: var(--tag-gov); text-decoration: none; }
+  .reading-list a:hover { text-decoration: underline; }
+  .reading-list span { display: block; font-size: 0.78rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+  .disclaimer { font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 12px; margin-top: 14px; line-height: 1.6; }
+
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media (max-width: 880px) {
+    .icon-btn { display: flex; }
+    .page-shell { grid-template-columns: 1fr; padding: 22px 16px 48px; }
+    .toc-sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 78vw; max-width: 320px; z-index: 300; border-radius: 0; transform: translateX(-100%); transition: transform 0.25s ease; box-shadow: var(--shadow-hover); }
+    .toc-sidebar.open { transform: translateX(0); }
+    .toc-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 250; }
+    .toc-overlay.open { display: block; }
+    .hero { padding: 24px 16px; }
+    .header-inner { padding: 14px 16px; }
+  }
+  @media print {
+    header, .toc-sidebar, .toc-overlay, .page-controls, .back-link { display: none !important; }
+    .page-shell { grid-template-columns: 1fr; padding: 0 12px; }
+    .sub-body { max-height: none !important; }
+    .hero { background: none; color: var(--text); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <button class="icon-btn" id="tocToggleBtn" aria-expanded="false" aria-controls="tocSidebar" aria-label="Toggle table of contents">☰</button>
+      <div class="brand-icon">MOT</div>
+      <div class="brand-text">
+        <h1>Maritime Operational Technology Security</h1>
+        <p>Final Control Elements Afloat</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="printBtn" onclick="window.print()" aria-label="Print or save as PDF" style="display:flex;">🖨️</button>
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Lab · Field Devices</span>
+    <h2>Final Control Elements Afloat</h2>
+    <p>A hands-on look at the final-control side of maritime OT: steering gear, controllable-pitch propellers, bow thrusters, ballast pumps and valves — how a controller's command becomes physical motion, and why actuator failure drives so much of shipboard safety design.</p>
+    <p style="margin-top:10px;"><span class="safety-flag">⚠ Simulation only — no live equipment</span></p>
+  </div>
+</div>
+
+<div class="toc-overlay" id="tocOverlay"></div>
+<div class="page-shell">
+  <nav class="toc-sidebar" id="tocSidebar" aria-label="Page contents">
+    <h5>Orientation</h5>
+    <ul>
+      <li><a href="#sec-01">01 · Why Final Control Elements Matter</a></li>
+    </ul>
+    <h5>Systems</h5>
+    <ul>
+      <li><a href="#sec-02">02 · Steering Gear</a></li>
+      <li><a href="#sec-03">03 · Controllable-Pitch Propellers</a></li>
+      <li><a href="#sec-04">04 · Bow/Stern Thrusters</a></li>
+      <li><a href="#sec-05">05 · Ballast Pumps &amp; Valves</a></li>
+    </ul>
+    <h5>Design &amp; Reference</h5>
+    <ul>
+      <li><a href="#sec-06">06 · Failure Modes &amp; Process Safety Design</a></li>
+      <li><a href="#sec-07">07 · Related Pages</a></li>
+    </ul>
+  </nav>
+
+  <main class="content" id="main-content">
+    <a class="back-link" href="index.html">← Back to Course Navigation</a>
+
+    <div class="page-controls">
+      <button class="ctrl-btn" id="expandAllBtn">▾ Expand all sections</button>
+      <button class="ctrl-btn" id="collapseAllBtn">▸ Collapse all</button>
+    </div>
+
+    <div class="quickfacts">
+      <h4>Quick Facts</h4>
+      <div class="fact-grid">
+        <div class="fact-tile"><div class="fact-label">Focus</div><div class="fact-value">Final-control / actuation side of maritime OT</div></div>
+        <div class="fact-tile"><div class="fact-label">Systems Covered</div><div class="fact-value">Steering gear, CPP, thrusters, ballast pumps/valves</div></div>
+        <div class="fact-tile"><div class="fact-label">Pairing</div><div class="fact-value">Extends Lesson 3's device tour</div></div>
+        <div class="fact-tile"><div class="fact-label">Format</div><div class="fact-value">Conceptual walkthrough + failure-mode analysis</div></div>
+        <div class="fact-tile"><div class="fact-label">Environment</div><div class="fact-value">Simulation / diagram-based, no live equipment</div></div>
+        <div class="fact-tile"><div class="fact-label">Prerequisite</div><div class="fact-value">Lesson 3 recommended first</div></div>
+      </div>
+    </div>
+
+    <section class="numsec" id="sec-01">
+      <div class="numsec-head"><span class="numsec-num">01</span><h3>Why Final Control Elements Matter</h3></div>
+      <p>Every lesson up to this point treats a command — a course change, a ballast adjustment, a thrust setting — as something a controller decides. But a decision inside a control system is only a signal until something turns it into physical motion. The device that does that conversion is called a <strong>final control element</strong> (or actuator): a steering gear ram, a propeller pitch mechanism, a thruster motor, a ballast pump. This page picks up where Lesson 3's device tour leaves off and looks specifically at that last, physical link in the chain.</p>
+      <div class="concept-grid">
+        <div class="concept-item"><h4>The command chain</h4><p>Sensor → controller → final control element → physical process. Security discussions often stop at the controller; the actuator is where a compromised command actually does something in the real world.</p></div>
+        <div class="concept-item"><h4>Why this matters for security</h4><p>Understanding what an actuator can and can't physically do — how fast it moves, what its safe range is, how it fails — is what turns an abstract "unauthorized command" concern into a concrete, analyzable consequence.</p></div>
+        <div class="concept-item"><h4>Why this matters for safety design</h4><p>Because final control elements move mass, apply force, or shift fluid, their failure modes are engineered as carefully as their normal operation — a theme that runs through every system on this page.</p></div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-02">
+      <div class="numsec-head"><span class="numsec-num">02</span><h3>Steering Gear</h3></div>
+      <p>Steering gear turns a commanded rudder angle — from the bridge, the autopilot, or an integrated navigation system — into the actual physical movement of the rudder. On most oceangoing vessels this is done hydraulically or electro-hydraulically, and it is one of the most safety-critical mechanical systems on the entire ship.</p>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am2-1"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">How it works</span></span><span class="sub-chip">Mechanism</span></button>
+        <div class="sub-body" id="am2-1" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>A hydraulic steering gear uses one or more rams or a rotary vane arrangement, driven by hydraulic pumps, to move the rudder stock to a commanded angle. A rudder angle feedback sensor reports the actual position back to the control system, closing the loop so the bridge display shows where the rudder actually is, not just where it was told to go.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am2-2"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Why it's uniquely safety-critical</span></span><span class="sub-chip">Safety</span></button>
+        <div class="sub-body" id="am2-2" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>A vessel that loses steering can lose the ability to avoid a collision or grounding within seconds, in a way that is often irreversible before a backup system can take over. This is precisely why SOLAS requires <strong>redundant steering gear systems</strong> (typically two independent power units) and a means of steering directly from the steering gear compartment if the bridge control path fails entirely.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am2-3"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Failure modes</span></span><span class="sub-chip">Failure Analysis</span></button>
+        <div class="sub-body" id="am2-3" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>Loss of hydraulic pressure, a stuck ram, a feedback sensor reporting a false rudder angle, or a control signal that doesn't match the physical rudder position are all recognized steering gear failure modes — each with its own alarm and manual fallback procedure required by class rules and SOLAS.</p><p><strong>Worked example:</strong> if a compromised or malfunctioning control signal commands "hard to port" while the feedback sensor still (correctly) reports amidships, the mismatch itself is the alarm condition an OT security engineer should expect the monitoring system to catch — see Lesson 11's alarm correlation content and the <a href="labs.html">Correlating an Alarm-Log Timeline</a> lab.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-03">
+      <div class="numsec-head"><span class="numsec-num">03</span><h3>Controllable-Pitch Propellers (CPP)</h3></div>
+      <p>A fixed-pitch propeller changes thrust only by changing shaft RPM — speeding up or slowing down the engine. A controllable-pitch propeller (CPP) instead keeps the shaft turning at a constant speed and changes the angle (pitch) of the propeller blades themselves to increase, decrease, or reverse thrust.</p>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am3-1"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Why decouple thrust from RPM?</span></span><span class="sub-chip">Design Rationale</span></button>
+        <div class="sub-body" id="am3-1" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>Keeping shaft RPM constant lets the main engine run at its most efficient, stable speed continuously, while pitch does the fast-response work of changing thrust — useful for vessels that need quick maneuvering response, like ferries and offshore support vessels, without constantly cycling engine speed.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am3-2"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Hydraulic pitch control</span></span><span class="sub-chip">Mechanism</span></button>
+        <div class="sub-body" id="am3-2" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>Pitch is typically actuated hydraulically through an oil distribution box and a control rod running the length of the propeller shaft to a mechanism inside the propeller hub itself — meaning the actuator's moving parts are submerged and mechanically remote from the control room, which shapes how it's monitored and maintained.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am3-3"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Failure modes</span></span><span class="sub-chip">Failure Analysis</span></button>
+        <div class="sub-body" id="am3-3" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>Loss of hydraulic oil pressure to the pitch mechanism, a stuck pitch actuator (thrust "frozen" at its last commanded value), or a pitch-feedback sensor mismatch are the primary failure modes. Because pitch and RPM are separately controlled, a CPP failure can leave a vessel with an engine still running normally but no way to change thrust — a distinct hazard profile from a fixed-pitch propeller's failure modes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-04">
+      <div class="numsec-head"><span class="numsec-num">04</span><h3>Bow/Stern Thrusters</h3></div>
+      <p>Bow and stern thrusters are transverse propulsion units — usually tunnel thrusters mounted through the hull — that push the vessel sideways. They're most heavily used at low speed, especially maneuvering in and out of port, where the main propeller and rudder are far less effective.</p>
+      <div class="concept-grid">
+        <div class="concept-item"><h4>Role in maneuvering</h4><p>Thrusters give a vessel fine lateral control during docking, undocking, and canal transits, reducing or eliminating the need for tug assistance in many ports.</p></div>
+        <div class="concept-item"><h4>Typical control interface</h4><p>Usually commanded from a bridge wing console or a dedicated maneuvering panel, often integrated with a dynamic positioning (DP) system on vessels equipped for it, giving thrusters a more direct, high-frequency command path than slower main-propulsion controls.</p></div>
+        <div class="concept-item"><h4>Concentrated port-call exposure</h4><p>Because thrusters are used almost exclusively during port maneuvering, their control path is active precisely when a vessel is also exchanging network connections with shore infrastructure and pilots — worth keeping in mind alongside Lesson 4's port-network content.</p></div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-05">
+      <div class="numsec-head"><span class="numsec-num">05</span><h3>Ballast Pumps &amp; Valves</h3></div>
+      <p>A ballast control system's commands only matter once a pump actually moves water and a valve actually opens or closes — the same physical-consequence idea introduced in Section 01, made concrete. This is also the system modeled directly in the course's <a href="simulators.html">Ballast Control Process Simulator</a>.</p>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am5-1"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">The command-to-motion loop</span></span><span class="sub-chip">Mechanism</span></button>
+        <div class="sub-body" id="am5-1" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>A ballast control system commands specific valves open, starts a pump, and monitors tank-level sensors as feedback — closing the loop by comparing the actual level trend against the commanded operation, and stopping automatically once a target level is reached or an alarm condition is detected.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am5-2"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Why ballast failure or manipulation matters</span></span><span class="sub-chip">Consequence</span></button>
+        <div class="sub-body" id="am5-2" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>Ballast directly affects a vessel's trim, list, and stability. An unintended or malicious change to ballast distribution has both an immediate safety consequence (list, reduced stability margin) and, in cargo operations, a commercial/logistics consequence (incorrect loading condition). Ballast water management systems and their control interfaces have been noted in some public security research and incident reporting as a system worth defending carefully — this is mentioned here neutrally, as a reason ballast control deserves the same segmentation and access-control attention as navigation systems, not as a how-to.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="am5-3"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">Failure modes</span></span><span class="sub-chip">Failure Analysis</span></button>
+        <div class="sub-body" id="am5-3" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p>A valve stuck open or closed, a pump that fails to start or stop on command, or a tank-level sensor reporting a stale or incorrect value are the primary failure modes — each of which the ballast control system's own alarms are designed to catch, provided the alarm thresholds and sensor integrity are themselves trustworthy.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-06">
+      <div class="numsec-head"><span class="numsec-num">06</span><h3>Actuator Failure Modes &amp; Process Safety Design</h3></div>
+      <p>Every system above has its own specific failure modes, but they all sit inside a small set of general process-safety design categories. Understanding these categories is what lets a security engineer reason about consequence, not just about whether a command was authorized.</p>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>Design Choice</th><th>What It Means</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td class="attr">Fail-safe</td><td>On loss of power or control signal, the actuator moves to a predefined safe state.</td><td>A relief valve that fails open to release pressure rather than allowing a vessel over-pressurization.</td></tr>
+            <tr><td class="attr">Fail-last-position</td><td>On loss of signal, the actuator holds wherever it currently is rather than moving anywhere.</td><td>A CPP pitch mechanism that freezes at its last commanded pitch if hydraulic control signal is lost, rather than snapping to zero thrust.</td></tr>
+            <tr><td class="attr">Fail-open / fail-closed</td><td>A binary actuator (typically a valve) is designed to default to one specific state on failure.</td><td>A ballast valve that fails closed to prevent uncontrolled flooding, versus a bilge valve that may be designed to fail open for drainage.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h4 class="sub-head">Why this matters for security decisions</h4>
+      <p>These categories are not interchangeable, and the choice is rarely available to a security team after the fact — it's an engineering decision baked into the physical system. This has a direct consequence for how a security engineer should think about compromise: <strong>you cannot "fail closed" a rudder.</strong> Steering gear is, by necessity, a fail-last-position (or actively-held) system — a rudder has no safe default angle, so the safety design instead focuses on redundancy (Section 02) and rapid detection of a mismatch between commanded and actual position, rather than on a safe failure state that doesn't exist for this system.</p>
+      <div class="teaching-note">
+        <h4>📖 Teaching Note</h4>
+        <p><strong>Anchor lesson:</strong> Lesson 3 (device tour) and Lesson 7 (vulnerabilities &amp; countermeasures). Use the steering-gear fail-last-position example specifically to challenge a common learner assumption carried over from IT security — that "fail closed" is always the safer default. In final control elements, the safe default depends entirely on what the physical process needs, and sometimes no safe default exists at all.</p>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-07">
+      <div class="numsec-head"><span class="numsec-num">07</span><h3>Related Pages</h3></div>
+      <ul class="reading-list">
+        <li><a href="lesson03.html">Lesson 3 — Maritime OT Technologies &amp; Field Devices<span>The device-by-device tour this page extends with a focus on final control elements</span></a></li>
+        <li><a href="simulators.html">Maritime OT Simulator Suite<span>Includes the Ballast Control Process Simulator referenced in Section 05</span></a></li>
+      </ul>
+      <p class="disclaimer">This page is a conceptual and diagram-based walkthrough of final control elements; it does not describe or reference any specific vessel's actual equipment, wiring, or configuration, and no exercise here involves live equipment. Any mention of a documented security concern regarding ballast systems is presented for defensive, contextual awareness only, consistent with this course's Safeguards policy.</p>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only. All exercises are simulation-based and defensive in scope.
+</footer>
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mot-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) {}
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var tocBtn = document.getElementById('tocToggleBtn');
+  var toc = document.getElementById('tocSidebar');
+  var overlay = document.getElementById('tocOverlay');
+  function closeToc() {
+    toc.classList.remove('open');
+    overlay.classList.remove('open');
+    tocBtn.setAttribute('aria-expanded', 'false');
+  }
+  tocBtn.addEventListener('click', function () {
+    var isOpen = toc.classList.contains('open');
+    if (isOpen) { closeToc(); } else {
+      toc.classList.add('open');
+      overlay.classList.add('open');
+      tocBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+  overlay.addEventListener('click', closeToc);
+  toc.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeToc); });
+
+  function setSub(btn, expand) {
+    var card = btn.closest('.sub-card');
+    var body = card.querySelector('.sub-body');
+    var caret = btn.querySelector('.sub-caret');
+    btn.setAttribute('aria-expanded', String(expand));
+    body.setAttribute('aria-hidden', String(!expand));
+    if (expand) {
+      body.classList.add('open');
+      body.removeAttribute('inert');
+      if (caret) caret.textContent = '▾';
+    } else {
+      body.classList.remove('open');
+      body.setAttribute('inert', '');
+      if (caret) caret.textContent = '▸';
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.sub-toggle');
+    if (!btn) return;
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    setSub(btn, !expanded);
+  });
+  document.getElementById('expandAllBtn').addEventListener('click', function () {
+    document.querySelectorAll('.sub-toggle').forEach(function (btn) { setSub(btn, true); });
+  });
+  document.getElementById('collapseAllBtn').addEventListener('click', function () {
+    document.querySelectorAll('.sub-toggle').forEach(function (btn) { setSub(btn, false); });
+  });
+</script>
+</body>
+</html>

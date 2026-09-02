@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 9: Governance, Risk &amp; Compliance for Maritime IT/OT | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 4, Lesson 9 of the Maritime Operational Technology Security curriculum: the Ship Security Plan, the ISM Code's cyber risk requirements, flag/port state control, classification society audits, and building an asset inventory and risk register that survive an audit.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 4 · Lesson 9 · 4 Contact Hours</span>
+    <h1>Governance, Risk &amp; Compliance for Maritime IT/OT</h1>
+    <p class="tagline">Ship Security Plans, the ISM Code's cyber risk requirements, flag state and port state control expectations, classification society audits, and the asset inventory and risk register that make an audit survivable.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">ISPS &amp; SSP</a>
+    <a href="#s2" data-section="s2">ISM &amp; MSC.428(98)</a>
+    <a href="#s3" data-section="s3">Flag &amp; Port State</a>
+    <a href="#s4" data-section="s4">Class Audits</a>
+    <a href="#s5" data-section="s5">Asset &amp; Risk Register</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>A framework only becomes real for a ship's crew and shore staff once it shows up as a document someone has to produce, a plan someone has to follow, and an inspector someone has to satisfy. Lesson 8 introduced the frameworks; this lesson walks through the paper trail and the people who check it — the <dfn id="def-ssp">Ship Security Plan</dfn> required under the <dfn id="def-isps">ISPS Code</dfn>, the way cyber risk was folded into the ISM Code's <dfn id="def-sms">Safety Management System</dfn>, the roles of <dfn id="def-flagstate">flag state</dfn> and <dfn id="def-psc">port state control</dfn>, the classification society's dual audit and Recognized Organization role, and — because none of this works without one — the basic asset inventory and risk register that give an operator something concrete to hand an auditor.</p>
+      <p>None of this is abstract compliance theater. A vessel that cannot produce a current network diagram, a defensible asset inventory, or evidence that cyber risk was actually discussed at its last SMS review is a vessel that is going to generate audit findings — and, more importantly, is a vessel whose security team does not actually know what it is defending. The paperwork and the security posture are not separate concerns; a good risk register is a security tool that happens to also satisfy an auditor.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of a vessel's compliance documentation the way you would think of a patient's medical chart. The chart doesn't cure anything by itself — but a hospital that can't produce an accurate, current chart during an inspection has a real problem, and so does a hospital where the chart says one thing and the patient's actual condition says another. A Ship Security Plan, an SMS cyber risk entry, and an asset inventory are that ship's chart: they need to be current, accurate, and — the part most programs get wrong — they need to actually match what a technician would find if they walked the network today.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Explain the Ship Security Plan (SSP) and its relationship to the ISPS Code.</li>
+        <li>Explain how cyber risk is folded into the ISM Code's Safety Management System.</li>
+        <li>Describe flag state and port state control's role in maritime cyber compliance.</li>
+        <li>Describe the classification society's audit and survey role.</li>
+        <li>Build a basic asset inventory and risk register appropriate for a vessel or fleet.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔐</span>
+      <h2>The ISPS Code and the Ship Security Plan</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>The <dfn>International Ship and Port Facility Security (ISPS) Code</dfn> entered into force in 2004, adopted as a direct response to the post-9/11 recognition that ships and port facilities were vulnerable to deliberate, unlawful acts — originally understood almost entirely in physical terms: unauthorized boarding, smuggling, sabotage, piracy, and terrorism. Every SOLAS-regulated vessel above the applicable size threshold must carry an approved <dfn>Ship Security Plan (SSP)</dfn>, developed under the direction of a designated <dfn>Ship Security Officer (SSO)</dfn> aboard and a <dfn>Company Security Officer (CSO)</dfn> ashore, describing the security measures, procedures, and equipment in place to prevent those unlawful acts.</p>
+    <p>For its first decade and more, the SSP's contents stayed almost entirely physical: restricted-area access control, gangway watch procedures, security drills, and coordination with port facility security officers. That has changed. As vessel systems converged with shore networks (Lesson 1) and cyber risk became recognized as a route to the same kinds of consequences the ISPS Code was written to prevent — a manipulated cargo system, a disabled propulsion control, an falsified AIS track — SSPs increasingly need to address cyber risk explicitly, alongside physical security, rather than leaving it entirely to the separate SMS cyber risk management process covered in Module 2.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A container line's Company Security Officer updates the fleet's standard SSP template to add a short cyber-security annex: who to notify if the cargo management system behaves unexpectedly, what to do if a USB device of unknown origin is found near the bridge, and how a suspected cyber incident should be logged alongside the physical security incidents the SSP already tracks. This doesn't replace the SMS-based cyber risk management process in Module 2 — it makes sure the ship's frontline security officer, who may not be the same person managing the SMS, has a documented, drillable procedure for the cyber scenarios most likely to look like a security incident in the moment.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners sometimes assume the SSP and the SMS cyber risk requirements (Module 2) are the same document, or that one supersedes the other. They are two separate instruments under two separate IMO codes (ISPS and ISM respectively), maintained by roles that may or may not be the same person aboard a given vessel — worth stating plainly before moving on.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📘</span>
+      <h2>The ISM Code, the SMS, and MSC.428(98)</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>The <dfn>International Safety Management (ISM) Code</dfn> requires every certified vessel and its managing company to maintain a <dfn>Safety Management System (SMS)</dfn> — the documented set of policies, procedures, and risk-assessment processes covering everything from maintenance to emergency response. When the IMO's Maritime Safety Committee turned to cyber risk, it made a deliberate, consequential choice: rather than writing an entirely new cyber-specific code and certification scheme, <dfn>Resolution MSC.428(98)</dfn> affirmed that cyber risk already falls within the risk management the ISM Code requires, and directed that it be addressed within each company's existing SMS.</p>
+    <p>That choice matters practically. It means a maritime cyber risk program does not get a separate audit calendar, a separate certificate, or a separate officer role by default — it gets folded into a process every operator was already required to run. The accompanying guidance, MSC-FAL.1/Circ.3, spells out what "addressed within the SMS" should actually look like: risk identification covering both IT and OT systems, defined roles and responsibilities, contingency planning, and response and recovery procedures, documented the same way any other operational risk in the SMS is documented.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Rather than issuing every vessel a brand-new "cyber license," the IMO effectively said: your existing safety inspector's checklist now has a cyber section on it. The inspector doesn't change, the certificate doesn't change — but what counts as a complete, well-run safety management system does.</p>
+    </div>
+    <p>For the full text of MSC-FAL.1/Circ.3 and Resolution MSC.428(98), and a deeper walkthrough of how they were adopted, see the dedicated <a href="imo-msc-fal.html">IMO Maritime Cyber Risk Management reference page</a>.</p>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🏴</span>
+      <h2>Flag state and port state control</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>A vessel's <dfn>flag state</dfn> — the country whose flag it flies and under whose law it is registered — bears the primary responsibility for ensuring the vessel meets its international obligations, including ISM Code compliance. In practice, flag states routinely delegate SMS audits to a classification society acting as a <dfn>Recognized Organization (RO)</dfn> (covered in Module 4), but accountability for the outcome remains with the flag state. Since cyber risk was folded into the SMS by MSC.428(98), it has been checked as part of that same audit cycle — specifically <strong>from the first annual SMS verification carried out after 1 January 2021</strong>, the date the IMO set for cyber risk management to be incorporated into SMS audits fleet-wide.</p>
+    <p><dfn>Port state control (PSC)</dfn> works differently. Where flag state oversight follows the vessel across its whole operating life, PSC is an inspection regime carried out by the authorities of a port a foreign-flagged vessel calls at, checking that the ship meets applicable international conventions regardless of which flag it flies. A PSC officer is not typically conducting a full cyber audit at the gangway — but they can, and increasingly do, ask to see documentary evidence that cyber risk is being managed: a current SMS entry addressing cyber risk, crew familiarity with basic incident reporting procedures, and evidence that the ship's documented cyber risk management reflects reality rather than a template nobody has updated since it was issued.</p>
+    <table class="compare-table">
+      <caption>Flag state versus port state control</caption>
+      <thead>
+        <tr><th scope="col">Characteristic</th><th scope="col">Flag State</th><th scope="col">Port State Control</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Authority basis</td><td>The vessel's own registry and national law</td><td>The port country's authority over foreign vessels calling there</td></tr>
+        <tr><td>Scope</td><td>Full ISM Code / SMS compliance, ongoing across the vessel's life</td><td>Spot-check compliance with applicable conventions, at each port call</td></tr>
+        <tr><td>Cyber risk role</td><td>Annual SMS audit includes cyber risk management since 1 Jan 2021</td><td>May request documentary evidence of cyber risk management during inspection</td></tr>
+        <tr><td>Typical outcome</td><td>Certificate renewal, deficiency notice, or (rarely) detention</td><td>Deficiency notice or, for serious findings, detention until corrected</td></tr>
+      </tbody>
+    </table>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A bulk carrier flagged in one country calls at a foreign port. The port state control officer, reviewing the vessel's SMS documentation, asks the master to show where cyber risk is addressed and whether the crew can describe the procedure for reporting a suspected cyber incident. The master produces the SMS cyber risk section, but it references a network diagram that is visibly out of date — a satellite communications upgrade installed eighteen months earlier isn't reflected anywhere in the documentation. The officer notes it as a deficiency requiring correction, not a detainable offense on its own, but a clear signal that the SMS entry was written once and never revisited.</p>
+    </div>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛡️</span>
+      <h2>Classification society audits</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>A classification society plays two related but distinct roles that are easy to conflate. First, it verifies compliance with its own <dfn>class rules</dfn> — the technical requirements a vessel must meet to earn and keep its class certificate, which for covered newbuilds now include <a href="iacs-e26-e27.html">IACS UR E26 and E27</a>'s cyber resilience design requirements, checked through plan approval at design stage and survey during and after construction. Second, in many jurisdictions the same society acts as a <dfn>Recognized Organization (RO)</dfn>, performing statutory audits — including ISM Code and SMS audits — on the flag state's behalf, under authority the flag state has delegated to it.</p>
+    <p>These two roles use different rulebooks and different triggers, even when the same surveyor is doing both jobs on the same visit: class survey asks "does this system meet the class society's technical rules," while a statutory RO audit asks "does this operator meet the flag state's regulatory requirements." A gap found in one doesn't automatically become a finding in the other, though in practice a well-run vessel keeps both aligned.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — a class survey finding</span>
+      <p>During a periodic class survey, a surveyor reviewing a vessel's network architecture documentation against its UR E26 zone diagram finds an undocumented network change: a new remote-diagnostics connection installed by an engine vendor's technician during a prior port call, wired directly into the propulsion control zone without going through the documented boundary protection or appearing anywhere in the as-built diagram. The surveyor raises a finding requiring the operator to either remove the connection, document and properly secure it within the approved zone architecture, or provide a justified variance — because an undocumented path into a zone that UR E26 explicitly required to be protected is exactly the kind of drift the requirement exists to catch. The finding closes only once the ship's actual network matches its documentation again, not before.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>The worked example above is a good bridge to Module 5: a class surveyor could not have caught that undocumented connection without an accurate baseline to compare against. Every governance and audit mechanism covered in this lesson — SSP, SMS, flag state, PSC, class — ultimately depends on the same underlying artifact: a current, accurate record of what's actually on the network. That's exactly what Module 5 builds.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🗂️</span>
+      <h2>Building an asset inventory and risk register</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Every compliance mechanism covered so far — the SSP, the SMS cyber risk entry, the flag state audit, the PSC inspection, the class survey — is only as good as the underlying record of what equipment actually exists on the vessel and what could go wrong with it. Two artifacts do that work: the <dfn>asset inventory</dfn> and the <dfn>risk register</dfn>.</p>
+    <p>A maritime OT asset inventory should capture, at minimum: the <strong>device</strong> itself (make, model, function), the <strong>zone</strong> it sits in (matching the vessel's UR E26 or equivalent zone architecture), its <strong>criticality</strong> (what happens if it fails or is compromised), the <strong>vendor</strong> and support contact, the <strong>firmware or software version</strong> currently installed, and the <strong>last patch or dry-dock service date</strong> — because OT equipment is frequently only updated during scheduled yard periods, unlike shore IT which can patch on a rolling basis.</p>
+    <p>A risk register entry, in turn, should be structured around: a clear <strong>risk description</strong>, an estimated <strong>likelihood</strong>, an estimated <strong>consequence</strong>, the <strong>existing controls</strong> already in place, a <strong>treatment plan</strong> for anything not yet adequately controlled, an accountable <strong>owner</strong>, and a <strong>review date</strong> — ideally tied into a <dfn>POA&amp;M-style</dfn> (Plan of Action and Milestones) tracking process so that treatment plans have real deadlines and someone checks whether they were actually completed, rather than a register that gets written once and never revisited, exactly like the SMS cyber risk entry in the port state control worked example above.</p>
+    <table class="compare-table">
+      <caption>Example asset inventory row and risk register row</caption>
+      <thead>
+        <tr><th scope="col">Asset inventory row</th><th scope="col">Risk register row</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Device:</strong> ECDIS Unit 1 (bridge)<br><strong>Zone:</strong> Navigation<br><strong>Criticality:</strong> High<br><strong>Vendor:</strong> OEM-A Marine Electronics<br><strong>Firmware:</strong> v4.2.1<br><strong>Last patched/serviced:</strong> Last dry dock, 14 months ago</td>
+          <td><strong>Risk:</strong> ECDIS firmware is two versions behind vendor's current release, including a patched remote-code-execution advisory<br><strong>Likelihood:</strong> Medium<br><strong>Consequence:</strong> High (primary means of navigation)<br><strong>Existing controls:</strong> Network segmentation from business LAN; no direct internet path<br><strong>Treatment plan:</strong> Schedule firmware update at next port call with vendor technician<br><strong>Owner:</strong> Chief Officer / IT Manager (fleet)<br><strong>Review date:</strong> Next SMS quarterly review</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>An asset inventory without a risk register is like a hospital's equipment log with no chart of which patients are in critical condition — you know what you have, but not what to worry about first. A risk register without an asset inventory is worse: you're prioritizing risks against equipment you can't actually verify still exists, still has that configuration, or is even still connected the way the register assumes. They only work as a pair.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is a good point to have learners build a one-row version of each artifact for a piece of equipment they know — see the activity below and the suggested assessment artifact at the end of the review section for a fuller version of this exercise.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Compliance Activity to Its Owner</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each compliance activity below, select who is primarily responsible for it. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Compliance activity</th><th scope="col">Primary owner</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="sso">
+                <td>Reviewing the Ship Security Plan for cyber content</td>
+                <td>
+                  <select aria-label="Owner for reviewing the Ship Security Plan for cyber content">
+                    <option value="">— Select —</option>
+                    <option value="sso">Ship Security Officer / Company Security Officer</option>
+                    <option value="flag">Flag State / Recognized Organization</option>
+                    <option value="psc">Port State Control</option>
+                    <option value="class">Classification Society</option>
+                    <option value="fleet">Fleet / shore-based security manager</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="flag">
+                <td>Auditing SMS cyber risk management annually</td>
+                <td>
+                  <select aria-label="Owner for auditing SMS cyber risk management annually">
+                    <option value="">— Select —</option>
+                    <option value="sso">Ship Security Officer / Company Security Officer</option>
+                    <option value="flag">Flag State / Recognized Organization</option>
+                    <option value="psc">Port State Control</option>
+                    <option value="class">Classification Society</option>
+                    <option value="fleet">Fleet / shore-based security manager</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="psc">
+                <td>Inspecting a foreign-flagged vessel at a foreign port</td>
+                <td>
+                  <select aria-label="Owner for inspecting a foreign-flagged vessel at a foreign port">
+                    <option value="">— Select —</option>
+                    <option value="sso">Ship Security Officer / Company Security Officer</option>
+                    <option value="flag">Flag State / Recognized Organization</option>
+                    <option value="psc">Port State Control</option>
+                    <option value="class">Classification Society</option>
+                    <option value="fleet">Fleet / shore-based security manager</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="class">
+                <td>Verifying newbuild compliance with UR E26/E27</td>
+                <td>
+                  <select aria-label="Owner for verifying newbuild compliance with UR E26/E27">
+                    <option value="">— Select —</option>
+                    <option value="sso">Ship Security Officer / Company Security Officer</option>
+                    <option value="flag">Flag State / Recognized Organization</option>
+                    <option value="psc">Port State Control</option>
+                    <option value="class">Classification Society</option>
+                    <option value="fleet">Fleet / shore-based security manager</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="fleet">
+                <td>Maintaining the fleet risk register</td>
+                <td>
+                  <select aria-label="Owner for maintaining the fleet risk register">
+                    <option value="">— Select —</option>
+                    <option value="sso">Ship Security Officer / Company Security Officer</option>
+                    <option value="flag">Flag State / Recognized Organization</option>
+                    <option value="psc">Port State Control</option>
+                    <option value="class">Classification Society</option>
+                    <option value="fleet">Fleet / shore-based security manager</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: Audit Readiness Simulator</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live systems or real audit determinations</span>
+    <p>Click each governance artifact below to add it to this vessel's compliance posture and see how audit readiness changes. Nothing here touches a real audit record — this is a model of a decision, not an inspection result.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Governance artifacts">
+          <button type="button" class="sim-toggle" data-conn="diagram" aria-pressed="false">Documented network diagram</button>
+          <button type="button" class="sim-toggle" data-conn="inventory" aria-pressed="false">Current asset inventory</button>
+          <button type="button" class="sim-toggle" data-conn="irplan" aria-pressed="false">Tested incident response plan</button>
+          <button type="button" class="sim-toggle" data-conn="policy" aria-pressed="false">Signed acceptable-use / remote-access policy</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Audit readiness</span><span id="simMeterValue">0%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:0%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> none of the four artifacts are in place. An auditor arriving today would find a vessel that cannot substantiate its cyber risk management with documentation. Select an artifact above to see what having it changes.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q1.</span>The Ship Security Plan (SSP) is required under which IMO instrument, and what was its original focus?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> The ISM Code, originally focused on cyber risk management.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> The ISPS Code, originally focused on physical security against unlawful acts.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> IACS UR E26/E27, originally focused on network design.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> MSC-FAL.1/Circ.3, originally focused on port state inspections.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q2.</span>What did Resolution MSC.428(98) actually do?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> Created a brand-new cyber-specific IMO certificate separate from the ISM Code.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> Made cyber risk management voluntary for all vessels.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> Affirmed that cyber risk falls within existing ISM Code risk management and must be addressed inside each company's Safety Management System.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> Replaced port state control inspections with classification society audits.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q3.</span>What is the key difference between flag state oversight and port state control?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> Flag state oversight follows the vessel across its operating life via SMS audits; port state control inspects foreign-flagged vessels at the ports they call at.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> Port state control only applies to vessels flagged in the inspecting country.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> Flag state oversight only occurs once, at vessel delivery.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> There is no meaningful difference — both terms describe the same inspection regime.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q4.</span>A classification society finds an undocumented network connection during a survey that isn't reflected in the vessel's approved UR E26 zone diagram. Which role is it exercising when it raises that finding?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> Port state control, inspecting a foreign-flagged vessel.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> Ship Security Officer, reviewing the SSP.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> Flag state, conducting an annual SMS audit.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> Classification society, verifying compliance with its own class rules (including UR E26/E27 for covered newbuilds).</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q5.</span>Why should an asset inventory and a risk register be maintained together rather than separately?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> IMO regulations require them to be stored in the same physical binder.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> A risk register without an accurate asset inventory prioritizes risks against equipment that may no longer match what's actually installed, while an inventory without a risk register doesn't say what to worry about first.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Only the risk register is ever reviewed by auditors, so the asset inventory is optional.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Classification societies do not recognize asset inventories as valid documentation.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner produce a one-row asset inventory entry and a matching one-row risk register entry for a real or hypothetical piece of OT equipment (a chartplotter, an engine monitoring sensor, a shore-side terminal PLC), using the fields introduced in Module 5. This is a low-stakes way to confirm the governance vocabulary transferred before Lesson 10 builds access-control decisions on top of it.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://www.imo.org/en/OurWork/Security/Pages/SOLAS-XI-2%20ISPS%20Code.aspx" target="_blank" rel="noopener noreferrer">IMO — SOLAS XI-2 and the ISPS Code</a> — the International Maritime Organization's overview of the Code covered in Module 1, including the Ship Security Plan requirement.</li>
+      <li><a href="https://www.imo.org/en/OurWork/Security/Pages/Cyber-security.aspx" target="_blank" rel="noopener noreferrer">IMO — Maritime Cyber Risk Management</a> — the overview page for MSC-FAL.1/Circ.3 and Resolution MSC.428(98) covered in Module 2, with full depth on this site's <a href="imo-msc-fal.html">IMO MSC-FAL.1 reference page</a>.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson08.html">← Lesson 8: Frameworks for Maritime OT Security</a>
+    <a class="nav-btn" href="lesson10.html">Lesson 10: Access Control &amp; Identity Management Afloat →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. ISPS Code &amp; the SSP</a></li>
+      <li><a href="#s2">2. ISM Code &amp; MSC.428(98)</a></li>
+      <li><a href="#s3">3. Flag &amp; Port State Control</a></li>
+      <li><a href="#s4">4. Classification Society Audits</a></li>
+      <li><a href="#s5">5. Asset Inventory &amp; Risk Register</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Audit Readiness</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Explain the SSP and its relationship to the ISPS Code</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Explain how cyber risk is folded into the ISM Code's SMS</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Describe flag state and port state control's compliance role</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Describe the classification society's audit and survey role</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Build a basic asset inventory and risk register</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s1"><span class="glossary-term">ISPS Code</span></a><span class="glossary-def">The International Ship and Port Facility Security Code, requiring every SOLAS-regulated vessel to carry an approved Ship Security Plan.</span></li>
+      <li><a href="#s2"><span class="glossary-term">ISM Code</span></a><span class="glossary-def">The International Safety Management Code, requiring a documented Safety Management System into which cyber risk was folded by Resolution MSC.428(98).</span></li>
+      <li><a href="#s3"><span class="glossary-term">Flag State</span></a><span class="glossary-def">The country whose flag a vessel flies and under whose law it is registered, bearing primary responsibility for ISM Code and SMS compliance.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Port State Control</span></a><span class="glossary-def">Inspection of foreign-flagged vessels by the authorities of a port they call at, checking compliance with applicable international conventions.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Risk Register</span></a><span class="glossary-def">A structured record of identified risks — description, likelihood, consequence, existing controls, treatment plan, owner, and review date — tied to an accurate asset inventory.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson08.html">← Previous: Lesson 8 — Frameworks for Maritime OT Security</a>
+      <a href="lesson10.html">Next: Lesson 10 — Access Control &amp; Identity Management Afloat →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 9 · Day 4 · Governance, Risk &amp; Compliance for Maritime IT/OT<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { diagram: false, inventory: false, irplan: false, policy: false };
+  var simMessages = {
+    diagram: "Documented network diagram: added. Without this, an auditor would find a vessel unable to show what is actually connected to what — the single most common finding behind an undocumented network change, like the one in the class survey example in Module 4.",
+    inventory: "Current asset inventory: added. Without this, an auditor would find a security team that cannot say with confidence which devices exist, what firmware they run, or when they were last serviced — and a risk register with nothing reliable to attach its risks to.",
+    irplan: "Tested incident response plan: added. Without this, an auditor would find a crew that has a document but no evidence it has ever actually been rehearsed — a plan that has never been drilled tends to fail in exactly the ways a drill would have caught.",
+    policy: "Signed acceptable-use / remote-access policy: added. Without this, an auditor would find no documented boundary on who may connect remotely to OT systems or how crew and vendors are expected to use shipboard networks — the exact gap that lets one-off vendor connections go unrecorded."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = activeCount * 25;
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> none of the four artifacts are in place. An auditor arriving today would find a vessel that cannot substantiate its cyber risk management with documentation. Select an artifact above to see what having it changes.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Just added:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> all four artifacts are now in place. This is not a guarantee of a clean audit — an auditor will still check whether these documents match reality — but a vessel with all four is starting from a defensible position instead of an empty one, at every level covered in this lesson: SSP, SMS, flag state, PSC, and class.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. The SSP is required under the ISPS Code, adopted in the post-9/11 era with an original focus on physical security against unlawful acts.", incorrect: "Not quite. The SSP sits under the ISPS Code, not the ISM Code, UR E26/E27, or MSC-FAL.1 — and its original focus was physical, not cyber or network design." },
+    2: { correct: "Correct. MSC.428(98) folded cyber risk into the existing ISM Code SMS rather than creating a separate certification or making it voluntary.", incorrect: "Not quite. MSC.428(98) did not create a new certificate, make cyber risk voluntary, or touch port state control — it affirmed cyber risk belongs inside the existing SMS." },
+    3: { correct: "Correct. Flag state oversight is continuous across the vessel's operating life via SMS audits; PSC is a per-call inspection of foreign-flagged vessels by the port country's authorities.", incorrect: "Not quite. PSC inspects foreign-flagged (not domestically flagged) vessels, flag state oversight is ongoing rather than a one-time delivery event, and the two are distinct regimes with different authority bases." },
+    4: { correct: "Correct. Verifying compliance with class rules, including UR E26/E27 for covered newbuilds, is the classification society's own class-verification role, separate from any statutory RO audit it might also perform.", incorrect: "Not quite. Port state control inspects foreign vessels at port calls, the SSO/CSO owns the SSP, and flag state audits check SMS compliance — none of those is the class-rules verification role this finding illustrates." },
+    5: { correct: "Correct. An inventory without a risk register doesn't prioritize anything, and a risk register without an accurate inventory prioritizes risks against equipment that may no longer match what's actually installed.", incorrect: "Not quite. There's no binder-format rule, auditors do examine asset inventories, and classification societies do recognize them — the real reason to pair them is that each is incomplete without the other." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 10.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 10.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

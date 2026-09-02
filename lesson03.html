@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3: Maritime OT Technologies &amp; Field Devices | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 1, Lesson 3 of the Maritime Operational Technology Security curriculum: a device-by-device tour of shipboard navigation, propulsion, cargo/ballast, and safety instrumented systems — what each does, how it fails, and what it exposes on the network.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 1 · Lesson 3 · 4 Contact Hours</span>
+    <h1>Maritime OT Technologies &amp; Field Devices</h1>
+    <p class="tagline">A device-by-device tour of maritime OT equipment — what each does, how it fails, and what it exposes on the network.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Navigation &amp; Positioning</a>
+    <a href="#s2" data-section="s2">Propulsion &amp; Steering</a>
+    <a href="#s3" data-section="s3">Cargo &amp; Ballast</a>
+    <a href="#s4" data-section="s4">Safety Instrumented Systems</a>
+    <a href="#s5" data-section="s5">Network Exposure</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>Lesson 2 gave you a vocabulary for reasoning about maritime OT — priorities, legal backbone, determinism, lifecycle, and a five-zone model. This lesson puts names and faces to that vocabulary. We walk the ship system by system: the devices that tell the bridge where the vessel is and what's around it, the devices that actually move the ship, the devices that manage cargo and ballast, and the devices whose entire job is to notice a hazard and act on it automatically. For each one, you will learn what it does, what happens when it fails, and — briefly, since Lesson 5 goes much deeper into the protocols themselves — what it typically exposes on the network.</p>
+      <p>Treat this lesson as building a mental inventory. By the time you reach Lesson 4's discussion of the IT protocols riding inside these networks, and Lesson 5's deep dive into maritime-specific protocols like NMEA and Modbus, you should already be able to picture, for any device named, roughly where it sits physically on a ship, how consequential its failure would be, and which of Lesson 2's five zones it belongs in.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of this lesson as a hospital orientation tour rather than a lecture on hospital IT policy. You are walking the floors, learning what the imaging machine does, what the ventilator does, what the crash cart is for, and what happens to a patient if each one stops working — before anyone asks you to secure the hospital's network. The device tour has to come first, because you cannot reason about criticality, segmentation, or acceptable risk for a system you cannot picture.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Identify key navigation devices — ECDIS, radar/ARPA, GNSS, AIS, and the VDR — and describe what each does.</li>
+        <li>Identify key control devices — autopilot, ballast/cargo control, steering gear, and engine automation (AMS) — and describe what each does.</li>
+        <li>Identify key safety systems — fire/gas detection, emergency shutdown, and safety instrumented systems generally — and their role aboard ship.</li>
+        <li>Explain the failure modes of these devices and the operational consequences of each failure.</li>
+        <li>Explain, at a high level, what each device typically exposes on the network.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧭</span>
+      <h2>Navigation &amp; positioning devices</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>The devices in this section exist to answer one question, continuously: where is the ship, and what else is out there?</p>
+    <p><dfn id="def-ecdis">ECDIS</dfn> (Electronic Chart Display and Information System) is the mandated primary means of navigation on most SOLAS vessels — a networked electronic chart that plots the vessel's own position and overlays radar and AIS targets on top of it. When ECDIS fails, the crew falls back to backup arrangements: a secondary ECDIS unit, or on some vessels paper charts, with manual plotting slowing down fix-taking exactly when the crew can least afford the delay.</p>
+    <p><strong>Radar/ARPA</strong> detects nearby vessels and obstacles by reflecting radio waves, and Automatic Radar Plotting Aid (ARPA) processing auto-tracks those targets to compute their course, speed, closest point of approach, and time to closest point of approach. Loss of ARPA tracking reverts the watch officer to manually plotting multiple targets by hand in restricted visibility — the exact workload radar and ARPA were introduced to remove.</p>
+    <p>A <strong>GNSS/GPS receiver</strong> provides a continuous position fix from a satellite constellation and feeds that position to ECDIS, AIS, the VDR, and other systems that assume it is correct. Its most dangerous failure mode is not an obvious outage but a silent one: a jammed or spoofed signal can feed a wrong position to every downstream system that trusts it, with no automatic alarm unless someone cross-checks against an independent source.</p>
+    <p>The <strong>gyrocompass</strong> provides true heading independent of magnetic variation, feeding heading data to the autopilot, ARPA, and AIS. A drifting or failed gyrocompass introduces a systematic heading error that silently propagates into every system depending on it — including the autopilot's course-keeping.</p>
+    <p>The <dfn id="def-ais">AIS transponder</dfn> (Automatic Identification System) broadcasts the vessel's identity, position, course, and speed to nearby ships and shore stations over VHF, and receives the same broadcasts from others. An undetected malfunction, deliberate "AIS dark" behavior, or spoofing of AIS data removes the vessel from other ships' — and shore authorities' — situational picture, or worse, can be exploited to impersonate a different vessel entirely.</p>
+    <p>The <dfn id="def-vdr">VDR</dfn> (Voyage Data Recorder) is the maritime industry's "black box" — it continuously records bridge audio, radar imagery, ECDIS data, and machinery and helm parameters, purpose-built for post-incident investigation rather than day-to-day operation. A VDR outage or a tampered recording does not affect the ship in the moment, but it removes the evidentiary record an investigation would need after a casualty.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>During an approach to a busy strait, a container ship's GNSS receiver began reporting a position roughly 300 meters off the vessel's actual location — a plausible signature of GPS spoofing rather than a hard failure, since the receiver kept producing what looked like a normal fix. The error propagated silently into ECDIS and AIS until the second officer noticed the displayed position didn't match a visual bearing on a charted landmark. The incident underscored why cross-checking GNSS output against an independent source — radar, visual bearings, or a second receiver — remains a required watchkeeping practice rather than a redundant one.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⚙️</span>
+      <h2>Propulsion &amp; steering control</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Where Section 1's devices tell the ship where it is, this section's devices actually move it.</p>
+    <p>The <strong>autopilot / course computer</strong> automatically holds a commanded heading or track using gyrocompass and GNSS input, issuing continuous correction commands to the steering gear. An undetected autopilot fault can produce a slow, gradual drift off track long before anyone notices — particularly on a quiet watch with few other cues to prompt a manual check.</p>
+    <p><strong>Steering gear control</strong> translates helm or autopilot commands into hydraulic ram movement of the rudder itself. Loss of steering gear control is one of the most serious failures a ship can have underway, which is exactly why SOLAS requires an independent, physically separate backup steering control arrangement and posted emergency steering procedures — this is not a system the industry is willing to leave single-string.</p>
+    <p>The <dfn id="def-ams">engine automation system (AMS)</dfn> monitors and controls the main engine and auxiliary machinery, consolidating alarms for engine-room parameters — temperatures, pressures, RPM — onto a single console. An AMS outage removes centralized alarm visibility, forcing engineers back to local gauges and manual rounds exactly when something in the machinery space may be going wrong.</p>
+    <p>A <strong>controllable-pitch propeller (CPP) control</strong> system adjusts propeller blade pitch to vary thrust independent of shaft RPM, letting the engine run at a constant, efficient speed while thrust changes. A CPP control fault can leave the propeller pitched for continued forward thrust with no ability to reduce speed quickly — a serious hazard during close-quarters maneuvering or an emergency stop.</p>
+    <p><strong>Bow and stern thrusters</strong> provide lateral thrust for docking and low-speed maneuvering, when the rudder alone can't generate enough sideways force. Thruster failure during a berthing maneuver removes a maneuvering option the pilot may already be actively relying on, particularly in confined waters or a stiff crosswind.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>If navigation devices are the ship's eyes, propulsion and steering devices are its muscles and tendons — and just like a human body, a fault doesn't have to be total to be dangerous. A knee that still bends but can no longer bear full weight is a real hazard even though it "still works"; a CPP control that still changes pitch but with a growing lag is the same kind of degraded-but-not-obviously-broken failure.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A ferry's primary steering gear control lost hydraulic pressure during a routine crossing. The bridge team detected the loss within seconds via a steering gear alarm, declared an emergency, and switched command to the independent secondary steering system per the posted emergency steering procedure — a drill the crew had practiced the previous month. The vessel completed the crossing on backup steering without incident, which is precisely the outcome the SOLAS-mandated redundancy requirement exists to guarantee.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛢️</span>
+      <h2>Cargo &amp; ballast systems</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>These systems manage what's inside the ship — cargo and ballast water — rather than how the ship moves through the water.</p>
+    <p>The <strong>ballast control system</strong> manages the pumping and valving of seawater ballast between tanks to control the vessel's trim, list, and stability, particularly during loading and discharge when the vessel's weight distribution is changing. An uncommanded or stuck ballast valve can shift trim or stability beyond safe limits, especially if it happens during active cargo operations when several tanks may already be mid-transfer.</p>
+    <p>On tankers and bulkers, the <strong>cargo control system</strong> centralizes monitoring and control of cargo tank valves, pumps, and — on tankers — the inert gas system, for loading and discharge operations. Loss of cargo control visibility during a loading operation can allow a tank overfill to develop before a manual check catches it.</p>
+    <p><strong>Cargo pump control</strong> governs the speed and sequencing of cargo pumps during loading and discharge. An uncontrolled or unexpected pump speed change can create pressure surges in cargo piping, risking a spill or structural stress on the pipework.</p>
+    <p><strong>Tank level and pressure sensors</strong> instrument individual ballast or cargo tanks and feed their readings to the ballast and cargo control systems and the high-level alarms those systems drive. A failed or slowly drifting level sensor can silently defeat the very high-level alarm it feeds — the same failure chain behind the ballast-pump alarm scenario worked through in Lesson 2.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A bulk carrier's ballast control system received a valve-open command during deballasting that never fully executed due to a mechanical actuator fault — the control panel showed the valve as open, but it had only partially opened. The mismatch between commanded and actual tank levels wasn't caught until the chief officer's routine sounding round found the discrepancy, roughly forty minutes after the command was issued. The vessel's stability was never in serious jeopardy, but the incident prompted a fleet-wide review of whether ballast control feedback (valve position, not just valve command) should be displayed more prominently on the console.</p>
+    </div>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🚨</span>
+      <h2>Safety instrumented systems</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Every device covered so far exists to help the crew do something — navigate, propel, manage cargo. The devices in this section exist for a narrower and more absolute purpose: detect a hazardous condition and act, automatically, independent of whatever else is happening on the bridge or in the engine room. A <dfn id="def-sis">Safety Instrumented System (SIS)</dfn> is the general name for that category — fire and gas detection, emergency shutdown systems, and, in a broader sense, the general alarm and watertight door systems all function as an SIS. These are the highest-criticality, most deliberately fail-safe-oriented systems on the ship.</p>
+    <p><strong>Fire and gas detection</strong> continuously monitors spaces for smoke, heat, flame, or combustible and toxic gas concentration, triggering alarms and, where configured, automatic suppression. An undetected sensor fault can leave a compartment effectively unmonitored while the panel continues to display normal status — a failure that is dangerous precisely because it is invisible until tested.</p>
+    <p><dfn id="def-esd">Emergency shutdown (ESD) systems</dfn> automatically isolate fuel, cargo, or ventilation systems the instant a hazardous condition is detected, independent of normal operator control. A false trip halts cargo or propulsion operations unnecessarily and has a real operational cost; a failed-to-trip ESD leaves a genuine hazard unmitigated and has a far worse one. Both directions carry consequences, which is exactly why ESD logic is deliberately conservative and engineered to be fail-safe.</p>
+    <p>The <strong>general alarm system</strong> is the ship-wide audible and visual alarm used to summon the crew to emergency stations. A general alarm failure during a genuine emergency directly delays crew muster, with immediate consequences for survivability.</p>
+    <p><strong>Watertight door control</strong> remotely operates and monitors the watertight doors that preserve a vessel's subdivision and buoyancy after hull damage. A door that fails to close — or worse, shows "closed" on the indicator panel while actually standing open — defeats the exact damage-control function the door exists to provide.</p>
+    <p>Safety instrumented systems are engineered around fail-safe defaults: when a component fails, the system is designed to fail toward the safer state — an ESD valve that fails closed, not open. Any maritime OT security control that touches these systems has to preserve that fail-safe property above every other consideration, which ties directly back to Lesson 2's priority stack: these are the systems with the least tolerance for an availability compromise, but also the least tolerance for a security control that could suppress or delay their own alarm output.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners sometimes assume "highest criticality" means "most heavily secured" in the conventional IT sense — lots of authentication, lots of logging, lots of restriction. Push back on that instinct here: an SIS's defining security property is that it keeps functioning and keeps failing safely, which sometimes argues for less friction on its control path, not more. Revisit this tension when Lesson 8 covers how security frameworks get adapted for OT rather than applied unmodified.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔌</span>
+      <h2>What each device exposes on the network</h2>
+      <span class="module-time">≈ 25 min</span>
+    </div>
+    <p>Every device covered in this lesson eventually talks to something else — a display, a logger, a controller, or another sensor — and that conversation happens over some physical interface, using some protocol, at some point on the vessel's network. The table below is a summary reference, not a deep technical treatment; Lesson 4 covers the IT protocols riding inside shipboard and port networks, and Lesson 5 goes much deeper into maritime-specific protocols like NMEA 0183/2000 and Modbus. What matters here is the pattern: the more safety-critical a device is, the more likely it sits deep in Lesson 2's zone model (Zone 1) on a protocol that was never designed with authentication in mind — because it was designed for a wire nobody else was ever supposed to be on.</p>
+    <table class="compare-table">
+      <caption>Device network exposure summary (Zones refer to the reference model introduced in Lesson 2)</caption>
+      <thead>
+        <tr><th scope="col">Device</th><th scope="col">Typical interface</th><th scope="col">Common protocol</th><th scope="col">Criticality</th><th scope="col">Typical zone</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ECDIS</td><td>Ethernet</td><td>NMEA 0183/2000 over IEC 61162-450, proprietary chart data</td><td>High</td><td>Zone 2</td></tr>
+        <tr><td>Radar / ARPA</td><td>Serial &amp; Ethernet</td><td>NMEA 0183/2000, proprietary radar video feed</td><td>High</td><td>Zone 2</td></tr>
+        <tr><td>GNSS/GPS receiver</td><td>Serial</td><td>NMEA 0183</td><td>High</td><td>Zone 1/2 (feeds both)</td></tr>
+        <tr><td>AIS transponder</td><td>Serial &amp; Ethernet, plus VHF</td><td>NMEA 0183, VHF data broadcast</td><td>Medium-High</td><td>Zone 2</td></tr>
+        <tr><td>VDR</td><td>Ethernet aggregation of multiple serial feeds</td><td>NMEA 0183/2000, proprietary capture format</td><td>Medium (evidentiary)</td><td>Zone 2</td></tr>
+        <tr><td>Autopilot / course computer</td><td>Serial &amp; hardwired control loop</td><td>NMEA 0183/2000, proprietary control bus</td><td>Very high</td><td>Zone 1</td></tr>
+        <tr><td>Steering gear control</td><td>Hardwired &amp; serial</td><td>Proprietary control loop, sometimes NMEA 2000</td><td>Very high</td><td>Zone 1</td></tr>
+        <tr><td>Engine automation system (AMS)</td><td>Ethernet &amp; fieldbus</td><td>Modbus, proprietary fieldbus</td><td>Very high</td><td>Zone 1/2</td></tr>
+        <tr><td>Ballast control PLC</td><td>Fieldbus &amp; Ethernet</td><td>Modbus, proprietary PLC protocol</td><td>Very high</td><td>Zone 1</td></tr>
+        <tr><td>Fire &amp; gas detection / ESD (SIS)</td><td>Hardwired loops &amp; fieldbus</td><td>Proprietary addressable-loop protocol, hardwired relay, sometimes Modbus</td><td>Highest (fail-safe)</td><td>Zone 1</td></tr>
+      </tbody>
+    </table>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Point learners back to Lesson 1's discussion of serial versus Ethernet at this table: notice how many of the highest-criticality rows still rely on a serial or hardwired fieldbus connection rather than Ethernet. That is not an oversight — it is often a deliberate choice, since a dedicated point-to-point link is harder for an unrelated device to reach than a shared switched network, even without any authentication at all.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Device to Its Failure Mode</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each device below, select the description that best matches its most consequential failure mode. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Device</th><th scope="col">Most consequential failure mode</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="steer">
+                <td>Steering gear control</td>
+                <td>
+                  <select aria-label="Failure mode for steering gear control">
+                    <option value="">— Select —</option>
+                    <option value="steer">Independent backup steering required — loss is one of the most serious failures a vessel can have underway</option>
+                    <option value="gnss">A spoofed or jammed signal can silently feed a wrong position to every downstream system</option>
+                    <option value="ballast">A stuck or uncommanded valve can shift trim or stability beyond safe limits</option>
+                    <option value="firegas">A sensor fault can leave a compartment effectively unmonitored while appearing normal on the panel</option>
+                    <option value="ais">Malfunction or deliberate "dark" behavior removes the vessel from other ships' situational picture</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="gnss">
+                <td>GNSS/GPS receiver</td>
+                <td>
+                  <select aria-label="Failure mode for GNSS/GPS receiver">
+                    <option value="">— Select —</option>
+                    <option value="steer">Independent backup steering required — loss is one of the most serious failures a vessel can have underway</option>
+                    <option value="gnss">A spoofed or jammed signal can silently feed a wrong position to every downstream system</option>
+                    <option value="ballast">A stuck or uncommanded valve can shift trim or stability beyond safe limits</option>
+                    <option value="firegas">A sensor fault can leave a compartment effectively unmonitored while appearing normal on the panel</option>
+                    <option value="ais">Malfunction or deliberate "dark" behavior removes the vessel from other ships' situational picture</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="ballast">
+                <td>Ballast control system</td>
+                <td>
+                  <select aria-label="Failure mode for ballast control system">
+                    <option value="">— Select —</option>
+                    <option value="steer">Independent backup steering required — loss is one of the most serious failures a vessel can have underway</option>
+                    <option value="gnss">A spoofed or jammed signal can silently feed a wrong position to every downstream system</option>
+                    <option value="ballast">A stuck or uncommanded valve can shift trim or stability beyond safe limits</option>
+                    <option value="firegas">A sensor fault can leave a compartment effectively unmonitored while appearing normal on the panel</option>
+                    <option value="ais">Malfunction or deliberate "dark" behavior removes the vessel from other ships' situational picture</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="firegas">
+                <td>Fire and gas detection</td>
+                <td>
+                  <select aria-label="Failure mode for fire and gas detection">
+                    <option value="">— Select —</option>
+                    <option value="steer">Independent backup steering required — loss is one of the most serious failures a vessel can have underway</option>
+                    <option value="gnss">A spoofed or jammed signal can silently feed a wrong position to every downstream system</option>
+                    <option value="ballast">A stuck or uncommanded valve can shift trim or stability beyond safe limits</option>
+                    <option value="firegas">A sensor fault can leave a compartment effectively unmonitored while appearing normal on the panel</option>
+                    <option value="ais">Malfunction or deliberate "dark" behavior removes the vessel from other ships' situational picture</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="ais">
+                <td>AIS transponder</td>
+                <td>
+                  <select aria-label="Failure mode for AIS transponder">
+                    <option value="">— Select —</option>
+                    <option value="steer">Independent backup steering required — loss is one of the most serious failures a vessel can have underway</option>
+                    <option value="gnss">A spoofed or jammed signal can silently feed a wrong position to every downstream system</option>
+                    <option value="ballast">A stuck or uncommanded valve can shift trim or stability beyond safe limits</option>
+                    <option value="firegas">A sensor fault can leave a compartment effectively unmonitored while appearing normal on the panel</option>
+                    <option value="ais">Malfunction or deliberate "dark" behavior removes the vessel from other ships' situational picture</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: Device Criticality Sorter</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Click each device below, in any order, to take it offline in this model and see the operational consequence. Nothing here touches a real network — this is a model of a consequence, not a network scan.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Devices to take offline">
+          <button type="button" class="sim-toggle" data-conn="ecdis" aria-pressed="false">Take ECDIS offline</button>
+          <button type="button" class="sim-toggle" data-conn="ais" aria-pressed="false">Take AIS offline</button>
+          <button type="button" class="sim-toggle" data-conn="ballast" aria-pressed="false">Take ballast control offline</button>
+          <button type="button" class="sim-toggle" data-conn="firegas" aria-pressed="false">Take fire &amp; gas detection offline</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Safety &amp; Situational Awareness Coverage</span><span id="simMeterValue">100%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:100%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> every device modeled here is online and functioning normally. Select a device above to take it offline and see the consequence.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q1.</span>Which device is responsible for continuously recording bridge audio, radar, ECDIS, and engine/helm data for post-incident investigation?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> ECDIS</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> VDR (Voyage Data Recorder)</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> AIS transponder</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> Engine automation system (AMS)</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q2.</span>Why does SOLAS require an independent backup steering control system?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> Because steering gear failure is one of the most serious failures a vessel can have underway, and losing primary control leaves no margin without a backup path.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> Because autopilot software is inherently unreliable and needs a manual override at all times.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> Because gyrocompasses cannot be trusted without a second unit.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> Because ECDIS depends directly on steering gear data to function at all.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q3.</span>A GNSS receiver is jammed or spoofed and begins reporting an incorrect position. What makes this failure mode particularly dangerous?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> It immediately disables the ECDIS display entirely, making the problem obvious.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> The wrong position propagates silently into every downstream system that trusts it, with no automatic alarm unless cross-checked against an independent source.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> It is the only failure mode addressed anywhere in SOLAS.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> It only affects systems connected by Ethernet, not by serial links.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q4.</span>What best describes a Safety Instrumented System (SIS), such as fire and gas detection or an ESD system?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> A system engineered to fail toward the safer state by default, with detection and shutdown functions independent of normal operator control.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> A backup navigation system used only when ECDIS is offline.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> A shore-based system for monitoring fleet-wide regulatory compliance.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> A cargo documentation system required by the ISM Code.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>Using Lesson 3's network exposure summary and Lesson 2's zone model, where does a ballast control PLC typically belong, and what protocol family is it commonly associated with?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Zone 4, using proprietary satellite protocols.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Zone 3, using standard office Ethernet protocols exclusively.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Zone 1, commonly associated with Modbus or a proprietary PLC protocol.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Zone 0, with no network protocol at all.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner pick any two devices from this lesson — one navigation or control device and one safety instrumented system — and write a short paragraph describing what a plausible cyber-enabled failure of each would look like from the bridge's perspective, and which of Lesson 2's zones would need to be crossed for an attacker to reach it. This is a low-stakes way to confirm the device vocabulary and the zone model are starting to connect before Lesson 4 introduces the IT protocols that actually carry this traffic.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://www.imo.org/en/OurWork/Safety/Pages/AIS.aspx" target="_blank" rel="noopener noreferrer">IMO — Automatic Identification Systems (AIS)</a> — the International Maritime Organization's overview of AIS carriage requirements and function, covered in this lesson's navigation devices section.</li>
+      <li><a href="https://csrc.nist.gov/pubs/sp/800/82/r3/final" target="_blank" rel="noopener noreferrer">NIST SP 800-82 Rev. 3: Guide to Operational Technology (OT) Security</a> — background on control system device types and protocols, useful ahead of Lesson 4 and Lesson 5's deeper protocol coverage.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson02.html">← Lesson 2: IT/OT Security Principles at Sea</a>
+    <a class="nav-btn" href="lesson04.html">Lesson 4: IT Protocols Inside Shipboard &amp; Port Networks →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Navigation &amp; Positioning</a></li>
+      <li><a href="#s2">2. Propulsion &amp; Steering</a></li>
+      <li><a href="#s3">3. Cargo &amp; Ballast</a></li>
+      <li><a href="#s4">4. Safety Instrumented Systems</a></li>
+      <li><a href="#s5">5. Network Exposure</a></li>
+      <li><a href="#activity">Activity: Failure Mode Mapping</a></li>
+      <li><a href="#simulation">Simulation: Criticality Sorter</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Identify navigation devices (ECDIS, radar/ARPA, GNSS, AIS, VDR)</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Identify control devices (autopilot, ballast/cargo control, steering gear, AMS)</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Identify safety systems (fire/gas detection, ESD, SIS)</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Explain failure modes and their operational consequences</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Explain what each device typically exposes on the network</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s1"><span class="glossary-term">ECDIS</span></a><span class="glossary-def">Electronic Chart Display and Information System — the mandated electronic replacement for paper charts as the primary means of navigation.</span></li>
+      <li><a href="#s1"><span class="glossary-term">AIS</span></a><span class="glossary-def">Automatic Identification System — a VHF-based transponder broadcasting vessel identity, position, course, and speed to nearby ships and shore stations.</span></li>
+      <li><a href="#s1"><span class="glossary-term">VDR</span></a><span class="glossary-def">Voyage Data Recorder — the maritime "black box," continuously recording bridge audio, radar, ECDIS, and machinery data for post-incident investigation.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Ballast Control</span></a><span class="glossary-def">The system of pumps, valves, and sensors that manages ballast water distribution to maintain a vessel's trim, list, and stability.</span></li>
+      <li><a href="#s4"><span class="glossary-term">SIS</span></a><span class="glossary-def">Safety Instrumented System — a device such as fire/gas detection or an ESD unit, engineered to detect a hazard and drive the process to a fail-safe state independent of normal operator control.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson02.html">← Previous: Lesson 2 — IT/OT Security Principles at Sea</a>
+      <a href="lesson04.html">Next: Lesson 4 — IT Protocols Inside Shipboard &amp; Port Networks →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 3 · Day 1 · Maritime OT Technologies &amp; Field Devices<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { ecdis: false, ais: false, ballast: false, firegas: false };
+  var simMessages = {
+    ecdis: "Taking ECDIS offline: the watch reverts to backup radar plotting and, if fitted, paper charts — survivable, but slower and more workload-intensive fix-taking at exactly the moment attention should be on collision avoidance or pilotage.",
+    ais: "Taking AIS offline: nearby vessels and shore VTS lose your transmitted identity, position, and course. You can still see others on radar, but you've gone dark to everyone relying on AIS to see you — including automated collision-avoidance tools running on other ships.",
+    ballast: "Taking ballast control offline: trim and stability can no longer be adjusted from the console — any correction now requires manual valve operation in the pump room, slower and more error-prone during active cargo operations.",
+    firegas: "Taking fire &amp; gas detection offline: the ship loses automated early warning for smoke, heat, and gas buildup in monitored spaces — detection now depends entirely on a human physically finding the problem."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = 100 - (activeCount * 25);
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> every device modeled here is online and functioning normally. Select a device above to take it offline and see the consequence.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Just taken offline:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> all four devices are now offline simultaneously — an extreme, deliberately unrealistic scenario used here to make a point. No single device carries all of a vessel\'s risk, but stacking outages compounds it fast. Redundancy, procedures, and backup systems exist precisely so that no one device failure alone is catastrophic — but they were never designed to absorb all four at once.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. The VDR is the maritime 'black box,' purpose-built to record bridge audio, radar, ECDIS, and machinery/helm data for post-incident investigation.", incorrect: "Not quite. ECDIS, AIS, and the AMS each serve operational functions in the moment — the VDR is the device built specifically for post-incident recording." },
+    2: { correct: "Correct. Steering gear failure is one of the most serious failures a vessel can face underway, which is exactly why an independent backup path is mandated rather than left optional.", incorrect: "Not quite. The requirement is about the severity of losing steering control itself, not autopilot software reliability, gyrocompass trust, or an ECDIS dependency that doesn't exist." },
+    3: { correct: "Correct. A spoofed or jammed GNSS signal can look like a normal fix while propagating a wrong position into every system that trusts it, with no automatic alarm unless someone cross-checks independently.", incorrect: "Not quite. The danger is precisely that the failure is silent and propagates — it does not disable ECDIS outright, it isn't SOLAS's only covered failure, and it isn't limited to Ethernet-connected systems." },
+    4: { correct: "Correct. A Safety Instrumented System is defined by its fail-safe design and its independence from normal operator control — not by being a backup navigation, compliance, or documentation system.", incorrect: "Not quite. Fire/gas detection and ESD systems are defined by fail-safe, independent hazard detection and shutdown — not by any of the other roles listed." },
+    5: { correct: "Correct. A ballast control PLC is a Zone 1 control system, commonly associated with Modbus or a proprietary PLC protocol per this lesson's network exposure summary.", incorrect: "Not quite. A ballast control PLC sits in Zone 1 as a control system, not in the business LAN, the shore/enterprise zone, or the raw field-sensor zone — and it is not protocol-less." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 4.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 4.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

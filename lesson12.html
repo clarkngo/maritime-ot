@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 12: Capstone — Build and Teach Your Own Maritime OT Module | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 5, Lesson 12 (Capstone) of the Maritime Operational Technology Security curriculum: design a teachable module with measurable objectives, one hands-on simulation, a rubric-scored assessment, and a safeguards statement — then teach a segment and take structured peer feedback.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 5 · Lesson 12 · Capstone</span>
+    <h1>Capstone: Build and Teach Your Own Maritime OT Module</h1>
+    <p class="tagline">Produce a teachable module — objectives, one hands-on simulation, an assessment with a rubric, and a written safeguards statement — then teach a segment of it and take peer critique.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Capstone Project</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Capstone Options</a>
+    <a href="#s2" data-section="s2">Objectives &amp; Structure</a>
+    <a href="#s3" data-section="s3">Designing a Simulation</a>
+    <a href="#s4" data-section="s4">Assessment &amp; Rubric</a>
+    <a href="#s5" data-section="s5">Teaching &amp; Feedback</a>
+    <a href="#activity" data-section="activity">Planning Checklist</a>
+    <a href="#simulation" data-section="simulation">Design Worksheet</a>
+    <a href="#review" data-section="review">Readiness Check</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>Eleven lessons in, you've now sat on the other side of a full maritime OT security curriculum — convergence, segmentation, protocols, threat actors, frameworks, governance, identity, and incident response, each delivered the same way: a lecture grounded in worked examples, a hands-on activity, a browser-based simulation, and a graded review. This capstone asks you to build one module of your own, in that same shape, on a maritime OT topic you choose — then teach a short excerpt of it to your peers and take their feedback.</p>
+      <p>This is deliberately a <dfn id="def-capstone">capstone project</dfn>, not another content lecture: the four sections below are a project brief, not new subject-matter content to memorize. You will select a topic, write measurable objectives, design one interactive activity, draft an assessment with a scoring rubric, write a safeguards statement appropriate to your content, and rehearse a short taught segment — using the same component patterns (overview box, worked examples, mapping activity, toggle/meter simulation, graded quiz) every lesson on this site has already shown you how to build.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of Lessons 1 through 11 as eleven cooking classes where you watched an instructor prepare a full dish from a recipe, step by step, explaining each technique as they went. This capstone is the moment you're handed your own set of ingredients — a maritime OT topic — and asked to write the recipe yourself: what technique does this dish actually need, in what order, and how will you know when it's done right. The techniques aren't new. Choosing which ones this specific dish calls for, and executing them cleanly, is the whole exercise.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Write clear, measurable learning objectives for a self-designed maritime OT module.</li>
+        <li>Design one hands-on simulation or activity appropriate to a chosen maritime OT topic.</li>
+        <li>Design an assessment item set with an accompanying scoring rubric.</li>
+        <li>Write a safeguards statement appropriate to the module's content.</li>
+        <li>Deliver a short taught segment and incorporate peer and instructor feedback.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Project Brief</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧭</span>
+      <h2>Capstone overview and options</h2>
+      <span class="module-time">≈ 20 min</span>
+    </div>
+    <p>The deliverable is a single teachable module on a maritime OT security topic of your choosing, built to the same standard as Lessons 1 through 11: a stated set of learning objectives, structured lecture content, one hands-on interactive activity, an assessment with a rubric, and a written safeguards statement. You have two broad routes to a topic. You can go <strong>deeper</strong> on something this course already introduced but didn't fully unpack — a single IACS UR E26/E27 capability category from Lesson 8, a specific GNSS spoofing region from Lesson 6, the identity lifecycle problem from Lesson 10 applied to a fishing fleet instead of a merchant one. Or you can go <strong>adjacent</strong> — a maritime OT domain this course didn't cover at all, but that clearly belongs in the same family.</p>
+    <p>Either route is acceptable, and neither is automatically stronger than the other — a well-scoped deep dive on a narrow topic usually makes a better capstone module than a shallow survey of a broad new one. Whichever direction you choose, the topic needs to be narrow enough to teach in one module: not "maritime cybersecurity" but "OT security considerations specific to a container terminal's ship-to-shore cranes."</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Example topic options</span>
+      <ul class="lo-display">
+        <li>Port crane and container-terminal OT security — ship-to-shore crane control systems, terminal operating system integration, and gate automation.</li>
+        <li>Offshore platform control systems — drilling and production control networks, safety instrumented systems, and their exposure over supply-vessel and helicopter-linked connectivity.</li>
+        <li>Autonomous and remote-controlled vessel considerations — remote operations centers, the shift of "the bridge" ashore, and what that does to the access-control and IR material from Lessons 10 and 11.</li>
+        <li>Cruise ship hotel-service OT — HVAC, potable water treatment, and passenger-facing entertainment systems as a converged network sharing infrastructure with navigation-adjacent systems.</li>
+        <li>A deeper dive on a single IACS UR E26/E27 capability category that Lesson 8's orientation-level treatment only introduced.</li>
+        <li>Fishing or inland-waterway fleet OT security — applying this course's merchant-vessel-centric material to a smaller, less-resourced, less-regulated vessel class.</li>
+      </ul>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Have learners commit to a topic in writing (even a single sentence) before moving past this module — a capstone that drifts between two or three candidate topics through Modules 2 and 3 rarely converges into a coherent module by the end. Approval doesn't need to be formal; the point is forcing the choice early.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🎯</span>
+      <h2>Writing learning objectives and structuring content</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Every lesson on this site opens with a short list of objectives written using a small, deliberate set of verbs — <strong>Explain</strong>, <strong>Describe</strong>, <strong>Compare</strong>, <strong>Evaluate</strong>, <strong>Apply</strong> — because each one points to something a learner can actually demonstrate, rather than an internal state you'd have to take their word for. "Understand port crane cybersecurity" cannot be checked; "Explain why a ship-to-shore crane's control network is typically segmented from the terminal's business network" can be checked, directly, against what the learner writes or says. Your capstone module needs three to five objectives written the same way, each naming a verb from that set and a specific, checkable claim.</p>
+    <table class="compare-table">
+      <caption>Weak versus measurable objective phrasing</caption>
+      <thead>
+        <tr><th scope="col">Weak phrasing</th><th scope="col">Measurable rewrite</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>"Understand crane OT security."</td><td>"Explain why a ship-to-shore crane's control network is typically segmented from the terminal's business IT network."</td></tr>
+        <tr><td>"Learn about offshore platform risk."</td><td>"Describe the safety instrumented system boundary on an offshore platform and why it is treated as a separate security zone."</td></tr>
+        <tr><td>"Know about remote vessel operations."</td><td>"Compare the access-control model of a traditional bridge crew to that of a shore-based remote operations center."</td></tr>
+        <tr><td>"Be aware of hotel-service OT."</td><td>"Evaluate whether a cruise ship's HVAC and entertainment networks should share infrastructure with navigation-adjacent systems."</td></tr>
+      </tbody>
+    </table>
+    <p>Once your objectives are set, structure your content the way Lessons 1 through 11 do: three to five content modules, each roughly 20 to 45 minutes, each built from a short lecture, at least one worked example grounding the concept in a concrete scenario, and — where it genuinely helps — an analogy box or comparison table. You do not need every component every lesson on this site uses; you need the ones that actually serve your topic. A module that forces in a timeline or a compare-table it doesn't need is weaker than one that skips it.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Push learners to draft their module outline — just headings and one sentence per module — before writing full prose. It's much cheaper to discover a five-module plan should really be three modules at the outline stage than after two of the five are fully written.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧪</span>
+      <h2>Designing one hands-on simulation</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Every lesson in this course includes exactly one interactive activity beyond the mapping exercise and quiz, and it is always one of a small number of reusable mechanics — not because the course ran out of ideas, but because a small set of mechanics, reused well, teaches a learner the interaction pattern once and lets them focus on the content every time after. Your capstone's hands-on component should draw from the same small set: a <strong>toggle/meter simulation</strong> (like Lesson 1's isolation-erosion model or Lesson 11's correlation-confidence meter), where each toggle represents a choice or condition and a meter shows the cumulative effect; a <strong>mapping exercise</strong> (like the "match the X to its Y" activity every lesson includes), where learners pair scenarios to the correct concept; or a <strong>quiz</strong> with explanatory feedback, if your topic is better served by direct knowledge checks than by a simulated decision.</p>
+    <p>The design question that matters most is not which mechanic to pick — it's what single concept the mechanic should make concrete. A toggle/meter simulation works best when your topic has a clear cumulative or degrading quantity (isolation eroding, confidence building, accountability weakening) that toggles plausibly affect. A mapping exercise works best when your topic has five or six scenarios that cleanly sort into a small number of categories. If neither fits naturally, a well-written quiz with strong distractor options and real explanatory feedback is a completely legitimate choice — it is what several of this course's own review sections already are.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A learner capstoning on port crane OT security considers three options: a toggle/meter simulation showing "terminal network isolation" eroding as remote diagnostics, TOS integration, and gate-camera feeds are added one at a time (directly parallel to Lesson 1's mechanic); a mapping exercise pairing crane subsystems (hoist control, anti-sway sensors, operator cab HMI) to their correct security zone; or a quiz on crane-specific failure scenarios. They choose the toggle/meter simulation, because their module's central claim — that a crane network's isolation erodes through the same kind of individually reasonable requests Lesson 1 described for vessels — is best demonstrated by watching a meter move, not by sorting items into categories.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Remind learners that the mechanic is reused, not the content — copying Lesson 1's four business-pressure toggles verbatim with a new label is not a capstone simulation. The toggles, the readout text, and the end-state message all need to be written fresh for the chosen topic.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Assessment, Delivery &amp; Feedback</div>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📝</span>
+      <h2>Assessment design and rubric</h2>
+      <span class="module-time">≈ 25 min</span>
+    </div>
+    <p>Write three to five assessment items for your module, mirroring the quiz pattern used throughout this course: a clear stem, one correct answer, plausible distractors that reflect real misconceptions rather than obviously wrong filler, and a short explanatory feedback message for both the correct answer and the incorrect ones. Good distractors are the hardest part to get right — each wrong option should be something a learner who half-understood the material might actually pick, not a throwaway.</p>
+    <p>Pair your items with a simple four-criterion rubric so a peer or instructor reviewer — and you yourself, before submitting — can score the whole module consistently rather than on a vague overall impression.</p>
+    <table class="compare-table">
+      <caption>Capstone module scoring rubric</caption>
+      <thead>
+        <tr><th scope="col">Criterion</th><th scope="col">Developing</th><th scope="col">Proficient</th><th scope="col">Exemplary</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Technical accuracy</td><td>Contains factual errors or unsupported claims about maritime OT systems or security practice</td><td>Technically accurate throughout, with claims that are reasonable and defensible</td><td>Accurate and precise, with worked examples that reflect real-world nuance and correct terminology</td></tr>
+        <tr><td>Safeguards framing</td><td>No safeguards statement, or one that doesn't match the module's actual content</td><td>Includes a clear safeguards statement appropriate to the content and activity type</td><td>Safeguards statement is specific to the module's actual risks and reinforced within the activity itself</td></tr>
+        <tr><td>Activity design</td><td>Activity is missing, generic, or only loosely connected to the module's core concept</td><td>Activity clearly reinforces one central concept using an appropriate, working mechanic</td><td>Activity's mechanic, toggles/options, and end-state message are purpose-built to make the module's core claim concrete</td></tr>
+        <tr><td>Clarity of objectives</td><td>Objectives are vague, unmeasurable, or too broad for one module</td><td>Objectives use measurable verbs and are scoped to what the module actually covers</td><td>Objectives are precise, individually checkable, and each one is visibly addressed somewhere in the module content</td></tr>
+      </tbody>
+    </table>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Have learners self-score their own draft against this rubric before peer review. Most learners are harder on themselves for "activity design" than for "technical accuracy" — worth naming out loud, since a weak activity is usually more fixable in the time remaining than a technical gap is.</p>
+    </div>
+  </section>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🎤</span>
+      <h2>Teaching your segment and taking feedback</h2>
+      <span class="module-time">≈ 20 min</span>
+    </div>
+    <p>Prepare and deliver a 10 to 15 minute taught excerpt of your module to a small group of peers — not the whole module, just enough to demonstrate your objectives, one worked example, and your hands-on activity in action. Teaching a deliberately short excerpt forces the same prioritization discipline as writing the module itself: you cannot cover everything, so choose the segment that best demonstrates what makes your module work.</p>
+    <p>Structure the feedback you request from peers narrowly rather than opening the floor to general critique. Ask each peer for exactly three things: <strong>two things that worked</strong> and <strong>one suggestion</strong>. This constraint matters — open-ended critique tends to produce either polite vagueness or an unfocused list of every possible improvement, neither of which is actionable in the time available. Two-plus-one forces reviewers to commit to what was genuinely effective before offering a change, and gives you a short, prioritized list rather than a wall of notes.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Unstructured critique is like being handed a marked-up manuscript with comments in every margin — technically thorough, but you don't know which three comments matter most until you've read all forty. "Two things that worked, one suggestion" is closer to a pit-stop debrief: fast, specific, and focused on what to change before the next lap, not a full performance review.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">✅</span>
+        <h3>Activity: Capstone Planning Checklist</h3>
+        <span class="activity-structure">Individual planning</span>
+        <span class="activity-time">≈ 15 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions">Check off each deliverable as you complete it while planning and building your capstone module. This tracker lives only in your own browser — use it as a personal progress guide while you work, not as a submission record.</p>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="capProgressFill"></div></div>
+        <div class="progress-label" id="capProgressLabel">0 of 8 complete</div>
+        <ul class="lo-list" id="capList" role="group" aria-label="Capstone planning checklist">
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap1"><label for="cap1">Topic selected and approved</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap2"><label for="cap2">3–5 learning objectives drafted, using measurable verbs</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap3"><label for="cap3">Module content outlined (3–5 modules with headings and a one-sentence summary each)</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap4"><label for="cap4">One hands-on simulation or activity designed</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap5"><label for="cap5">Assessment items with rubric drafted</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap6"><label for="cap6">Safeguards statement written</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap7"><label for="cap7">Peer teaching segment rehearsed (10–15 min)</label></li>
+          <li class="lo-item"><input type="checkbox" class="lo-check" id="cap8"><label for="cap8">Materials submitted</label></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧩</span>
+      <h2>Simulation Design Worksheet</h2>
+      <span class="module-time">≈ 20 min</span>
+    </div>
+    <p>This lesson is about designing a simulation, not running one — so instead of a toggle/meter demo, work through the worksheet below for your own capstone topic. Answer each prompt in your own planning notes before you start building your activity in Module 3's mechanic.</p>
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">📋</span>
+        <h3>Worksheet: Planning your hands-on activity</h3>
+        <span class="activity-structure">Individual planning</span>
+      </div>
+      <div class="activity-body">
+        <div class="worked-example">
+          <span class="worked-example-label">Prompt 1</span>
+          <p>What single concept should your simulation make concrete? Name it in one sentence — if you can't, the activity likely isn't scoped tightly enough yet.</p>
+        </div>
+        <div class="worked-example">
+          <span class="worked-example-label">Prompt 2</span>
+          <p>What are three or four toggleable states, inputs, or scenario rows your activity needs? List them by name, the way Lesson 11's simulation lists "Alarm monitoring system log," "VDR data," "Network traffic capture," and "Synchronized accurate time source."</p>
+        </div>
+        <div class="worked-example">
+          <span class="worked-example-label">Prompt 3</span>
+          <p>What does the meter, readout, or feedback message communicate at each state? Draft the actual text a learner will read after each interaction — not just "meter goes up," but the sentence that explains why.</p>
+        </div>
+        <div class="worked-example">
+          <span class="worked-example-label">Prompt 4</span>
+          <p>Which existing course mechanic — toggle/meter simulation, mapping exercise, or quiz — fits this concept best, and why? Name the specific lesson whose mechanic you're modeling yours on.</p>
+        </div>
+        <div class="worked-example">
+          <span class="worked-example-label">Prompt 5</span>
+          <p>What happens if a learner selects every option? Does the end state teach something specific — the way Lesson 1's fully-converged network or Lesson 11's degraded-correlation warning does — or does it just say "done"? If it's the latter, revisit Prompt 1.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🎓</span>
+      <h2>Capstone Readiness Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five self-assessment questions covering the design principles this lesson asked you to apply. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item — use it to confirm you're ready to finalize your capstone module, not as a test of the maritime OT content itself.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q1.</span>Which of these best describes a measurable learning objective?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> "Understand maritime OT security."</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> "Explain why passive asset discovery is preferred over active scanning on a vessel OT network."</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> "Learn about crane security."</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> "Be aware of offshore platform risks."</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q2.</span>A capstone module's hands-on simulation should generally:</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> Introduce an entirely new interactive mechanic, coded from scratch, not used elsewhere in the course.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> Reuse one of the course's existing mechanics — toggle/meter, mapping exercise, or quiz — applied to the chosen topic.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> Be a static video with no interactivity.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> Require live access to real OT equipment to be effective.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q3.</span>The rubric criterion "Safeguards framing" is primarily checking whether:</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> The module includes at least ten quiz questions.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> The module includes a safeguards statement appropriate to its actual content, making clear any hands-on activity is simulation-based and defensive in scope.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> The module avoids all mention of real-world incidents.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> The module's simulation runs correctly without JavaScript enabled.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q4.</span>This lesson recommends structuring peer feedback after a taught segment as:</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> Unlimited open-ended critique for as long as time allows.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> A single overall letter grade with no comments.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> Two things that worked and one suggestion.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> Written feedback only, submitted anonymously days later.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q5.</span>A capstone topic that goes deeper on material this course already introduced (for example, a fuller treatment of one IACS UR E26/E27 capability category from Lesson 8) is:</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Not allowed — only entirely new, adjacent topics qualify as a capstone.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> An acceptable capstone topic, provided it is scoped narrowly enough to be a teachable module of its own.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Only allowed with direct approval from IACS.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Automatically weaker than a topic this course never covered.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Submit your completed capstone module (objectives, module outline, hands-on activity design, assessment items with rubric, and safeguards statement) alongside a short written reflection: what feedback you received during your taught segment, and what you would change about the module based on it. The reflection is what closes the loop between Module 5's peer feedback and a finished deliverable.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="teaching-guide.html">Teaching Guide</a> — this site's own guidance for instructors delivering the course, including notes on pacing, component patterns, and how to adapt lessons for different learner backgrounds.</li>
+      <li><a href="assessments.html">Assessments</a> — this site's own reference on assessment design across the curriculum, useful alongside Module 4's rubric guidance when finalizing your capstone's assessment items.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson11.html">← Lesson 11: Monitoring, Detection &amp; Maritime OT Incident Response</a>
+    <a class="nav-btn" href="index.html">Return to Course Home →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Capstone Overview &amp; Options</a></li>
+      <li><a href="#s2">2. Objectives &amp; Structure</a></li>
+      <li><a href="#s3">3. Designing a Simulation</a></li>
+      <li><a href="#s4">4. Assessment &amp; Rubric</a></li>
+      <li><a href="#s5">5. Teaching &amp; Feedback</a></li>
+      <li><a href="#activity">Activity: Planning Checklist</a></li>
+      <li><a href="#simulation">Simulation Design Worksheet</a></li>
+      <li><a href="#review">Capstone Readiness Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Write measurable learning objectives</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Design one hands-on simulation or activity</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Design an assessment item set with a rubric</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Write a safeguards statement</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Deliver a taught segment and use peer feedback</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s2"><span class="glossary-term">Learning Objectives</span></a><span class="glossary-def">Measurable statements of what a learner will be able to do, written with verbs like Explain, Describe, Compare, Evaluate, and Apply.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Lab Design</span></a><span class="glossary-def">Designing a hands-on simulation or activity around the single concept it should make concrete, using a reusable interaction mechanic.</span></li>
+      <li><a href="#s4"><span class="glossary-term">Rubric</span></a><span class="glossary-def">A scoring table with defined criteria and performance levels, used to assess a module consistently rather than by overall impression.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Peer Review</span></a><span class="glossary-def">Structured feedback from classmates after a taught segment, here scoped to two things that worked and one suggestion.</span></li>
+      <li><a href="#s4"><span class="glossary-term">Safeguards Statement</span></a><span class="glossary-def">A written statement, appropriate to the module's content, clarifying that any hands-on activity is simulation-based and defensive in scope.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson11.html">← Previous: Lesson 11 — Monitoring, Detection &amp; Maritime OT Incident Response</a>
+      <span class="disabled">Next: none (final lesson)</span>
+      <a class="btn" style="text-align:center;margin-top:6px;" href="index.html">Return to Course Home</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 12 · Day 5 · Capstone: Build and Teach Your Own Maritime OT Module<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  // Capstone planning checklist — separate tracker, separate ids, no collision with the
+  // objectives-progress checklist above.
+  var capChecks = Array.prototype.slice.call(document.querySelectorAll('#capList .lo-check'));
+  var capProgressFill = document.getElementById('capProgressFill');
+  var capProgressLabel = document.getElementById('capProgressLabel');
+
+  function updateCapProgress() {
+    var checkedCount = capChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / capChecks.length) * 100);
+    capProgressFill.style.width = pct + '%';
+    capProgressLabel.textContent = checkedCount + ' of ' + capChecks.length + ' complete';
+    capChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  capChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateCapProgress);
+  });
+  updateCapProgress();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. It names a specific, checkable verb (Explain) and a claim a learner can actually demonstrate — not a vague internal state like 'understand.'", incorrect: "Not quite. The measurable option uses a specific verb (Explain) and a checkable claim; the others describe an internal state ('understand,' 'learn,' 'be aware') with nothing to verify against." },
+    2: { correct: "Correct. Reusing an existing mechanic — toggle/meter, mapping exercise, or quiz — lets you focus your design effort on content rather than reinventing an interaction pattern.", incorrect: "Not quite. This course's own activities all reuse a small set of proven mechanics; a capstone module should do the same rather than building something new from scratch, static, or hardware-dependent." },
+    3: { correct: "Correct. Safeguards framing checks that the module clearly states its hands-on content is simulation-based and defensive in scope, matched to what the module actually covers.", incorrect: "Not quite. Safeguards framing isn't about a minimum question count, avoiding real incidents entirely, or a technical constraint — it's about a clear, content-appropriate simulation-based/defensive-scope statement." },
+    4: { correct: "Correct. This lesson's recommended structure — two things that worked, one suggestion — keeps feedback specific and actionable within a short session.", incorrect: "Not quite. Unstructured, grade-only, or delayed anonymous feedback all lose the specificity that 'two things that worked, one suggestion' is designed to preserve." },
+    5: { correct: "Correct. A narrowly scoped deeper dive on existing course material is a fully acceptable capstone topic, and is not automatically weaker than an adjacent new topic.", incorrect: "Not quite. This lesson explicitly allows either route — deeper or adjacent — with no external approval requirement and no built-in preference for new topics over deeper ones." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready to finalize and submit your capstone module.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before finalizing your module.' : 'Worth a re-read of the sections above before finalizing your module.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

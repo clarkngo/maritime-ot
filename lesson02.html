@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 2: IT/OT Security Principles at Sea | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 1, Lesson 2 of the Maritime Operational Technology Security curriculum: why maritime OT inverts the office CIA triad into Safety, Availability, Integrity, Confidentiality, how SOLAS and the ISM Code anchor that priority in law, and a five-zone reference model for classifying vessel and port equipment.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 1 · Lesson 2 · 4 Contact Hours</span>
+    <h1>IT/OT Security Principles at Sea</h1>
+    <p class="tagline">Why maritime OT inverts the CIA triad, why safety of life at sea sits above everything else, and a zone model for reasoning about vessel and port networks.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Inverted Triad</a>
+    <a href="#s2" data-section="s2">SOLAS &amp; ISM Code</a>
+    <a href="#s3" data-section="s3">Determinism &amp; Availability</a>
+    <a href="#s4" data-section="s4">Lifecycle Mismatch</a>
+    <a href="#s5" data-section="s5">Zone Model</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>Lesson 1 traced how a vessel's network stopped being isolated from shore. Before we can talk about defending that network, we need a vocabulary for what "defending" even means at sea — and it turns out that vocabulary is not the one most security professionals learn first. Nearly every introductory security course opens with the <dfn id="def-cia">CIA triad</dfn> — Confidentiality, Integrity, Availability, usually in that order — because it was written for information systems whose worst-case failure is a data breach. A ship underway has a worse failure mode than a data breach, and that single fact reorders everything.</p>
+      <p>This lesson builds the four ideas that everything else in the course rests on: the maritime priority stack that puts <dfn id="def-priority">Safety, Availability, Integrity, and Confidentiality</dfn> in that order rather than IT's usual confidentiality-first arrangement; the international legal backbone — <dfn id="def-solas">SOLAS</dfn> and the <dfn id="def-ism">ISM Code</dfn> — that makes safety non-negotiable rather than merely preferred; the operational reality of <dfn id="def-determinism">determinism</dfn> and continuous availability on a vessel that cannot simply be taken offline mid-voyage; the mismatch between a three-to-five-year IT refresh cycle and a twenty-to-thirty-year vessel service life; and a five-zone reference model for classifying any piece of equipment you encounter aboard a ship or in a port facility, from a rudder angle sensor to a shore-based fleet dashboard.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>A corporate email server's worst day is a leaked inbox. A ship underway is closer to a hospital intensive care unit than to an email server: the heart monitor that is imperfectly calibrated but running beats the heart monitor that has been switched off so a technician can patch it with a clean conscience. Security instincts built around the office — encrypt everything, lock down every login, block unrecognized traffic by default — all have to be re-checked against the possibility that, this time, the "server" is keeping a ballast alarm alive.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Explain how the maritime OT priority order (Safety, Availability, Integrity, Confidentiality) differs from the standard IT CIA triad.</li>
+        <li>Describe SOLAS and the ISM Code's role as the umbrella safety obligation that maritime OT security decisions must respect.</li>
+        <li>Explain why determinism and continuous availability matter more on a vessel mid-voyage than in a typical office IT environment.</li>
+        <li>Contrast typical 3-5 year IT refresh cycles with 20-30 year vessel/equipment lifecycles and what that means for patching and vendor support.</li>
+        <li>Apply a vessel/port zone reference model, analogous to the Purdue model, to classify a piece of equipment by zone.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⚖️</span>
+      <h2>The inverted triad at sea</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Every introductory security course teaches the CIA triad in roughly the same order, because in a typical office IT environment the worst-case failure is a data breach: a leaked customer database, a stolen credential, a proprietary file exfiltrated to a competitor. Confidentiality dominates that world, because information systems exist primarily to store and move information, and the primary harm from a compromise is that the wrong person reads or copies it.</p>
+    <p>A ship's OT priority order runs in the opposite direction, with one addition above the triad entirely. On a vessel underway, the first question a security decision has to answer is not "could this leak information?" but "could this hurt someone, or endanger the ship?" That gives four tiers rather than three, ranked in this order: Safety, Availability, Integrity, Confidentiality — sometimes written as SAIC to distinguish it from the office world's CIA. Safety sits above the triad because a maritime OT security decision that improves confidentiality or integrity at the cost of safety of life or safety of navigation is not a security improvement at all — it is a new hazard wearing a security badge.</p>
+    <p>Availability outranks integrity at sea because a system that is running and imperfect is usually safer than a system that is perfectly consistent but offline. An ECDIS with a slightly stale chart correction is still giving the watch officer a picture to work from; an ECDIS taken down to guarantee data integrity is giving them nothing. Confidentiality still matters — nobody wants a vessel's cargo manifest, crewing details, or ship security plan exposed — but it is the tier maritime OT security is willing to sacrifice first when a control's costs and benefits genuinely conflict, and IT security is usually not built to make that trade.</p>
+    <div class="icon-row" aria-hidden="true">
+      <div class="icon-item">
+        <svg width="52" height="52" viewBox="0 0 52 52" focusable="false">
+          <path d="M26 8 L42 15 V26 C42 36 35 43 26 46 C17 43 10 36 10 26 V15 Z" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+          <path d="M19 26 L24 31 L34 20" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        </svg>
+        Safety
+      </div>
+      <div class="icon-item">
+        <svg width="52" height="52" viewBox="0 0 52 52" focusable="false">
+          <circle cx="26" cy="26" r="17" fill="none" stroke="var(--text-muted)" stroke-width="2.5"/>
+          <path d="M26 15 V26 L34 31" stroke="var(--text-muted)" stroke-width="2.5" fill="none"/>
+        </svg>
+        Availability
+      </div>
+      <div class="icon-item">
+        <svg width="52" height="52" viewBox="0 0 52 52" focusable="false">
+          <rect x="12" y="18" width="28" height="20" rx="2" fill="none" stroke="var(--text-muted)" stroke-width="2.5"/>
+          <path d="M12 24 H40" stroke="var(--text-muted)" stroke-width="2"/>
+        </svg>
+        Integrity
+      </div>
+      <div class="icon-item">
+        <svg width="52" height="52" viewBox="0 0 52 52" focusable="false">
+          <rect x="16" y="24" width="20" height="16" rx="2" fill="none" stroke="var(--text-muted)" stroke-width="2.5"/>
+          <path d="M20 24 V18 a6 6 0 0 1 12 0 v6" fill="none" stroke="var(--text-muted)" stroke-width="2.5"/>
+        </svg>
+        Confidentiality
+      </div>
+    </div>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Think of the standard CIA triad as a bank's priority order and the maritime stack as a hospital's. A bank protects the ledger above all else — confidentiality and integrity of the numbers are the whole business. A hospital protects the patient above the chart: a heart monitor running on slightly outdated firmware and still beeping beats a perfectly patched monitor that has been powered down for the update. Maritime OT security borrows the hospital's instinct, not the bank's.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📜</span>
+      <h2>SOLAS, the ISM Code, and why safety outranks the exercise</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>The maritime industry's safety-first order is not a cultural preference — it is backed by international law. The International Convention for the Safety of Life at Sea (SOLAS), first adopted in the wake of the Titanic disaster and amended repeatedly since, is the treaty that sets the baseline safety requirements for the vast majority of the world's commercial ships: construction standards, life-saving equipment, fire protection, navigation equipment carriage, and — since amendments introduced in the 1990s and 2000s — elements of onboard safety management. SOLAS is, in effect, the umbrella that every other maritime safety and security obligation sits under, including maritime OT security.</p>
+    <p>Sitting underneath SOLAS is the International Safety Management (ISM) Code, which requires every SOLAS-covered operator to run a documented Safety Management System (<abbr>SMS</abbr>): company-level policies, shipboard procedures, and a chain of accountability running from the vessel's master up to a shore-based Designated Person Ashore, all aimed at making sure safety and pollution-prevention decisions actually get made — and actually get followed. A maritime OT security program does not sit outside the SMS; it has to be written into it. A change to a bridge or engine-control network is, functionally, a change to the safety management system, whether or not the person making the change thinks of it that way.</p>
+    <p>The practical consequence for security work is blunt: a control that could ever compromise safety of navigation or safety of life is a non-starter, no matter how sound it is as pure IT security practice. "Technically correct" and "acceptable aboard a SOLAS vessel" are not the same test, and every proposed control has to clear both.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A shore-based IT security team, tasked with hardening a newly converged vessel network, proposed a default-deny firewall rule between the engine control LAN and the alarm monitoring segment, intending to reduce lateral-movement risk after a penetration test flagged the two segments as too permissive. Tested in a lab, the rule performed exactly as designed — until a vessel engineer pointed out that the same segment carried the ballast pump high-level alarm feed to the bridge. Under the proposed rule, a ballast tank overfill during cargo operations would trigger no bridge alarm at all. The rule was technically sound IT security practice and an unacceptable safety regression at the same time; it was rewritten, with a narrower scope carved out for the alarm feed, before it went anywhere near a real ship.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is exactly the kind of outcome Lesson 1's discussion of ungoverned convergence previewed: a reasonable-sounding IT control, proposed without a maritime safety review, quietly threatens the SOLAS-level obligation the network exists to protect in the first place. A functioning maritime OT security program routes every control change that touches a safety-related signal path through the vessel's SMS change process — not around it.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⏱️</span>
+      <h2>Determinism and availability mid-voyage</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>A deterministic system produces the same output, within a predictable and bounded time, for the same input — every time. An autopilot's control loop, a steering gear's response, a ballast valve's actuation all depend on this property: the operator, or another automated system reading the result, needs to know not just that the command will eventually execute, but that it will execute within a guaranteed window, every time, without some background process introducing unpredictable delay.</p>
+    <p>A typical office IT environment can tolerate the opposite. A file server that pauses for two seconds to run a virus scan, an application server that reboots automatically at 2 a.m. to apply a patch — mildly annoying, quickly forgotten. A vessel four hundred miles from the nearest port does not get that grace period. Its ECDIS, its alarm monitoring system, its steering control cannot simply "take a moment" or "come back after a quick restart" whenever it happens to suit a shore-side patch calendar — because there may be a watch officer relying on that exact system, at that exact moment, to avoid a hazard that IT scheduling has no visibility into at all.</p>
+    <p>This is what "you can't just take it down" means operationally: not that OT systems are never patched or rebooted, but that every maintenance action mid-voyage has to be scheduled around the vessel's actual operational state — open ocean versus restricted waters, steady transit versus a scheduled course change, routine passage versus cargo operations — rather than around a shore IT team's convenience.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>During a routine software update window, a vessel's alarm monitoring system (AMS) was rebooted by a shore-scheduled patch job while the ship was making a planned course change through a traffic separation scheme. For the ninety seconds the AMS took to restart, the bridge team lost consolidated visibility into engine, fire, and bilge alarms — instruments that would normally have surfaced a developing problem before a human noticed it manually. No incident occurred, but the incident report that followed flagged the update as scheduled without regard for the vessel's operational state, and the fleet's patch policy was rewritten to require watch-officer sign-off before any bridge-system reboot, regardless of how routine the patch.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Determinism and availability mid-voyage are exactly why frameworks written for enterprise IT — including most default hardening guides — need maritime-specific interpretation before they are applied to a bridge network. Lesson 8 works through how frameworks such as NIST SP 800-82 and IEC 62443 get adapted, rather than applied verbatim, to vessel OT.</p>
+    </div>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛠️</span>
+      <h2>20-30 year hull lifecycles vs. 3-5 year IT refresh</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>A typical enterprise IT refresh cycle runs three to five years: laptops, servers, and even most business applications are budgeted to be replaced or substantially upgraded on that cadence, in part because the security model assumes it — vendors stop patching old operating systems on a predictable schedule, and the organization simply buys new hardware rather than defend an aging one indefinitely.</p>
+    <p>A vessel does not work that way. Ships are commissioned for twenty-five to thirty-year service lives, and a large share of the OT equipment installed at newbuild — control PLCs, HMI panels, the underlying computers running ECDIS or the alarm monitoring system — remains original-fit for fifteen years or more before anyone seriously considers replacing it, because swapping out embedded control equipment mid-service-life means a shipyard period, class society survey, and a level of cost and logistics an IT refresh never has to clear. It is not unusual to find a bridge HMI still running an operating system whose vendor stopped issuing security patches years earlier, simply because the equipment still does its job and there is no economically sane way to replace it at sea.</p>
+    <table class="compare-table">
+      <caption>Comparing typical IT refresh assumptions with shipboard OT equipment lifecycles</caption>
+      <thead>
+        <tr><th scope="col">Aspect</th><th scope="col">Typical office IT</th><th scope="col">Vessel / shipboard OT equipment</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Refresh interval</td><td>3-5 years, budgeted and routine</td><td>15+ years for embedded control equipment; hull service life of 20-30 years</td></tr>
+        <tr><td>OS support window</td><td>Vendor mainstream support typically 5-10 years</td><td>Legacy or end-of-life Windows versions often still running in production</td></tr>
+        <tr><td>Patch cadence</td><td>Monthly or continuous, remotely pushed</td><td>Opportunistic — tied to yard periods, port calls, and operational windows</td></tr>
+        <tr><td>Replacement cost &amp; logistics</td><td>Swap a laptop or server the same day</td><td>Requires a shipyard period, class survey, and vendor engineering support</td></tr>
+      </tbody>
+    </table>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Patching an office laptop is like changing a smoke detector battery — quick, cheap, and done without a second thought. Replacing a ballast control PLC is closer to replacing a building's structural steel — technically possible, but it needs a plan, a permit, a specialist crew, and a window when the building isn't occupied. Security programs that assume every asset can be patched like a laptop will keep proposing plans a ship simply cannot execute.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🗺️</span>
+      <h2>A zone model for vessel and port networks</h2>
+      <span class="module-time">≈ 40 min</span>
+    </div>
+    <p>Industrial control security borrows heavily from the Purdue Enterprise Reference Architecture, a layered model that separates field-level sensors from control systems, from supervisory HMIs, from the business network, from the wider enterprise and internet. Maritime OT security teaches a maritime-specific adaptation of the same idea: a five-zone reference model that gives a vessel or port network a common vocabulary for "how far is this device from the open internet, and how much would it hurt if it failed."</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>If you already know the Purdue model from industrial security, map Zone 0-2 loosely onto Purdue Levels 0-2 and Zone 3-4 onto Levels 3-5. The maritime version simply renames the layers around a vessel's actual equipment — a rudder angle sensor instead of a factory flow meter, a bridge HMI instead of a plant control room — rather than a factory floor's process units.</p>
+    </div>
+    <p>The five zones, from the physical process outward to the open internet:</p>
+    <table class="compare-table">
+      <caption>The maritime vessel/port zone reference model</caption>
+      <thead>
+        <tr><th scope="col">Zone</th><th scope="col">Example equipment</th><th scope="col">Typical criticality / trust level</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Zone 0</strong> — Field devices &amp; sensors</td><td>Rudder angle sensor, tank level sensor</td><td>Highest safety relevance; simplest devices, usually no independent security controls of their own</td></tr>
+        <tr><td><strong>Zone 1</strong> — Control systems</td><td>Autopilot, ballast control PLC, engine governor</td><td>Very high; closed-loop control acting directly on Zone 0 data — availability and determinism are paramount</td></tr>
+        <tr><td><strong>Zone 2</strong> — Bridge/engine HMI &amp; monitoring</td><td>ECDIS, alarm monitoring system, conning display</td><td>High; the human supervisory layer watching and directing Zones 0-1</td></tr>
+        <tr><td><strong>Zone 3</strong> — Shipboard business LAN</td><td>Crew Wi-Fi, cargo documentation systems</td><td>Moderate; administrative traffic, but a common bridge to Zone 4</td></tr>
+        <tr><td><strong>Zone 4</strong> — Shore/enterprise via VSAT</td><td>Fleet ops center, charterer systems, internet</td><td>Lowest trust; the vessel's only routine path to the open internet</td></tr>
+      </tbody>
+    </table>
+    <p>The model is a teaching scaffold, not a wiring diagram — a real vessel's network rarely respects these boundaries as cleanly as the table suggests, which is exactly why the model is useful. Every time you cannot cleanly say which zone a piece of equipment belongs to, you have found a segmentation gap worth investigating.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A port terminal's crane control PLCs (Zone 1) were found, during a security assessment, to be reachable directly from the terminal's guest Wi-Fi network (Zone 3-4 territory) because an integrator had left a diagnostic laptop's network bridge in place after commissioning. Classifying the PLCs by zone first — before touching a single firewall rule — made the gap obvious: a Zone 1 device should never be directly reachable from a Zone 3/4 network without at least one enforced boundary in between.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Equipment to Its Zone</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each piece of equipment below, select the zone from the reference model it belongs in. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Equipment</th><th scope="col">Zone</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="zone0">
+                <td>Rudder angle sensor</td>
+                <td>
+                  <select aria-label="Zone for rudder angle sensor">
+                    <option value="">— Select —</option>
+                    <option value="zone0">Zone 0 — Field devices &amp; sensors</option>
+                    <option value="zone1">Zone 1 — Control systems</option>
+                    <option value="zone2">Zone 2 — Bridge/engine HMI &amp; monitoring</option>
+                    <option value="zone3">Zone 3 — Shipboard business LAN</option>
+                    <option value="zone4">Zone 4 — Shore/enterprise via VSAT</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="zone1">
+                <td>Ballast control PLC</td>
+                <td>
+                  <select aria-label="Zone for ballast control PLC">
+                    <option value="">— Select —</option>
+                    <option value="zone0">Zone 0 — Field devices &amp; sensors</option>
+                    <option value="zone1">Zone 1 — Control systems</option>
+                    <option value="zone2">Zone 2 — Bridge/engine HMI &amp; monitoring</option>
+                    <option value="zone3">Zone 3 — Shipboard business LAN</option>
+                    <option value="zone4">Zone 4 — Shore/enterprise via VSAT</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="zone2">
+                <td>ECDIS</td>
+                <td>
+                  <select aria-label="Zone for ECDIS">
+                    <option value="">— Select —</option>
+                    <option value="zone0">Zone 0 — Field devices &amp; sensors</option>
+                    <option value="zone1">Zone 1 — Control systems</option>
+                    <option value="zone2">Zone 2 — Bridge/engine HMI &amp; monitoring</option>
+                    <option value="zone3">Zone 3 — Shipboard business LAN</option>
+                    <option value="zone4">Zone 4 — Shore/enterprise via VSAT</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="zone3">
+                <td>Crew Wi-Fi access point</td>
+                <td>
+                  <select aria-label="Zone for crew Wi-Fi access point">
+                    <option value="">— Select —</option>
+                    <option value="zone0">Zone 0 — Field devices &amp; sensors</option>
+                    <option value="zone1">Zone 1 — Control systems</option>
+                    <option value="zone2">Zone 2 — Bridge/engine HMI &amp; monitoring</option>
+                    <option value="zone3">Zone 3 — Shipboard business LAN</option>
+                    <option value="zone4">Zone 4 — Shore/enterprise via VSAT</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="zone4">
+                <td>Shore fleet performance dashboard</td>
+                <td>
+                  <select aria-label="Zone for shore fleet performance dashboard">
+                    <option value="">— Select —</option>
+                    <option value="zone0">Zone 0 — Field devices &amp; sensors</option>
+                    <option value="zone1">Zone 1 — Control systems</option>
+                    <option value="zone2">Zone 2 — Bridge/engine HMI &amp; monitoring</option>
+                    <option value="zone3">Zone 3 — Shipboard business LAN</option>
+                    <option value="zone4">Zone 4 — Shore/enterprise via VSAT</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: The Priority Conflict Simulator</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Click each proposed IT-style security action below, in any order, to see how it conflicts with the maritime priority stack this lesson opened with. Nothing here touches a real network — this is a model of a trade-off, not a network scan.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Proposed IT-style security actions">
+          <button type="button" class="sim-toggle" data-conn="reboot" aria-pressed="false">Auto-reboot after patch install</button>
+          <button type="button" class="sim-toggle" data-conn="blockout" aria-pressed="false">Block all outbound traffic by default</button>
+          <button type="button" class="sim-toggle" data-conn="mfa" aria-pressed="false">Require MFA prompt before any bridge system login</button>
+          <button type="button" class="sim-toggle" data-conn="encrypt" aria-pressed="false">Encrypt all NMEA sentence traffic</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Operational Safety Margin</span><span id="simMeterValue">100%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:100%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> no proposed IT-style controls have been applied yet. Select an action above to see how it lands on a bridge network.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q1.</span>In a typical office IT environment, the CIA triad usually places confidentiality first. What is the maritime OT priority order, and what sits above the triad?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> Confidentiality, Integrity, Availability — the same as IT, because data protection matters most at sea too.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> Safety, Availability, Integrity, Confidentiality — safety sits above the triad, and availability outranks integrity.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> Integrity, Availability, Confidentiality, Safety — integrity always comes first because sensor data must be accurate.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> Availability, Confidentiality, Integrity, Safety — availability alone matters on a moving vessel.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q2.</span>Why does the ISM Code matter to a maritime OT security decision?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> It is a voluntary best-practice guideline with no legal weight.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> It only applies to cargo documentation, not to control systems.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> It requires a documented Safety Management System, which any OT security change effectively becomes part of, tying security decisions to a vessel's legal safety obligations.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> It replaces SOLAS as the primary safety convention.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q3.</span>What does "you can't just take it down" mean when applied to a ship's alarm monitoring system mid-voyage?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> The system is physically impossible to reboot while at sea.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> Maintenance must be scheduled around the vessel's actual operational state, because the crew may depend on that system at the exact moment IT scheduling has no visibility into.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> OT systems should never be patched, under any circumstances.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> Only the ISM Code's Designated Person Ashore is legally permitted to reboot shipboard equipment.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q4.</span>A bridge HMI is still running an operating system whose vendor stopped releasing security patches years ago. What does this scenario illustrate?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> The crew is negligent and could replace the equipment immediately without shipyard involvement.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> IT refresh cycles (3-5 years) and vessel/equipment lifecycles (15-30 years) create a structural mismatch that leaves shipboard OT running unsupported software far longer than typical office IT ever would.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> Marine equipment vendors never release security patches for any product.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> This situation is prohibited under SOLAS and cannot legally occur.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>Where does a ballast control PLC belong in the vessel/port zone reference model, and why?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Zone 4, because it should be reachable from shore for remote diagnostics.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Zone 3, because it shares a network with crew Wi-Fi.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Zone 1, because it is a control system directly closing a control loop on field-level sensor data.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Zone 0, because it is a raw sensor with no logic of its own.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner take one piece of equipment from their own experience — a home boat's chartplotter, a warehouse PLC, a smart-home hub — and classify it against the priority stack (would a failure be a safety, availability, integrity, or confidentiality problem first?) and the zone model (how many boundaries sit between it and the open internet?). A short written justification for both classifications confirms the two frameworks transferred before Lesson 3 starts naming specific shipboard devices.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://www.imo.org/en/OurWork/HumanElement/Pages/ISMCode.aspx" target="_blank" rel="noopener noreferrer">IMO — International Safety Management (ISM) Code</a> — the International Maritime Organization's overview of the Code and the Safety Management System requirement discussed in this lesson.</li>
+      <li><a href="https://csrc.nist.gov/pubs/sp/800/82/r3/final" target="_blank" rel="noopener noreferrer">NIST SP 800-82 Rev. 3: Guide to Operational Technology (OT) Security</a> — background on layered OT reference architectures, including the Purdue-model thinking behind this lesson's zone model.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson01.html">← Lesson 1: From Isolated Bridges to Converged Fleets</a>
+    <a class="nav-btn" href="lesson03.html">Lesson 3: Maritime OT Technologies &amp; Field Devices →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. The Inverted Triad</a></li>
+      <li><a href="#s2">2. SOLAS &amp; ISM Code</a></li>
+      <li><a href="#s3">3. Determinism &amp; Availability</a></li>
+      <li><a href="#s4">4. Lifecycle Mismatch</a></li>
+      <li><a href="#s5">5. Zone Model</a></li>
+      <li><a href="#activity">Activity: Zone Mapping</a></li>
+      <li><a href="#simulation">Simulation: Priority Conflict</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Explain the inverted maritime OT priority order vs. the IT CIA triad</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Describe SOLAS and the ISM Code's role as the umbrella safety obligation</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Explain why determinism and availability matter more mid-voyage</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Contrast IT refresh cycles with vessel/equipment lifecycles</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Apply the vessel/port zone model to classify equipment</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s2"><span class="glossary-term">SOLAS</span></a><span class="glossary-def">International Convention for the Safety of Life at Sea — the primary international treaty on ship safety, which no maritime OT security control may compromise.</span></li>
+      <li><a href="#s2"><span class="glossary-term">ISM Code</span></a><span class="glossary-def">International Safety Management Code — requires every SOLAS-covered operator to run a documented Safety Management System covering security-relevant changes.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Determinism</span></a><span class="glossary-def">A system's ability to produce the same output within a guaranteed, predictable time — critical for control loops like autopilot and steering gear.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Zone Model</span></a><span class="glossary-def">A maritime-specific, Purdue-model-inspired reference architecture (Zones 0-4) for classifying equipment by criticality and trust boundary.</span></li>
+      <li><a href="#s1"><span class="glossary-term">Availability</span></a><span class="glossary-def">In maritime OT, the requirement that navigation and control systems keep running continuously — especially mid-voyage, when they cannot simply be taken offline.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson01.html">← Previous: Lesson 1 — From Isolated Bridges to Converged Fleets</a>
+      <a href="lesson03.html">Next: Lesson 3 — Maritime OT Technologies &amp; Field Devices →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 2 · Day 1 · IT/OT Security Principles at Sea<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { reboot: false, blockout: false, mfa: false, encrypt: false };
+  var simMessages = {
+    reboot: "Auto-reboot after patch install: convenient for a shore-side IT patch cycle, but a scheduled reboot doesn't know whether the vessel is mid-maneuver. On a vessel underway, this trades guaranteed patch compliance for a window of lost visibility on exactly the systems the crew may be relying on right now.",
+    blockout: "Block all outbound traffic by default: the standard IT hardening move — but maritime alarm and monitoring feeds sometimes ride the same segments as traffic assumed to be routine. A default-deny rule adopted without a maritime safety review can silently drop a safety-relevant alarm along with the traffic it was actually meant to stop.",
+    mfa: "Require MFA prompt before any bridge system login: sound identity practice ashore, but a bridge system is sometimes operated under pressure, by whichever qualified officer is on watch, in a wheelhouse where a phone or hardware token may not be within reach. An MFA prompt that blocks a time-critical login is a new hazard, not a hardened one.",
+    encrypt: "Encrypt all NMEA sentence traffic: protects confidentiality of navigation data in transit, but many shipboard NMEA consumers — older ECDIS units, radar — expect to read plaintext sentences in real time with minimal processing overhead. Universal encryption can introduce latency or break compatibility with legacy listeners never built to decrypt anything, undermining the availability and determinism this lesson's priority stack ranks above confidentiality."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = 100 - (activeCount * 25);
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> no proposed IT-style controls have been applied yet. Select an action above to see how it lands on a bridge network.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Just proposed:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> all four proposed controls are now active. Each one is a defensible practice in a typical office IT environment — and each one, applied to a bridge network without a maritime-specific review, chips away at the Operational Safety Margin by conflicting with the Safety &gt; Availability &gt; Integrity &gt; Confidentiality priority order this lesson opened with. This is precisely the judgment call a maritime OT security program has to make on every proposed control, not just the four modeled here.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. Safety sits above the triad, and Availability outranks Integrity — a running-but-imperfect system usually beats a perfectly consistent one that's offline.", incorrect: "Not quite. The maritime order is Safety, Availability, Integrity, Confidentiality — not the office CIA order, and not any of the other reorderings offered here." },
+    2: { correct: "Correct. The ISM Code's Safety Management System requirement means an OT security change is functionally a change to the vessel's legal safety obligations.", incorrect: "Not quite. The ISM Code is a binding requirement under SOLAS's framework, applies well beyond cargo documentation, and does not replace SOLAS — it sits underneath it." },
+    3: { correct: "Correct. The constraint is operational, not technical or purely regulatory — maintenance has to fit the vessel's real situation, not a shore patch calendar.", incorrect: "Not quite. OT systems can be rebooted at sea; the point is that timing has to respect what the crew is relying on the system for at that moment." },
+    4: { correct: "Correct. A 3-5 year IT refresh assumption and a 15-30 year vessel/equipment lifecycle are structurally mismatched, which is exactly why unsupported software persists on ships far longer than it would in an office.", incorrect: "Not quite. This is a predictable consequence of the lifecycle mismatch, not negligence, a blanket vendor policy, or something SOLAS prohibits outright." },
+    5: { correct: "Correct. A ballast control PLC closes a control loop on Zone 0 sensor data, which is exactly what defines Zone 1.", incorrect: "Not quite. A ballast control PLC is a control system acting on sensor data — that places it in Zone 1, not among the field sensors, the business LAN, or the shore/enterprise zone." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 3.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 3.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

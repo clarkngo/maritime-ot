@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 5: Maritime &amp; Industrial Communication Protocols | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 2, Lesson 5 of the Maritime Operational Technology Security curriculum: NMEA 0183 and NMEA 2000 sentence and bus structure, AIS message content, and Modbus/PROFINET/OPC UA in the engine room and port terminal — read at a level you can follow in a capture, with an eye to what each protocol does and does not authenticate.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 2 · Lesson 5 · 4 Contact Hours</span>
+    <h1>Maritime &amp; Industrial Communication Protocols</h1>
+    <p class="tagline">NMEA 0183 and NMEA 2000, AIS message formats, Modbus and CAN bus in the engine room, and the terminal-side protocols that move a container from ship to yard — framing at a level you can read in a capture.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">NMEA 0183</a>
+    <a href="#s2" data-section="s2">NMEA 2000 &amp; CAN</a>
+    <a href="#s3" data-section="s3">AIS</a>
+    <a href="#s4" data-section="s4">Modbus &amp; CAN</a>
+    <a href="#s5" data-section="s5">Terminal Protocols</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>Lesson 4 covered the general-purpose IT protocols — Ethernet, TCP/IP, VLANs, DHCP, DNS, NTP — that carry traffic around a modern vessel and port terminal network. This lesson goes one layer up, into the maritime- and industrial-specific protocols riding on top of that network: the sentence and message formats that actually tell an ECDIS where the ship is, that broadcast a vessel's identity and position to everyone nearby, and that let a crane's programmable logic controller know when to lower its spreader onto a container.</p>
+      <p>None of these protocols require you to memorize bit-level frame layouts to reason about their security posture. What matters for this course is a working sense of what each protocol carries, how it is structured well enough to recognize in a packet capture, and — the thread that ties the whole lesson together — what each one does, or does not, do to verify that a message came from where it claims to have come from. <dfn id="def-nmea0183">NMEA 0183</dfn>, <dfn id="def-nmea2000">NMEA 2000</dfn>, and <dfn id="def-ais">AIS</dfn> all inherit the "trust the wire" assumption from Lesson 1; <dfn id="def-modbus">Modbus</dfn> carries the same assumption into the engine room and the port terminal; and <dfn id="def-opcua">OPC UA</dfn> is the one protocol in this lesson that was actually designed with authentication and encryption as optional, built-in features.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Reading these protocols is a bit like learning to read shorthand road signs from a country you've never visited. You don't need to memorize the entire traffic code — you need to recognize the shape of a stop sign versus a yield sign versus a speed limit sign well enough to know what kind of message you're looking at, and, for this course, whether that sign could have been put up by literally anyone with a can of paint.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Describe the structure of an NMEA 0183 sentence, including talker/formatter codes and the checksum field.</li>
+        <li>Describe how NMEA 2000 operates over a CAN bus and how Parameter Group Numbers (PGNs) address different data types.</li>
+        <li>Describe the message types AIS transponders broadcast and the kind of data each one carries.</li>
+        <li>Describe how Modbus, PROFINET, and OPC UA are used in port terminal and engine-room automation.</li>
+        <li>Explain the authentication — or lack of it — built into each protocol covered in this lesson.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📟</span>
+      <h2>NMEA 0183: sentence structure and how it's read</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>An NMEA 0183 sentence is a single line of plain ASCII text, always starting with a dollar sign, and organized as comma-separated fields ending in a checksum. The first field after the dollar sign is a five-character <dfn>talker/formatter</dfn> code: the first two characters identify the type of device sending the sentence — <code>GP</code> for a GPS receiver, for instance — and the remaining three identify the sentence type itself, describing what kind of data follows. A sentence beginning <code>$GPGGA</code> is therefore a GPS fix data sentence from a GPS talker. The sentence ends with an asterisk, a two-character hexadecimal <dfn>checksum</dfn> computed by XOR-ing every character between the dollar sign and the asterisk, and a carriage return/line feed. The checksum catches transmission errors — a corrupted bit somewhere in the sentence — but, notably, it verifies nothing about who sent the message; it only confirms the message wasn't garbled in transit.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — decoding a GGA sentence</span>
+      <p>Consider the sentence <code>$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47</code>. Reading it field by field: <code>GPGGA</code> is a GPS fix data sentence; <code>123519</code> is the UTC time of the fix, 12:35:19; <code>4807.038,N</code> is latitude 48°07.038′ North; <code>01131.000,E</code> is longitude 011°31.000′ East; <code>1</code> is the fix quality indicator (1 meaning a standard GPS fix); <code>08</code> is the number of satellites used; <code>0.9</code> is horizontal dilution of precision; <code>545.4,M</code> is altitude above mean sea level in meters; <code>46.9,M</code> is the geoid separation; the two empty fields are for differential GPS data not in use here; and <code>*47</code> is the checksum. A learner who can walk through those fields in order has everything needed to recognize this sentence type in a live capture, without needing to memorize the NMEA specification.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>If time allows, put a real (or realistic sample) NMEA 0183 capture on screen and have learners identify the talker code, sentence type, and checksum before you walk through the fields together. The pattern-matching skill — recognizing structure at a glance — matters more here than memorizing every sentence type.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔗</span>
+      <h2>NMEA 2000 and CAN bus</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>NMEA 0183, as Lesson 1 covered, is fundamentally a point-to-point protocol: one talker, one dedicated wire, one (or a small handful of) listeners per circuit. <dfn>NMEA 2000</dfn> was built to remove that limitation by riding on top of a <dfn>CAN (Controller Area Network) bus</dfn> — the same bus technology widely used in automotive and industrial control — which lets many devices share a single network trunk instead of each needing its own dedicated wire. A single NMEA 2000 backbone can carry position data, engine parameters, and wind and depth sensor readings from a dozen or more devices all sharing the same cable run.</p>
+    <p>Where an NMEA 0183 sentence identifies itself by a talker/formatter code, an NMEA 2000 message identifies itself by a <dfn>PGN (Parameter Group Number)</dfn> — a numeric identifier that says what kind of data the message contains (vessel heading, engine RPM, GPS position, and so on). Think of a PGN as the CAN-bus equivalent of the sentence-type portion of an NMEA 0183 talker code: it tells every device on the bus what kind of data just went by, so each device can pick out only the PGNs it cares about and ignore the rest. Like the CAN bus it rides on, NMEA 2000 has no built-in sender authentication — any device physically wired onto the bus can transmit any PGN it chooses, and every other device on the bus will accept it as legitimate.</p>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📍</span>
+      <h2>AIS: what it broadcasts and how</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p><dfn>AIS (Automatic Identification System)</dfn> transponders — Class A, required on most SOLAS commercial vessels since the 2002 carriage mandate covered in Lesson 1, and the lower-power Class B used by smaller and recreational craft — continuously broadcast a vessel's identity and navigational state over VHF radio to any receiver within range: other ships, shore stations, and satellites. A typical AIS position report carries the vessel's <dfn>MMSI</dfn> (Maritime Mobile Service Identity, a unique numeric identifier), current position, <dfn>SOG/COG</dfn> (speed over ground and course over ground), heading, navigational status (under way using engine, at anchor, restricted in ability to maneuver, and so on), and rate of turn. Separate, less frequent messages carry static and voyage-related data: vessel name, call sign, ship type, dimensions, destination, and estimated time of arrival.</p>
+    <p>On the wire, AIS messages are encapsulated inside NMEA sentences using the <dfn>AIVDM/AIVDO</dfn> format — <code>!AIVDM</code> for a message received from another vessel, <code>!AIVDO</code> for a message about your own vessel's transmission — carrying a binary-encoded payload rather than the comma-separated plain text of a GGA sentence. You do not need to decode that binary payload bit by bit for this course; what matters is recognizing the AIVDM/AIVDO wrapper and understanding, at a conceptual level, which fields are inside it. What matters even more for this course is what AIS does <em>not</em> do: there is no cryptographic signature, no sender verification, and no built-in mechanism to confirm that a received AIS message actually originated from the vessel whose MMSI it claims. Any radio transmitter capable of the correct signaling can broadcast a technically well-formed AIS message claiming to be any vessel, at any position, doing anything — a gap Lesson 6 explores directly through AIS spoofing.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — reading an AIS position report conceptually</span>
+      <p>A watch officer's AIS display shows a target report: MMSI 366123456, vessel name "COASTAL TRADER," position 47.61°N / 122.33°W, SOG 12.3 knots, COG 047°, navigational status "under way using engine." Conceptually, that report tells the officer who the vessel claims to be (MMSI and name), where it claims to be (position), how fast and in what direction it claims to be moving (SOG/COG), and what it claims to be doing (navigational status) — four separate claims, none of them independently verified by the AIS system itself. The officer's radar, by contrast, reports only what is physically detected reflecting radar energy back — it makes no claims about identity at all. Module 5's simulation in this lesson explores what happens when those two pictures disagree.</p>
+    </div>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>AIS is closer to a boat shouting its own name and heading across open water than to a passport check at a border crossing — everyone nearby can hear the announcement, and it's usually accurate, but nothing stops someone else from shouting a false name just as loudly, and there's no gate agent checking papers to catch it.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⚙️</span>
+      <h2>Modbus and CAN bus in the engine room</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p><dfn>Modbus</dfn>, in both its serial (<dfn>Modbus RTU</dfn>) and networked (<dfn>Modbus TCP</dfn>) forms, remains one of the most common protocols in engine automation and auxiliary machinery monitoring, decades after its original release in 1979 for industrial programmable controllers ashore. Its longevity comes from the same source as its security weakness: it is a simple, openly documented, request-response protocol with a small set of function codes — a controller (the "master") sends a request such as "read holding registers starting at address X," and a device (the "slave") replies with the requested data. That simplicity made it trivial for equipment vendors across many industries, marine included, to implement decades ago, and trivial for it to keep working with minimal changes ever since.</p>
+    <p>The tradeoff is that Modbus, in its common legacy form, has no built-in authentication whatsoever. Any device that can reach a Modbus slave over the network (or the serial bus) can send it a legitimate-looking read or write request, and the slave has no protocol-level way to confirm the request came from the authorized engine control system rather than from something else that found its way onto the same network segment. Alongside Modbus, plain CAN bus (independent of the NMEA 2000 profile covered in Module 2) is also widely used directly in machinery control — generator control panels, engine electronic control units, and auxiliary equipment often communicate over a CAN bus using vendor-specific message formats rather than the standardized NMEA 2000 PGN scheme, but with the same lack of built-in sender authentication.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners with an IT security background will recognize Modbus's "no authentication" story as extremely similar to what they may already know about Modbus in land-based industrial control systems — because it is the same protocol, largely unchanged. This is a good moment to reinforce that maritime OT security draws heavily on decades of land-based ICS security research; the protocols and their weaknesses did not originate at sea.</p>
+    </div>
+  </section>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🏗️</span>
+      <h2>Port terminal protocols: Modbus TCP, PROFINET, OPC UA</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Moving a container off a ship and onto a chassis in the yard is, underneath the cranes and the choreography, an industrial automation problem — and it runs on the same general-purpose industrial protocols found in any heavy-manufacturing facility ashore, rather than on anything maritime-specific. A ship-to-shore crane's <dfn>PLC (programmable logic controller)</dfn> commonly communicates with sensors, drives, and safety systems over <dfn>Modbus TCP</dfn> or <dfn>PROFINET</dfn> — a Siemens-originated, now widely adopted, real-time industrial Ethernet protocol popular in crane and conveyor automation for its deterministic timing. Both inherit the strengths and weaknesses already discussed: efficient, well-understood, and — like Modbus in the engine room — generally without built-in authentication in their common configurations.</p>
+    <p><dfn>OPC UA (Open Platform Communications Unified Architecture)</dfn> is the protocol most likely to sit above these device-level networks in a modern terminal, serving as the interoperability layer that lets a terminal operating system (TOS) — the software that assigns cranes, tracks container moves, and schedules yard equipment — talk to OT devices from many different vendors without a custom integration for each one. What sets OPC UA apart from every other protocol in this lesson is that it was designed from the outset with optional, built-in security features: message signing and encryption, and certificate-based authentication between client and server, all specified as part of the standard rather than bolted on afterward. Those features are optional, not automatic — an OPC UA deployment configured without them offers no better authentication guarantee than plain Modbus — but the capability exists in the protocol itself, which is more than can be said for NMEA 0183, NMEA 2000, AIS, or legacy Modbus.</p>
+    <table class="compare-table">
+      <caption>Protocols covered in this lesson, compared</caption>
+      <thead>
+        <tr><th scope="col">Protocol</th><th scope="col">Typical use</th><th scope="col">Authentication</th><th scope="col">Typical transport</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>NMEA 0183</td><td>Point-to-point marine sensor data (GPS, depth, wind)</td><td>None — trust is physical, whoever is wired to the circuit</td><td>Serial (RS-422), or UDP multicast under IEC 61162-450</td></tr>
+        <tr><td>NMEA 2000 / CAN</td><td>Shared-bus marine sensor and engine data</td><td>None — any device wired onto the bus is trusted</td><td>CAN bus</td></tr>
+        <tr><td>AIS</td><td>Vessel identity, position, and status broadcast</td><td>None — broadcast trust only, no sender verification</td><td>VHF radio, encapsulated as NMEA AIVDM/AIVDO sentences</td></tr>
+        <tr><td>Modbus</td><td>Engine automation, machinery monitoring, crane PLC control</td><td>None by default in common legacy deployments</td><td>Serial (RTU) or TCP/IP</td></tr>
+        <tr><td>OPC UA</td><td>Terminal operating system to OT device interoperability</td><td>Optional built-in message signing, encryption, and certificate-based authentication</td><td>TCP/IP</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Protocol to Its Authentication Reality</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each protocol below, select the authentication reality that best matches it. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Protocol</th><th scope="col">Best-matching authentication reality</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="nmea0183">
+                <td>NMEA 0183</td>
+                <td>
+                  <select aria-label="Authentication reality for NMEA 0183">
+                    <option value="">— Select —</option>
+                    <option value="nmea0183">None — physical trust only</option>
+                    <option value="ais">None — broadcast trust only</option>
+                    <option value="modbus">None by default</option>
+                    <option value="opcua">Optional built-in security features</option>
+                    <option value="nmea2000">None — bus-level trust only</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="ais">
+                <td>AIS</td>
+                <td>
+                  <select aria-label="Authentication reality for AIS">
+                    <option value="">— Select —</option>
+                    <option value="nmea0183">None — physical trust only</option>
+                    <option value="ais">None — broadcast trust only</option>
+                    <option value="modbus">None by default</option>
+                    <option value="opcua">Optional built-in security features</option>
+                    <option value="nmea2000">None — bus-level trust only</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="modbus">
+                <td>Legacy Modbus (RTU or TCP)</td>
+                <td>
+                  <select aria-label="Authentication reality for legacy Modbus">
+                    <option value="">— Select —</option>
+                    <option value="nmea0183">None — physical trust only</option>
+                    <option value="ais">None — broadcast trust only</option>
+                    <option value="modbus">None by default</option>
+                    <option value="opcua">Optional built-in security features</option>
+                    <option value="nmea2000">None — bus-level trust only</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="opcua">
+                <td>OPC UA</td>
+                <td>
+                  <select aria-label="Authentication reality for OPC UA">
+                    <option value="">— Select —</option>
+                    <option value="nmea0183">None — physical trust only</option>
+                    <option value="ais">None — broadcast trust only</option>
+                    <option value="modbus">None by default</option>
+                    <option value="opcua">Optional built-in security features</option>
+                    <option value="nmea2000">None — bus-level trust only</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="nmea2000">
+                <td>NMEA 2000 / CAN bus</td>
+                <td>
+                  <select aria-label="Authentication reality for NMEA 2000 / CAN bus">
+                    <option value="">— Select —</option>
+                    <option value="nmea0183">None — physical trust only</option>
+                    <option value="ais">None — broadcast trust only</option>
+                    <option value="modbus">None by default</option>
+                    <option value="opcua">Optional built-in security features</option>
+                    <option value="nmea2000">None — bus-level trust only</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛰️</span>
+      <h2>Simulation: AIS Message Trust Simulator</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Click each watchkeeping condition below, in any order, to see how it shapes how much a bridge team should trust the AIS picture in front of them. Nothing here touches a real AIS receiver — this is a model of a judgment call, not a live traffic feed.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Watchkeeping conditions">
+          <button type="button" class="sim-toggle" data-conn="verify" aria-pressed="false">Verify AIS against radar track</button>
+          <button type="button" class="sim-toggle" data-conn="gnss" aria-pressed="false">Cross-check GNSS position independently</button>
+          <button type="button" class="sim-toggle" data-conn="blind" aria-pressed="false">Trust AIS position blindly</button>
+          <button type="button" class="sim-toggle" data-conn="broadcast" aria-pressed="false">Broadcast on AIS without verifying own GNSS fix</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Positional trust</span><span id="simMeterValue">100%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:100%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> no verification practices or risky assumptions have been applied yet. Select a condition above to see its trust implication.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q1.</span>In the NMEA 0183 sentence <code>$GPGGA,123519,...,*47</code>, what does the trailing <code>*47</code> field verify?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> That the sentence was sent by an authorized GPS receiver.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> That the position data has been cryptographically signed.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> That the sentence was not corrupted in transmission — it is a checksum, not a sender identity check.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> That the GPS fix meets minimum accuracy requirements.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q2.</span>What problem does NMEA 2000's use of a CAN bus solve compared with NMEA 0183?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> It adds cryptographic authentication that NMEA 0183 lacked.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> It lets many devices share a single network trunk instead of requiring a dedicated point-to-point wire per connection.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> It replaces plain-text sentences with an encrypted binary format.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> It eliminates the need for any addressing scheme at all.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q3.</span>Why does AIS pose a particular verification challenge for a watch officer?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> AIS messages are encrypted, so officers cannot read the position data at all.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> AIS transponders are only fitted to naval vessels.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> AIS requires a paid subscription to decode.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> AIS has no built-in mechanism to verify that a received message actually originated from the vessel whose MMSI it claims.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q4.</span>What is a defining security characteristic of legacy Modbus, as commonly deployed in engine rooms and port terminals?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> It has no built-in authentication — any device that can reach a Modbus slave can send it legitimate-looking requests.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> It requires a certificate exchange before any read or write request is accepted.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> It was designed exclusively for maritime use and has no land-based ICS equivalent.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> It encrypts all register read and write requests by default.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>What distinguishes OPC UA from the other protocols covered in this lesson?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> It is the oldest protocol covered, predating NMEA 0183.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> It always encrypts and authenticates every message with no configuration required.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> It was designed with optional, built-in message signing, encryption, and certificate-based authentication as part of the standard itself.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> It replaces PROFINET and Modbus TCP entirely in every modern terminal.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner take one protocol from this lesson and write two sentences: what it carries, and what happens (in plain operational terms, not packet-level detail) if a malicious device on the same network sends a well-formed but false message using that protocol. This is a low-stakes way to confirm the authentication vocabulary transferred before Lesson 6 builds threat scenarios — including AIS spoofing — on top of it.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://www.nmea.org/content/STANDARDS/NMEA_2000" target="_blank" rel="noopener noreferrer">National Marine Electronics Association — NMEA 2000 Standard Overview</a> — the standards body's own summary of NMEA 0183 and NMEA 2000, including how PGNs and CAN-bus addressing work.</li>
+      <li><a href="https://opcfoundation.org/about/opc-technologies/opc-ua/" target="_blank" rel="noopener noreferrer">OPC Foundation — OPC UA Overview</a> — the standards body's description of OPC UA's architecture and its built-in security model, referenced in Module 5.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson04.html">← Lesson 4: IT Protocols Inside Shipboard &amp; Port Networks</a>
+    <a class="nav-btn" href="lesson06.html">Lesson 6: The Maritime OT Threat Landscape →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. NMEA 0183</a></li>
+      <li><a href="#s2">2. NMEA 2000 &amp; CAN Bus</a></li>
+      <li><a href="#s3">3. AIS</a></li>
+      <li><a href="#s4">4. Modbus &amp; CAN in the Engine Room</a></li>
+      <li><a href="#s5">5. Port Terminal Protocols</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: AIS Message Trust</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Describe NMEA 0183 sentence structure</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Describe NMEA 2000/CAN bus operation</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Describe AIS message types and content</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Describe Modbus/PROFINET/OPC UA in terminal automation</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Explain each protocol's authentication (or lack of it)</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s1"><span class="glossary-term">NMEA 0183</span></a><span class="glossary-def">A point-to-point, text-based marine electronics sentence format: dollar-sign prefixed, comma-delimited fields, ending in a checksum that verifies transmission integrity only, not sender identity.</span></li>
+      <li><a href="#s2"><span class="glossary-term">NMEA 2000</span></a><span class="glossary-def">A CAN-bus-based marine electronics standard letting many devices share one network trunk, addressed by Parameter Group Numbers (PGNs) rather than dedicated per-device wiring.</span></li>
+      <li><a href="#s3"><span class="glossary-term">AIS</span></a><span class="glossary-def">Automatic Identification System — VHF broadcast of a vessel's identity, position, and navigational status, with no built-in sender authentication.</span></li>
+      <li><a href="#s4"><span class="glossary-term">Modbus</span></a><span class="glossary-def">A simple request-response industrial protocol widely used in engine automation and port terminal PLC control, with no built-in authentication in its common legacy form.</span></li>
+      <li><a href="#s5"><span class="glossary-term">OPC UA</span></a><span class="glossary-def">Open Platform Communications Unified Architecture — a modern industrial interoperability protocol with optional, standard-defined message signing, encryption, and certificate-based authentication.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson04.html">← Previous: Lesson 4 — IT Protocols Inside Shipboard &amp; Port Networks</a>
+      <a href="lesson06.html">Next: Lesson 6 — The Maritime OT Threat Landscape →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 5 · Day 2 · Maritime &amp; Industrial Communication Protocols<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { verify: false, gnss: false, blind: false, broadcast: false };
+  var simMessages = {
+    verify: "Verify AIS against radar track: cross-referencing an AIS target's reported position and identity against the vessel's own radar picture catches a large class of spoofed or ghost AIS targets — radar reports what is physically there, while AIS only reports what a transmitter claims.",
+    gnss: "Cross-check GNSS position independently: comparing your own GPS/GNSS fix against a second independent source, such as visual bearings or radar ranges, protects against the case where your own receiver — and therefore your own AIS broadcast — has been spoofed or degraded without your knowledge.",
+    blind: "Trust AIS position blindly: treating another vessel's broadcast AIS position and identity as ground truth with no independent cross-check is exactly the assumption a spoofed or manipulated AIS message is counting on.",
+    broadcast: "Broadcast on AIS without verifying own GNSS fix: transmitting your own position from an unverified GNSS fix means that if your receiver is being spoofed or jammed, you are now broadcasting bad data to every other vessel that extends you the same blind trust."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = 100 - (activeCount * 25);
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> no verification practices or risky assumptions have been applied yet. Select a condition above to see its trust implication.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Just applied:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> this scenario now mixes two sound verification practices with two risky assumptions. The lesson is not that AIS is useless — it is that AIS alone, without radar and independent GNSS cross-checks, is a claim rather than a fact. Lesson 6 builds directly on this by walking through what an actual AIS spoofing attempt looks like from the bridge.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. The checksum confirms the sentence wasn't corrupted in transit — it says nothing about who sent it.", incorrect: "Not quite. The checksum is a transmission-integrity check, not a sender-authentication or accuracy-verification mechanism." },
+    2: { correct: "Correct. NMEA 2000's CAN-bus foundation lets many devices share one trunk instead of each needing a dedicated point-to-point wire, as NMEA 0183 requires.", incorrect: "Not quite. NMEA 2000 didn't add authentication or encryption over NMEA 0183 — its main change was topological, letting many devices share one bus." },
+    3: { correct: "Correct. AIS has no built-in way to verify that a received message actually came from the vessel whose MMSI it claims — that gap is exactly what Lesson 6's AIS spoofing discussion builds on.", incorrect: "Not quite. AIS messages aren't encrypted or subscription-gated, and Class B transponders are common on smaller and recreational vessels — the real issue is the total absence of sender verification." },
+    4: { correct: "Correct. Legacy Modbus has no built-in authentication — any device that can reach a Modbus slave over the network or bus can send it a legitimate-looking request.", incorrect: "Not quite. Modbus predates certificate-based authentication, has extensive land-based industrial use outside maritime, and does not encrypt requests by default." },
+    5: { correct: "Correct. OPC UA is the one protocol in this lesson designed with optional, standard-defined message signing, encryption, and certificate-based authentication built in.", incorrect: "Not quite. OPC UA's security features are optional, not automatic, and it is newer than NMEA 0183 — it does not replace PROFINET or Modbus TCP everywhere, but often sits above them as an interoperability layer." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 6.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 6.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

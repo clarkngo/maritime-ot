@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor Teaching Guide | Maritime Operational Technology Security</title>
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface2: #eaf3f6; --border: #ccdce4;
+    --text: #0d1b26; --text-muted: #52697a; --accent: #0e7490; --accent2: #155e75; --on-accent: #ffffff;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10); --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b; --header-text: #ffffff; --card-hover: #e8f2f4;
+    --tag-gov: #6a1b9a; --tag-gov-bg: #f3e5f5;
+    --tag-found: #b45309; --tag-found-bg: #fff3e0;
+    --tag-ops: #2e7d32; --tag-ops-bg: #e8f5e9;
+    --tag-proto: #1565c0; --tag-proto-bg: #e3f0fd;
+    --tag-tools: #5c6bc0; --tag-tools-bg: #ede7f6;
+    --tag-safety: #b45309; --tag-safety-bg: #fdf3e3;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c; --surface: #101d2e; --surface2: #16283d; --border: #223349;
+    --text: #e6eef5; --text-muted: #8fa3b8; --accent: #22d3ee; --accent2: #67e8f9; --on-accent: #04222a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16; --header-text: #e6eef5; --card-hover: #16283d;
+    --tag-gov: #ce93d8; --tag-gov-bg: #1f0d2a;
+    --tag-found: #ffcc80; --tag-found-bg: #2a1a00;
+    --tag-ops: #a5d6a7; --tag-ops-bg: #0d2010;
+    --tag-proto: #90caf9; --tag-proto-bg: #0d1f35;
+    --tag-tools: #9fa8da; --tag-tools-bg: #1a1a35;
+    --tag-safety: #fbbf24; --tag-safety-bg: #2a1c05;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .skip-link { position: absolute; left: -999px; top: auto; }
+  .skip-link:focus { position: fixed; left: 12px; top: 12px; z-index: 400; background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 1180px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; display: none; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+  .icon-btn:hover { background: rgba(255,255,255,0.22); }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero { background: linear-gradient(135deg, #0a1a2b 0%, #103a4d 60%, #6a1b9a33 100%); color: #fff; padding: 30px 24px; }
+  .hero-inner { max-width: 1180px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+  .hero p { opacity: 0.82; font-size: 0.92rem; max-width: 74ch; line-height: 1.55; }
+
+  .page-shell { max-width: 1180px; margin: 0 auto; padding: 26px 24px 64px; display: grid; grid-template-columns: 250px 1fr; gap: 30px; align-items: start; }
+  .toc-sidebar { position: sticky; top: 82px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); max-height: calc(100vh - 100px); overflow-y: auto; }
+  .toc-sidebar h5 { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 14px 0 6px; }
+  .toc-sidebar h5:first-child { margin-top: 0; }
+  .toc-sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .toc-sidebar a { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 6px 8px; border-radius: 6px; }
+  .toc-sidebar a:hover { background: var(--surface2); color: var(--text); }
+  .toc-overlay { display: none; }
+
+  main.content { min-width: 0; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--tag-gov); text-decoration: none; margin-bottom: 18px; }
+  .back-link:hover { text-decoration: underline; }
+
+  .page-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .ctrl-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 0.78rem; font-weight: 700; padding: 7px 12px; border-radius: 20px; cursor: pointer; }
+  .ctrl-btn:hover { background: var(--surface2); }
+
+  .quickfacts { background: var(--surface); border: 2px solid var(--tag-gov); border-radius: 14px; padding: 18px 20px; margin-bottom: 32px; box-shadow: var(--shadow); }
+  .quickfacts h4 { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--tag-gov); margin-bottom: 12px; }
+  .fact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .fact-tile { background: var(--surface2); border-radius: 10px; padding: 10px 12px; }
+  .fact-tile .fact-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 4px; }
+  .fact-tile .fact-value { font-size: 0.86rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+
+  section.numsec { margin-bottom: 44px; padding-top: 8px; scroll-margin-top: 88px; }
+  .numsec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .numsec-num { font-size: 0.78rem; font-weight: 800; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 3px 9px; flex-shrink: 0; }
+  .numsec-head h3 { font-size: 1.2rem; font-weight: 800; }
+  .numsec > p { font-size: 0.92rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 14px; max-width: 82ch; }
+  .numsec h4.sub-head { font-size: 0.95rem; font-weight: 800; margin: 20px 0 10px; color: var(--text); }
+
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 8px 0 4px; }
+  .concept-item { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--tag-gov); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .concept-item h4 { font-size: 0.86rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .concept-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0; }
+
+  .howto-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+  .howto-list li { display: flex; gap: 12px; }
+  .howto-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--tag-gov-bg); color: var(--tag-gov); font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; }
+  .howto-list p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; }
+  .howto-list strong { color: var(--text); }
+
+  .cmp-table { width: 100%; border-collapse: collapse; margin: 10px 0 4px; font-size: 0.84rem; }
+  .cmp-table th, .cmp-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; line-height: 1.5; }
+  .cmp-table th { background: var(--surface2); font-weight: 800; color: var(--text); }
+  .cmp-table td.attr { font-weight: 700; color: var(--tag-gov); white-space: nowrap; }
+  .cmp-table td { color: var(--text-muted); }
+  .table-scroll { overflow-x: auto; border-radius: 10px; }
+  .sl-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; border-radius: 6px; background: var(--tag-gov-bg); color: var(--tag-gov); font-weight: 800; font-size: 0.76rem; padding: 0 6px; }
+
+  .stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 14px 0 6px; }
+  .stage-card { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+  .stage-band { padding: 10px 16px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+  .stage-card.general   .stage-band { background: var(--tag-found-bg); color: var(--tag-found); }
+  .stage-card.policies  .stage-band { background: var(--tag-ops-bg); color: var(--tag-ops); }
+  .stage-card.system    .stage-band { background: var(--tag-proto-bg); color: var(--tag-proto); }
+  .stage-card.component .stage-band { background: var(--tag-tools-bg); color: var(--tag-tools); }
+  .stage-card h5 { padding: 12px 16px 0; font-size: 0.94rem; font-weight: 800; }
+  .stage-card .stage-body { padding: 8px 16px 16px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; }
+
+  .sub-card { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; background: var(--surface); }
+  .sub-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface2); border: none; text-align: left; padding: 12px 14px; cursor: pointer; font-family: inherit; color: var(--text); }
+  .sub-toggle:hover { background: var(--card-hover); }
+  .sub-toggle-left { display: flex; align-items: center; gap: 10px; }
+  .sub-caret { color: var(--tag-gov); font-size: 0.85rem; flex-shrink: 0; width: 1em; display: inline-block; }
+  .sub-title { font-weight: 700; font-size: 0.86rem; }
+  .sub-chip { font-size: 0.66rem; font-weight: 700; color: var(--tag-gov); background: var(--tag-gov-bg); border-radius: 10px; padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; white-space: nowrap; }
+  .sub-chip.general   { color: var(--tag-found); background: var(--tag-found-bg); }
+  .sub-chip.policies  { color: var(--tag-ops); background: var(--tag-ops-bg); }
+  .sub-chip.system    { color: var(--tag-proto); background: var(--tag-proto-bg); }
+  .sub-chip.component { color: var(--tag-tools); background: var(--tag-tools-bg); }
+  .sub-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .sub-body.open { max-height: 1400px; }
+  .sub-body-inner { padding: 4px 16px 16px; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; }
+  .sub-body-inner strong { color: var(--text); }
+  .sub-body-inner ul { margin: 6px 0 0 18px; }
+  .sub-body-inner li { margin-bottom: 4px; }
+  .part-num { display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+
+  .teaching-note { background: var(--surface2); border: 2px solid var(--accent); border-radius: 14px; padding: 18px 20px; margin-top: 6px; }
+  .teaching-note h4 { font-size: 0.95rem; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+  .teaching-note p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px; }
+  .safety-flag { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety); border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; }
+
+  .exercise-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 8px; }
+  .exercise-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .exercise-card h5 { font-size: 0.88rem; font-weight: 800; margin-bottom: 6px; color: var(--tag-gov); }
+  .exercise-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; }
+
+  .reading-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .reading-list a { font-size: 0.88rem; font-weight: 600; color: var(--tag-gov); text-decoration: none; }
+  .reading-list a:hover { text-decoration: underline; }
+  .reading-list span { display: block; font-size: 0.78rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+  .disclaimer { font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 12px; margin-top: 14px; line-height: 1.6; }
+
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media (max-width: 880px) {
+    .icon-btn { display: flex; }
+    .page-shell { grid-template-columns: 1fr; padding: 22px 16px 48px; }
+    .toc-sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 78vw; max-width: 320px; z-index: 300; border-radius: 0; transform: translateX(-100%); transition: transform 0.25s ease; box-shadow: var(--shadow-hover); }
+    .toc-sidebar.open { transform: translateX(0); }
+    .toc-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 250; }
+    .toc-overlay.open { display: block; }
+    .hero { padding: 24px 16px; }
+    .header-inner { padding: 14px 16px; }
+  }
+  @media print {
+    header, .toc-sidebar, .toc-overlay, .page-controls, .back-link { display: none !important; }
+    .page-shell { grid-template-columns: 1fr; padding: 0 12px; }
+    .sub-body { max-height: none !important; }
+    .hero { background: none; color: var(--text); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <button class="icon-btn" id="tocToggleBtn" aria-expanded="false" aria-controls="tocSidebar" aria-label="Toggle table of contents">☰</button>
+      <div class="brand-icon">MOT</div>
+      <div class="brand-text">
+        <h1>Maritime Operational Technology Security</h1>
+        <p>Instructor Teaching Guide</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="printBtn" onclick="window.print()" aria-label="Print or save as PDF" style="display:flex;">🖨️</button>
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Guide · Pedagogy</span>
+    <h2>Instructor Teaching Guide</h2>
+    <p>Pacing for the five days, prerequisite checks, common misconceptions about maritime OT, discussion prompts, and mapping to maritime cybersecurity work roles — the delivery companion for everyone teaching this course, in person, virtually, or self-paced.</p>
+  </div>
+</div>
+
+<div class="toc-overlay" id="tocOverlay"></div>
+<div class="page-shell">
+  <nav class="toc-sidebar" id="tocSidebar" aria-label="Page contents">
+    <h5>Orientation</h5>
+    <ul>
+      <li><a href="#sec-01">01 · Course Pacing</a></li>
+      <li><a href="#sec-02">02 · Prerequisite Check</a></li>
+    </ul>
+    <h5>Delivery</h5>
+    <ul>
+      <li><a href="#sec-03">03 · Common Misconceptions</a></li>
+      <li><a href="#sec-04">04 · Discussion Prompts</a></li>
+      <li><a href="#sec-05">05 · Mapping to Work Roles</a></li>
+    </ul>
+    <h5>Facilitation</h5>
+    <ul>
+      <li><a href="#sec-06">06 · Facilitation Tips</a></li>
+      <li><a href="#sec-07">07 · Adapting for Self-Paced Delivery</a></li>
+      <li><a href="#sec-08">08 · Related Pages</a></li>
+    </ul>
+  </nav>
+
+  <main class="content" id="main-content">
+    <a class="back-link" href="index.html">← Back to Course Navigation</a>
+
+    <div class="page-controls">
+      <button class="ctrl-btn" id="expandAllBtn">▾ Expand all sections</button>
+      <button class="ctrl-btn" id="collapseAllBtn">▸ Collapse all</button>
+    </div>
+
+    <div class="quickfacts">
+      <h4>Quick Facts</h4>
+      <div class="fact-grid">
+        <div class="fact-tile"><div class="fact-label">Format</div><div class="fact-value">5 days, 12 lessons, ~4 contact hours each</div></div>
+        <div class="fact-tile"><div class="fact-label">Prerequisites</div><div class="fact-value">Basic networking familiarity recommended; no maritime background required</div></div>
+        <div class="fact-tile"><div class="fact-label">Pacing Model</div><div class="fact-value">2–3 lessons per day, Day 1–5 structure</div></div>
+        <div class="fact-tile"><div class="fact-label">Assessment</div><div class="fact-value">Per-lesson quiz + capstone project</div></div>
+        <div class="fact-tile"><div class="fact-label">Delivery Mode</div><div class="fact-value">In-person, virtual, or self-paced</div></div>
+        <div class="fact-tile"><div class="fact-label">Primary Audience</div><div class="fact-value">Security practitioners, IT/OT professionals moving into maritime, and maritime professionals building security literacy</div></div>
+      </div>
+    </div>
+
+    <section class="numsec" id="sec-01">
+      <div class="numsec-head"><span class="numsec-num">01</span><h3>Course Pacing</h3></div>
+      <p>The course is built around five delivery days and eight teaching strands, visible on the course hub's progress strip. Each day groups two or three lessons that share a strand, so the pacing table below is also a strand map — useful for deciding where to slow down or where a cohort can move faster.</p>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>Day</th><th>Lessons</th><th>Strand(s)</th><th>Suggested Schedule</th></tr></thead>
+          <tbody>
+            <tr><td class="attr">Day 1</td><td>Lesson 1 – Lesson 3</td><td>Foundations</td><td>Full day. Lesson 1 (convergence) runs longest — it resets assumptions learners arrive with; leave extra time for Section 03's misconceptions to surface here.</td></tr>
+            <tr><td class="attr">Day 2</td><td>Lesson 4 – Lesson 5</td><td>Protocols</td><td>Full day, two longer sessions. Lesson 5's NMEA/AIS framing benefits from a slower walk-through before the Lab 1 hands-on exercise.</td></tr>
+            <tr><td class="attr">Day 3</td><td>Lesson 6 – Lesson 7</td><td>Threats</td><td>Full day. Both lessons carry a "case study only / no live exploitation" safety flag — reinforce the Safeguards policy boundary before starting.</td></tr>
+            <tr><td class="attr">Day 4</td><td>Lesson 8 – Lesson 9</td><td>Frameworks · Governance</td><td>Full day. Denser reading load — the four Core Framework pages support Lesson 8 and can be assigned as pre-reading for a faster in-person pace.</td></tr>
+            <tr><td class="attr">Day 5</td><td>Lesson 10 – Lesson 12</td><td>Identity &amp; Access · Operations · Capstone</td><td>Longest day. Lesson 12's capstone needs protected working time — consider splitting Day 5 across two shorter sessions if your cohort's schedule allows it.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:10px;">This pacing assumes roughly four contact hours per lesson including discussion and any paired lab or simulator time. A cohort with less contact time per day can spread the same 12 lessons across more than five calendar days without changing the strand grouping.</p>
+    </section>
+
+    <section class="numsec" id="sec-02">
+      <div class="numsec-head"><span class="numsec-num">02</span><h3>Prerequisite Check</h3></div>
+      <p>This course does not assume any maritime background — Lesson 1 through Lesson 3 build that from the ground up. What it does assume is a working, general familiarity with networking concepts. A short diagnostic before Day 1 catches gaps early, when they're cheap to fill.</p>
+      <h4 class="sub-head">Suggested pre-course diagnostic (5–8 questions, ungraded)</h4>
+      <ol class="howto-list">
+        <li><span class="howto-num">1</span><p><strong>IP addressing and subnets.</strong> Can the learner explain, in plain terms, what an IP address and a subnet are for? This underlies Lesson 4's VLAN and segmentation content.</p></li>
+        <li><span class="howto-num">2</span><p><strong>Client/server and request-response.</strong> A basic sense of how two devices exchange data is enough — Lesson 4 and Lesson 5 build protocol-specific detail on top of this.</p></li>
+        <li><span class="howto-num">3</span><p><strong>Ports and protocols at a high level.</strong> Not memorized port numbers — just the idea that different services use different, identifiable channels.</p></li>
+        <li><span class="howto-num">4</span><p><strong>What a firewall does.</strong> The general concept of a boundary that allows or blocks traffic, which Lesson 7's segmentation countermeasures and the zone model from Lesson 2 both build on directly.</p></li>
+        <li><span class="howto-num">5</span><p><strong>Comfort reading a simple diagram.</strong> Learners who can follow a basic network diagram will move faster through the zone-model and architecture material in Lessons 2, 4, and 8.</p></li>
+      </ol>
+      <p style="margin-top:10px;">A learner who is shaky on two or more of these is not disqualified from the course — flag it so the instructor can plan a short Day 1 refresher, rather than letting the gap surface mid-lesson.</p>
+    </section>
+
+    <section class="numsec" id="sec-03">
+      <div class="numsec-head"><span class="numsec-num">03</span><h3>Common Misconceptions</h3></div>
+      <p>Learners arrive with mental models built from general IT security or from popular coverage of maritime incidents, and both produce predictable misconceptions. Naming them early — ideally on Day 1 — headed off a lot of confusion in later lessons.</p>
+
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="tg3-1"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">"Ships are always offline, so they can't really be hacked"</span></span><span class="sub-chip">Misconception</span></button>
+        <div class="sub-body" id="tg3-1" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p><strong>Why learners believe it:</strong> the mental image of a ship at sea, disconnected from shore, is decades out of date but persistent.</p><p><strong>How to counter it:</strong> Lesson 1's VSAT convergence content is the direct rebuttal — satellite links, crew connectivity, and shore-side remote access have merged vessel networks with the wider internet on most modern fleets. Have learners trace one concrete path from a crew laptop to a navigation system before this misconception gets challenged in the abstract.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="tg3-2"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">"AIS data can be trusted like GPS"</span></span><span class="sub-chip">Misconception</span></button>
+        <div class="sub-body" id="tg3-2" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p><strong>Why learners believe it:</strong> AIS looks and behaves like a reliable positioning feed on a chart display, so it reads as equally authoritative.</p><p><strong>How to counter it:</strong> Lesson 5's protocol framing and Lesson 6's spoofing case studies together show that AIS messages are self-reported and unauthenticated by design — anyone transmitting on the frequency can put a fabricated vessel on the chart. Neither AIS nor unencrypted civilian GPS carries strong built-in authentication.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="tg3-3"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">"Maritime OT security is just industrial OT security with boats"</span></span><span class="sub-chip">Misconception</span></button>
+        <div class="sub-body" id="tg3-3" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p><strong>Why learners believe it:</strong> a learner coming from general ICS/OT security sees PLCs, sensors, and control loops and assumes the discipline transfers unchanged.</p><p><strong>How to counter it:</strong> Lesson 2's SOLAS and ISM Code content shows a governance layer — safety of life at sea, flag-state and port-state oversight, classification society survey — with no direct equivalent in a factory. A vessel is also a mobile asset that changes jurisdiction, crew, and connectivity constantly; a shore plant does not.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="tg3-4"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">"A patch is a patch — apply it like you would on a laptop"</span></span><span class="sub-chip">Misconception</span></button>
+        <div class="sub-body" id="tg3-4" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p><strong>Why learners believe it:</strong> routine patch cadence is second nature in general IT, so the delay in applying a fix elsewhere reads as negligence rather than constraint.</p><p><strong>How to counter it:</strong> Lesson 7's dry-dock-length patch window content shows that many shipboard systems can only be safely updated during scheduled yard periods, sometimes a year or more apart — which is exactly why compensating controls (segmentation, allowlisting, jump hosts) carry so much weight in maritime OT.</p></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <button class="sub-toggle" aria-expanded="false" aria-controls="tg3-5"><span class="sub-toggle-left"><span class="sub-caret">▸</span><span class="sub-title">"If it's not connected to the internet it's not at risk"</span></span><span class="sub-chip">Misconception</span></button>
+        <div class="sub-body" id="tg3-5" aria-hidden="true" inert>
+          <div class="sub-body-inner"><p><strong>Why learners believe it:</strong> air-gap thinking is a reasonable first instinct, and it's not entirely wrong — it's incomplete.</p><p><strong>How to counter it:</strong> Lesson 6's insider-risk and supply-chain content covers vendor USB drives, contractor laptops during a port call, and OEM remote-support sessions — none of which require the target system to have its own internet connection. An isolated network is safer, not safe.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-04">
+      <div class="numsec-head"><span class="numsec-num">04</span><h3>Discussion Prompts</h3></div>
+      <p>Open-ended prompts, one or two per strand, useful for small-group discussion, a virtual breakout, or a warm-up before the lesson's quiz.</p>
+      <div class="exercise-grid">
+        <div class="exercise-card"><h5>Foundations</h5><p>What changed on a vessel's network the day its first VSAT terminal went live — and who, if anyone, was responsible for securing that new path?</p></div>
+        <div class="exercise-card"><h5>Foundations</h5><p>Why might "24/7 uptime" mean something different, and stricter, for a ship's steering system than it does for a shore data center?</p></div>
+        <div class="exercise-card"><h5>Protocols</h5><p>NMEA 0183 and AIS were designed decades before maritime cybersecurity was a discipline. Should they be replaced, retrofitted with authentication, or defended entirely at the network layer instead?</p></div>
+        <div class="exercise-card"><h5>Threats</h5><p>A ransomware operator hits a port's business network, not its terminal operations network. Why might they still cause an operational shutdown?</p></div>
+        <div class="exercise-card"><h5>Threats</h5><p>Given the dry-dock patch window problem, is "patch everything quickly" ever the right top priority for a maritime OT security program?</p></div>
+        <div class="exercise-card"><h5>Frameworks &amp; Governance</h5><p>If you could only require one of IACS UR E26/E27, the IMO instrument, NIST SP 800-82, or IEC 62443 for a fleet operator with limited resources, which would you pick, and what would it fail to cover?</p></div>
+        <div class="exercise-card"><h5>Identity &amp; Access · Operations</h5><p>A vendor needs remote access to an ECDIS over a satellite link mid-voyage. What's the minimum set of controls that makes that access acceptable rather than merely convenient?</p></div>
+        <div class="exercise-card"><h5>Operations · Capstone</h5><p>What does "contain the incident" mean on a ship that cannot simply be unplugged and is three days from the nearest port?</p></div>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-05">
+      <div class="numsec-head"><span class="numsec-num">05</span><h3>Mapping to Work Roles</h3></div>
+      <p>Learners often ask how this course connects to a job title they recognize. The table below is illustrative, not a claim of alignment to any specific formal competency framework (e.g., NICE, IMO model course competencies, or a classification society's own surveyor qualifications) — treat it as a conversation starter for career relevance, and verify against your own institution's or employer's actual role definitions before using it for credentialing purposes.</p>
+      <div class="table-scroll">
+        <table class="cmp-table">
+          <thead><tr><th>Course Lessons</th><th>Example Role</th><th>Illustrative Connection</th></tr></thead>
+          <tbody>
+            <tr><td>Lessons 2, 9</td><td>Ship Security Officer (SSO)</td><td>ISM/ISPS Code familiarity and the vessel/port zone model support the SSO's day-to-day security-plan responsibilities.</td></tr>
+            <tr><td>Lessons 8, 9</td><td>Company Security Officer (CSO)</td><td>Framework selection and governance/compliance content map to a CSO's fleet-wide policy and audit responsibilities.</td></tr>
+            <tr><td>Lessons 6, 11</td><td>Fleet SOC Analyst</td><td>Threat landscape case studies and the monitoring/incident-response lesson mirror a fleet SOC analyst's triage workload.</td></tr>
+            <tr><td>Lessons 3, 4, 5, 7</td><td>OT Security Engineer (maritime)</td><td>Device tours, protocol literacy, and vulnerability/countermeasure content map to hands-on hardening and segmentation work.</td></tr>
+            <tr><td>Lessons 8, 9</td><td>Classification Society Surveyor</td><td>Framework literacy, especially IACS UR E26/E27, supports the technical vocabulary a surveyor uses during a newbuild or periodic survey.</td></tr>
+            <tr><td>Lessons 10, 11</td><td>OT/IT Systems Administrator (shipowner or manager)</td><td>Access control, identity lifecycle, and monitoring content map to day-to-day administration of shore- and vessel-side systems.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-06">
+      <div class="numsec-head"><span class="numsec-num">06</span><h3>Facilitation Tips</h3></div>
+      <ol class="howto-list">
+        <li><span class="howto-num">1</span><p><strong>Run the per-lesson quiz live when you can.</strong> The in-browser quizzes give immediate feedback (see the <a href="assessments.html">Assessment &amp; Rubric Bank</a>) — projecting the results screen and discussing a missed question in the moment lands better than assigning it as homework.</p></li>
+        <li><span class="howto-num">2</span><p><strong>Use the mapping activities as a mid-lesson checkpoint,</strong> not just an end-of-lesson wrap-up — the zone-mapping and framework-mapping exercises surface confusion earlier, while there's still time in the session to address it.</p></li>
+        <li><span class="howto-num">3</span><p><strong>Let learners drive the toggle-based simulations themselves</strong> rather than demonstrating from the front of the room — the Ballast Control Process Simulator and the rest of the <a href="simulators.html">Simulator Suite</a> are built for hands-on interaction, and watching someone else click through them is a much weaker version of the exercise.</p></li>
+        <li><span class="howto-num">4</span><p><strong>Pair the accordion sub-sections with a "read, then explain back" pattern.</strong> Every framework and reference page on this site uses the same expand/collapse sub-card structure — asking a learner to summarize one sub-card aloud is a quick, low-stakes comprehension check.</p></li>
+        <li><span class="howto-num">5</span><p><strong>Reinforce the Safeguards policy before the first hands-on lab,</strong> not just once at the start of the course — a two-minute reminder before Lab 1 keeps the isolated-network and defensive-scope rules front of mind.</p></li>
+      </ol>
+    </section>
+
+    <section class="numsec" id="sec-07">
+      <div class="numsec-head"><span class="numsec-num">07</span><h3>Adapting for Self-Paced Delivery</h3></div>
+      <p>Every lesson, lab, and simulator page in this course is a self-contained, browser-based artifact — nothing requires a live instructor to function. That makes the course adaptable to self-paced delivery with a few adjustments.</p>
+      <div class="concept-grid">
+        <div class="concept-item"><h4>Replace live discussion with written reflection</h4><p>Have self-paced learners write a short response to one Section 04 discussion prompt per strand instead of a live group discussion, submitted alongside their lab reports.</p></div>
+        <div class="concept-item"><h4>Front-load the prerequisite check</h4><p>Put the Section 02 diagnostic at the very start of the self-paced track so a learner can self-assess readiness before committing to the full 12 lessons.</p></div>
+        <div class="concept-item"><h4>Set a pacing target, not a hard schedule</h4><p>Suggest the same Day 1–5 grouping as a five-session target (e.g., one evening per "day") rather than a fixed calendar, so the strand logic still holds.</p></div>
+        <div class="concept-item"><h4>Build in an asynchronous check-in</h4><p>A short async office-hours channel or forum, checked by an instructor a few times a week, replaces the live "ask a question mid-lesson" option self-paced learners otherwise lose.</p></div>
+      </div>
+      <div class="teaching-note">
+        <h4>📖 Teaching Note</h4>
+        <p>The capstone (Lesson 12) is the hardest lesson to run fully self-paced, since it's designed around peer critique. For a self-paced cohort, substitute a written peer-review exchange between two learners, or have the instructor provide the "peer" review themselves using the same rubric described in the <a href="assessments.html">Assessment &amp; Rubric Bank</a>.</p>
+      </div>
+    </section>
+
+    <section class="numsec" id="sec-08">
+      <div class="numsec-head"><span class="numsec-num">08</span><h3>Related Pages</h3></div>
+      <ul class="reading-list">
+        <li><a href="assessments.html">Assessment &amp; Rubric Bank<span>The quiz item bank, scenario prompts, and capstone rubric referenced throughout this guide</span></a></li>
+        <li><a href="safeguards.html">Safeguards &amp; Responsible Use Policy<span>The physical safety, environment, and defensive-scope rules to reinforce before every hands-on lab</span></a></li>
+        <li><a href="labs.html">Hands-on Lab Exercises<span>The five guided labs this course's pacing and facilitation tips are built around</span></a></li>
+      </ul>
+      <p class="disclaimer">This guide reflects one reasonable way to pace and facilitate this course; instructors should adapt timing, grouping, and delivery mode to their own cohort size, contact-hour budget, and institutional requirements. The work-role mapping in Section 05 is illustrative only and is not a claim of alignment to any specific formal competency or credentialing framework.</p>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only. All exercises are simulation-based and defensive in scope.
+</footer>
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mot-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) {}
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var tocBtn = document.getElementById('tocToggleBtn');
+  var toc = document.getElementById('tocSidebar');
+  var overlay = document.getElementById('tocOverlay');
+  function closeToc() {
+    toc.classList.remove('open');
+    overlay.classList.remove('open');
+    tocBtn.setAttribute('aria-expanded', 'false');
+  }
+  tocBtn.addEventListener('click', function () {
+    var isOpen = toc.classList.contains('open');
+    if (isOpen) { closeToc(); } else {
+      toc.classList.add('open');
+      overlay.classList.add('open');
+      tocBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+  overlay.addEventListener('click', closeToc);
+  toc.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeToc); });
+
+  function setSub(btn, expand) {
+    var card = btn.closest('.sub-card');
+    var body = card.querySelector('.sub-body');
+    var caret = btn.querySelector('.sub-caret');
+    btn.setAttribute('aria-expanded', String(expand));
+    body.setAttribute('aria-hidden', String(!expand));
+    if (expand) {
+      body.classList.add('open');
+      body.removeAttribute('inert');
+      if (caret) caret.textContent = '▾';
+    } else {
+      body.classList.remove('open');
+      body.setAttribute('inert', '');
+      if (caret) caret.textContent = '▸';
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.sub-toggle');
+    if (!btn) return;
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    setSub(btn, !expanded);
+  });
+  document.getElementById('expandAllBtn').addEventListener('click', function () {
+    document.querySelectorAll('.sub-toggle').forEach(function (btn) { setSub(btn, true); });
+  });
+  document.getElementById('collapseAllBtn').addEventListener('click', function () {
+    document.querySelectorAll('.sub-toggle').forEach(function (btn) { setSub(btn, false); });
+  });
+</script>
+</body>
+</html>

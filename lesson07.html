@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 7: Vulnerabilities &amp; Countermeasures | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 3, Lesson 7 of the Maritime Operational Technology Security curriculum: legacy firmware, flat shipboard networks, default credentials, and the dry-dock-length patch window, paired with segmentation, allowlisting, jump hosts, and compensating controls as the countermeasures that work anyway.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 3 · Lesson 7 · 4 Contact Hours</span>
+    <h1>Vulnerabilities &amp; Countermeasures</h1>
+    <p class="tagline">Legacy ECDIS and radar firmware, flat shipboard networks, default credentials, and the dry-dock-length patch window — then the countermeasures that work anyway.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Legacy Firmware</a>
+    <a href="#s2" data-section="s2">Flat Networks &amp; Default Creds</a>
+    <a href="#s3" data-section="s3">Patch Window</a>
+    <a href="#s4" data-section="s4">Segmentation</a>
+    <a href="#s5" data-section="s5">Allowlisting &amp; Backups</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <span class="safety-flag">⚠ No live exploitation</span>
+      <h2>Lesson Overview</h2>
+      <p>Lesson 6 established who is interested in maritime OT and what documented interference has looked like. This lesson turns to the other half of the risk equation: why maritime OT systems remain vulnerable in the first place, and — the part this lesson spends more time on — what actually reduces that risk when a vessel cannot simply be treated like a shore-based data center. Nothing in this lesson involves probing, scanning, or exploiting any real or simulated system. Every vulnerability class discussed here is described at the level of "what kind of weakness this is and why it persists," never as a walkthrough of how to find or abuse a specific instance of it.</p>
+      <p>The throughline is a simple but important idea: most maritime OT vulnerabilities are not the result of anyone doing something obviously wrong. They are the predictable outcome of operating equipment on a 15-to-25-year hull lifecycle, in an environment where a "quick patch" can mean re-certifying a safety-critical system, and where the next opportunity to safely touch some of that equipment might be years away. Countermeasures that assume monthly patch cycles and instantly reconfigurable networks don't survive contact with that reality — so this lesson focuses on the ones that do: segmentation, allowlisting, tightly controlled remote access, tested backups, and the broader concept of a compensating control.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>A shore-based IT system with a known vulnerability is like a car with a recalled part — you drive it to a shop this week and it's fixed. A vessel's ECDIS or engine automation system with a known vulnerability is more like a recalled part on a research station in Antarctica during the off-season: the part everyone agrees needs replacing simply cannot be reached until the next scheduled resupply, so in the meantime you manage the risk with whatever compensating measures are actually available where the equipment sits.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Identify common maritime OT vulnerability classes: legacy firmware, flat networks, default credentials, and unpatched systems.</li>
+        <li>Explain why a vessel's patch window is bounded by dry-dock scheduling rather than a monthly IT patch cycle.</li>
+        <li>Describe segmentation as a primary countermeasure, tying it to Lesson 2's zone model and the IACS UR E26 framework previewed in Lesson 8.</li>
+        <li>Describe allowlisting, jump-host-mediated remote access, and other compensating controls used in maritime OT.</li>
+        <li>Evaluate a vulnerability scenario and recommend an appropriate compensating control.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🗄️</span>
+      <h2>Legacy firmware and end-of-support systems</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>A vessel is typically designed for a service life of fifteen to twenty-five years, and the bridge and engine-control systems installed at newbuild are often the same firmware and operating-system versions still running when the ship is scrapped decades later. It is not unusual for a maritime cyber assessment to find embedded controllers running firmware that has not been updated since delivery, or workstation-class equipment — an ECDIS or engine-monitoring display, for instance — still running a Windows version whose mainstream vendor support ended years earlier. This is a widely acknowledged, publicly documented class of finding across maritime cyber-risk assessments and classification-society guidance, not a hypothetical.</p>
+    <p>Part of the reason this persists is technical inertia — nobody visits a bridge system as often as an office laptop — but part of it is structural. Bridge, navigation, and engine-control equipment is <dfn id="def-typeapproval">type-approved</dfn>: a specific hardware and software configuration is tested and certified against IMO performance standards, and that certification is tied to the exact configuration tested. Changing the software — even installing a routine security patch — can, in the manufacturer's own risk calculus, invalidate that certification until it is re-verified. Because re-certification is costly and slow, some vendors have historically discouraged or even contractually restricted patching outside of a formal, vendor-managed update process, which in practice can mean long stretches with no patching at all.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A bulk carrier's engine automation system was delivered in 2009 running an embedded operating system whose vendor ended mainstream support in 2014. The equipment still functions exactly as designed and remains within its type-approval certification. When the ship's technical manager raises the unsupported OS during a routine cyber-risk assessment, the equipment vendor's guidance is that any operating-system-level change would require re-certification the vendor is not currently prepared to fund or schedule — leaving the operator to manage the risk through network-level and procedural controls rather than a direct fix to the system itself.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners with a pure IT background often react to this module with "so patch it." Use the type-approval point to redirect that instinct: in maritime OT, "just patch it" can mean "recertify a piece of safety equipment," which is a materially bigger decision than a Windows update on an office laptop. This reframing is what makes Module 3's dry-dock patch window and Module 5's compensating controls land as reasonable rather than as excuses.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔓</span>
+      <h2>Flat shipboard networks and default credentials</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Lesson 1 described how convenience-driven convergence pulled a vessel's OT network onto the same infrastructure as shore connectivity and crew Wi-Fi. One of the most consistent, publicly documented downstream effects of that convergence is a <dfn id="def-flatnetwork">flat network</dfn> — a single, unsegmented network in which navigation systems, engine-control systems, business systems, and sometimes crew devices can all reach one another, because no one ever deliberately drew boundaries between them as the network grew.</p>
+    <p>A second, closely related and equally well-documented finding is the continued presence of <dfn id="def-defaultcreds">default or shared credentials</dfn> on bridge and engine systems — a username and password left at the factory default, or a single shared login used across an entire watch rotation because provisioning individual accounts was never built into the equipment's normal operating procedure. Multiple maritime cyber-assessment firms and classification societies have published summary findings describing default credentials as one of the most commonly observed weaknesses across vessels surveyed, independent of vessel age or type. This lesson states that as a documented category of finding — not as a demonstration of how to locate or use any specific default credential.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Ask learners why a flat network and default credentials are being taught together rather than separately. The connection is worth drawing out explicitly: on a flat network, a single default-credentialed device isn't an isolated weak point — it's a foothold that can reach everything else on the same network, exactly the pattern Lesson 6's NotPetya/Maersk case study illustrated at the port level.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⚓</span>
+      <h2>The dry-dock-length patch window</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>A typical IT patch cycle assumes systems can be updated monthly, or even continuously, with a reboot as the main operational cost. Maritime OT frequently cannot make that assumption. Many bridge and engine-control systems can only be safely updated during a scheduled <dfn id="def-drydock">dry-docking</dfn> — a period, often every two and a half to five years depending on vessel type and class requirements, when the ship is out of service and accessible for exactly this kind of work — or during a tightly controlled maintenance window at a port call, when the relevant system can be safely taken offline without endangering navigation, cargo operations, or the safety of the crew. Outside of those windows, taking a steering-control or engine-monitoring system offline to apply an update is often simply not an option the vessel can responsibly exercise.</p>
+    <p>The practical consequence is a <dfn id="def-patchwindow">patch window</dfn> measured in years rather than weeks. A known vulnerability identified today in a piece of navigation or engine-control equipment may remain formally unpatched not because anyone is negligent, but because the vessel's next dry-dock is genuinely eighteen months, or three years, away, and no earlier opportunity exists to touch that system without operational or safety consequences that outweigh the risk of leaving it as-is in the meantime.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A publicly disclosed vulnerability affecting a specific ECDIS software version is confirmed to be present on a container ship's bridge system. The vessel's next scheduled dry-docking is eighteen months away, and the vendor's patch requires a supervised on-site installation that cannot be performed safely at sea or during a routine port call. Rather than leaving the system unmanaged for eighteen months, the technical superintendent applies network-level compensating controls — restricting the ECDIS's network reachability and increasing monitoring at its zone boundary — and documents the accepted residual risk and planned remediation date in the vessel's risk register, consistent with the governance approach Lesson 9 covers in depth.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is the moment to name the concept the whole lesson has been building toward: a <em>compensating control</em>. Don't wait for Module 5 to introduce the term informally — flag it here as "the answer to what you do while you wait for the dry-dock," so Module 5 reads as a deeper treatment of something learners have already met, not a brand-new idea.</p>
+    </div>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧱</span>
+      <h2>Segmentation as the primary countermeasure</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>If a flat network is the vulnerability that lets one weak point become everyone's problem, <dfn id="def-segmentation">segmentation</dfn> is the countermeasure that limits how far any single compromise can spread. Lesson 2 introduced a vessel/port zone model as a teaching scaffold — grouping systems by function and criticality (navigation, propulsion and machinery control, cargo and ballast control, general/administrative including crew Wi-Fi) and drawing a defined, verifiable boundary around each group. Lesson 8 will introduce IACS UR E26, the classification-society requirement that makes exactly this kind of security-zone architecture a mandatory design element for newbuild vessels contracted from mid-2024 onward — this lesson is where that requirement's practical logic gets built, before Lesson 8 supplies its formal vocabulary.</p>
+    <p>Three elements make segmentation work in practice. <dfn id="def-boundaryprotection">Zone boundary protection</dfn> — firewalling, access control, and monitoring applied at the specific point where one zone connects to another or to a network outside the ship — is what actually enforces the boundary a zone diagram only describes on paper. A <dfn id="def-jumphost">jump host</dfn> is a single, tightly controlled and logged system that mediates remote access into a sensitive zone, so a vendor's remote-support session never connects directly to the engine-control network — it connects to the jump host, which is the only system inside the boundary the outside world can reach at all, and every session through it can be logged, time-limited, and reviewed (a control this lesson previews and Lesson 10 covers in depth as part of remote vendor access governance). And monitoring at zone boundaries — even simple traffic logging, rather than sophisticated intrusion detection — turns an undetected lateral-movement attempt into a visible, alertable event.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>A flat network is a cruise ship with no interior doors — a fire that starts in the galley reaches every deck. Segmentation is the fire-rated bulkheads and doors that ships are already required to have for exactly this reason: they don't prevent every fire, but they buy time and contain the damage to the compartment where it started. Zone boundary protection is those doors actually being closed and monitored, not just installed and forgotten.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>The fire-door analogy tends to land especially well with maritime learners because it maps onto SOLAS structural fire protection requirements they may already know from safety training — reinforce that segmentation is applying a safety concept they already trust to a network design problem, not importing something foreign from IT.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛡️</span>
+      <h2>Allowlisting, backups, and compensating controls</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p><dfn id="def-allowlisting">Application allowlisting</dfn> — configuring a system to run only a pre-approved, known set of software and refuse anything else — is an unusually strong fit for fixed-function maritime OT precisely because these systems are fixed-function: an ECDIS or an engine-automation HMI runs a small, well-known set of software and is never expected to run anything new. That narrowness, which makes the system inflexible for general-purpose computing, is exactly what makes allowlisting practical to deploy and maintain there in a way it often isn't on a general-purpose office laptop.</p>
+    <p>Regular, tested <dfn id="def-backuprecovery">backup and recovery</dfn> procedures are the second pillar, and they matter for a reason beyond convenience: IACS UR E26 explicitly requires ship-level backup and recovery capability as part of its cyber-resilience design requirements, precisely because recovering quickly from a disruptive incident is treated as being just as important as trying to prevent one in the first place. A backup that has never been tested for restoration is a documentation exercise, not a countermeasure — the practice that actually reduces risk is periodically proving that a system can be rebuilt from the backup within an operationally acceptable time.</p>
+    <p>Both of these sit inside a broader idea worth naming explicitly: a <dfn id="def-compensatingcontrol">compensating control</dfn> is a control adopted specifically because the textbook fix — patch the vulnerability, replace the legacy system — isn't operationally possible right now. Network isolation around an unpatched ECDIS, credential rotation and jump-host-mediated access in place of eliminating a shared login outright, and a tested recovery plan in place of a system that simply cannot be hardened further are all compensating controls: not what the ideal security posture would look like on a blank sheet of paper, but what actually reduces risk given the constraints a vessel operator is really working within.</p>
+    <table class="compare-table">
+      <caption>Common maritime OT vulnerability classes and their primary countermeasures</caption>
+      <thead>
+        <tr><th scope="col">Vulnerability class</th><th scope="col">Why it persists in maritime OT</th><th scope="col">Primary countermeasure</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Legacy firmware / end-of-support systems</td><td>15–25 year hull lifecycles; type-approval and re-certification cost discourage patching</td><td>Network isolation and application allowlisting around the affected system</td></tr>
+        <tr><td>Flat shipboard networks</td><td>Convenience-driven convergence with no deliberate boundary design (Lesson 1)</td><td>Zone segmentation and zone boundary protection</td></tr>
+        <tr><td>Default / shared credentials</td><td>Equipment shipped with factory defaults; provisioning individual accounts was never built into normal procedure</td><td>Credential rotation paired with jump-host-mediated, logged remote access</td></tr>
+        <tr><td>Unpatched known vulnerabilities</td><td>The patch window is bounded by dry-dock scheduling (often 2.5–5 years), not a monthly cycle</td><td>Documented compensating controls plus a tracked remediation date in the risk register</td></tr>
+        <tr><td>Untested recovery procedures</td><td>Backups exist on paper but are rarely rehearsed under real operational constraints</td><td>Regular, tested backup and recovery drills (an IACS UR E26 requirement)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Vulnerability to Its Best-Fit Compensating Control</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each vulnerability scenario below, select the compensating control that best fits it. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Vulnerability scenario</th><th scope="col">Best-fit compensating control</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="allowlist">
+                <td>Legacy, unpatched ECDIS firmware with no near-term dry-dock available</td>
+                <td>
+                  <select aria-label="Compensating control for legacy unpatched ECDIS firmware">
+                    <option value="">— Select —</option>
+                    <option value="allowlist">Application allowlisting + network isolation</option>
+                    <option value="jumphost">Credential rotation + jump-host-mediated remote access</option>
+                    <option value="segment">Zone segmentation</option>
+                    <option value="timeboxed">Time-boxed, logged, disable-able remote access</option>
+                    <option value="backup">Tested backup and recovery plan</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="jumphost">
+                <td>Default credentials still active on an engine automation HMI</td>
+                <td>
+                  <select aria-label="Compensating control for default credentials on engine automation HMI">
+                    <option value="">— Select —</option>
+                    <option value="allowlist">Application allowlisting + network isolation</option>
+                    <option value="jumphost">Credential rotation + jump-host-mediated remote access</option>
+                    <option value="segment">Zone segmentation</option>
+                    <option value="timeboxed">Time-boxed, logged, disable-able remote access</option>
+                    <option value="backup">Tested backup and recovery plan</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="segment">
+                <td>A flat shipboard network with no boundaries between navigation, engine control, and business systems</td>
+                <td>
+                  <select aria-label="Compensating control for flat shipboard network">
+                    <option value="">— Select —</option>
+                    <option value="allowlist">Application allowlisting + network isolation</option>
+                    <option value="jumphost">Credential rotation + jump-host-mediated remote access</option>
+                    <option value="segment">Zone segmentation</option>
+                    <option value="timeboxed">Time-boxed, logged, disable-able remote access</option>
+                    <option value="backup">Tested backup and recovery plan</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="timeboxed">
+                <td>A vendor's remote-access account has standing (always-on) credentials into the bridge network</td>
+                <td>
+                  <select aria-label="Compensating control for vendor remote access with standing credentials">
+                    <option value="">— Select —</option>
+                    <option value="allowlist">Application allowlisting + network isolation</option>
+                    <option value="jumphost">Credential rotation + jump-host-mediated remote access</option>
+                    <option value="segment">Zone segmentation</option>
+                    <option value="timeboxed">Time-boxed, logged, disable-able remote access</option>
+                    <option value="backup">Tested backup and recovery plan</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="backup">
+                <td>No tested recovery procedure exists for the vessel's terminal-facing cargo system</td>
+                <td>
+                  <select aria-label="Compensating control for no tested recovery procedure">
+                    <option value="">— Select —</option>
+                    <option value="allowlist">Application allowlisting + network isolation</option>
+                    <option value="jumphost">Credential rotation + jump-host-mediated remote access</option>
+                    <option value="segment">Zone segmentation</option>
+                    <option value="timeboxed">Time-boxed, logged, disable-able remote access</option>
+                    <option value="backup">Tested backup and recovery plan</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: The Compensating Control Builder</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Defensive modeling only — no live equipment</span>
+    <p>Click each control below, in any order, to apply it to a fictional vulnerable ECDIS scenario and see how much residual risk it addresses — and, just as importantly, what it does <em>not</em> address. Nothing here touches a real system; this is a model of a risk-reduction decision, not a network configuration tool.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Compensating controls">
+          <button type="button" class="sim-toggle" data-control="segmentation" aria-pressed="false">Network segmentation</button>
+          <button type="button" class="sim-toggle" data-control="allowlisting" aria-pressed="false">Application allowlisting</button>
+          <button type="button" class="sim-toggle" data-control="jumphost" aria-pressed="false">Vendor remote-access jump host</button>
+          <button type="button" class="sim-toggle" data-control="backup" aria-pressed="false">Tested backup / recovery plan</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Residual risk reduced</span><span id="simMeterValue">0%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:0%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> the vulnerable ECDIS has no compensating controls applied — it remains reachable from other zones with its known vulnerability unaddressed. Select a control above to see what it changes.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q1.</span>Why does legacy, unpatched firmware persist on maritime OT equipment longer than on typical shore-based IT systems?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> Maritime equipment vendors are legally barred from issuing patches.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> Marine electronics cannot technically receive software updates of any kind.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> Long hull lifecycles and type-approval/certification concerns mean a routine patch can require costly, slow re-certification, which vendors sometimes discourage outside a formal update process.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> Crews are prohibited from reporting outdated firmware to their technical managers.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q2.</span>A vessel is found to have both a flat network and default credentials on a bridge system. Why is this combination considered especially risky?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> Default credentials only matter on networks that are already segmented.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> On a flat network, a single default-credentialed device is a foothold that can reach every other system on the same network.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> Flat networks make default credentials technically impossible to exploit.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> This combination has never been documented in a real maritime cyber assessment.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q3.</span>Why is a vessel's patch window typically bounded by dry-dock scheduling rather than a monthly cycle?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> Many bridge and engine-control systems can only be safely updated when the vessel is out of service or in a tightly controlled maintenance window, which may not recur for years.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> IMO regulations explicitly forbid patching outside of dry-dock periods.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> Software updates for marine electronics are only released once every few years.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> Dry-docking is required before any software can be installed on any vessel system.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q4.</span>How does segmentation, tied to Lesson 2's zone model and IACS UR E26, function as a countermeasure?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> It eliminates the need for any other security control on a vessel.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> It guarantees no vulnerability can ever be exploited.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> It replaces the need for patching legacy systems entirely.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> It divides the network into zones with protected boundaries, limiting how far a compromise in one zone can spread to others.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q5.</span>A vessel has a known, unpatched vulnerability in its ECDIS, and the next dry-dock is 18 months away. What is the most appropriate response, consistent with this lesson?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Take the ECDIS out of service immediately and rely solely on paper charts for 18 months.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Apply compensating controls (such as network isolation and monitoring) and document the accepted residual risk and remediation timeline.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Ignore the vulnerability since it cannot be patched until dry-dock regardless of any other action.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Void the vessel's classification by installing an unauthorized third-party patch.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner select one vulnerability class from this lesson's compare-table and write a short paragraph recommending a compensating control for a hypothetical vessel where the textbook fix is not currently operationally possible, justifying the choice against the vulnerability's specific constraint (certification cost, patch window, network flatness, and so on). This keeps the assessment focused on defensive reasoning, consistent with this lesson's scope.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://csrc.nist.gov/pubs/sp/800/82/r3/final" target="_blank" rel="noopener noreferrer">NIST SP 800-82 Rev. 3: Guide to Operational Technology (OT) Security</a> — the standard federal reference for OT vulnerability classes, segmentation, and compensating controls; background for the frameworks lesson later this week.</li>
+      <li><a href="https://www.dnv.com/maritime/insights/topics/cyber-security/" target="_blank" rel="noopener noreferrer">DNV — Maritime Cyber Security Insights</a> — a classification society's ongoing guidance and assessment findings on vulnerability classes (legacy systems, default credentials, patch management) commonly observed across the fleet.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson06.html">← Lesson 6: The Maritime OT Threat Landscape</a>
+    <a class="nav-btn" href="lesson08.html">Lesson 8: Frameworks for Maritime OT Security →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Legacy Firmware</a></li>
+      <li><a href="#s2">2. Flat Networks &amp; Default Credentials</a></li>
+      <li><a href="#s3">3. The Dry-Dock Patch Window</a></li>
+      <li><a href="#s4">4. Segmentation</a></li>
+      <li><a href="#s5">5. Allowlisting, Backups &amp; Compensating Controls</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Compensating Control Builder</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Identify common maritime OT vulnerability classes</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Explain the dry-dock-bounded patch window</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Describe segmentation tied to Lesson 2's zone model and UR E26</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Describe allowlisting, jump-host, and compensating controls</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Evaluate a scenario to recommend a compensating control</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s1"><span class="glossary-term">Legacy Firmware</span></a><span class="glossary-def">Unsupported or outdated firmware/OS versions still in service on shipboard equipment, often persisting for the vessel's full 15–25 year lifecycle.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Patch Window</span></a><span class="glossary-def">The period during which an OT system can safely be taken offline for updates — on many vessels, bounded by scheduled dry-docking rather than a monthly cycle.</span></li>
+      <li><a href="#s4"><span class="glossary-term">Segmentation</span></a><span class="glossary-def">Dividing a network into zones by function and criticality, with protected boundaries limiting how far a compromise can spread.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Allowlisting</span></a><span class="glossary-def">Restricting a system to run only a pre-approved set of software — a strong fit for fixed-function OT equipment.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Compensating Control</span></a><span class="glossary-def">A control adopted because the ideal fix (patching, replacement) is not operationally possible right now, chosen to reduce risk within real constraints.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson06.html">← Previous: Lesson 6 — The Maritime OT Threat Landscape</a>
+      <a href="lesson08.html">Next: Lesson 8 — Frameworks for Maritime OT Security →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 7 · Day 3 · Vulnerabilities &amp; Countermeasures<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { segmentation: false, allowlisting: false, jumphost: false, backup: false };
+  var simMessages = {
+    segmentation: "Network segmentation: the vulnerable ECDIS is now isolated within its own zone with a protected boundary. This limits how far a compromise involving this system could spread to other zones — but it does not fix the underlying vulnerability itself.",
+    allowlisting: "Application allowlisting: the ECDIS will now only run its pre-approved, known set of software. This blocks unauthorized code from executing on the system — but it does not address weaknesses in the software the ECDIS is already approved to run.",
+    jumphost: "Vendor remote-access jump host: any vendor remote-support session must now pass through a single, logged, time-limited jump host rather than connecting directly to the ECDIS. This reduces exposure from remote access — but it does not address risk from something already present on the local network.",
+    backup: "Tested backup / recovery plan: a verified, rehearsed recovery procedure now exists for this system. This shortens recovery time if the vulnerability is ever exploited — but it does not reduce the chance of an incident occurring in the first place."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = activeCount * 25;
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct <= 25 ? 'var(--bad)' : (pct <= 50 ? 'var(--accent)' : 'var(--ok)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> the vulnerable ECDIS has no compensating controls applied — it remains reachable from other zones with its known vulnerability unaddressed. Select a control above to see what it changes.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Control applied:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> all four compensating controls are now active. Residual risk is substantially reduced, but the underlying vulnerability in the ECDIS itself is still present — these controls manage exposure until the system can be properly remediated at the next dry-dock, not a substitute for that remediation.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-control');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. Long hull lifecycles combined with type-approval and re-certification costs mean vendors sometimes discourage patching outside a formal, slow update process.", incorrect: "Not quite. Marine electronics can technically receive updates and crews are not barred from reporting issues — the real driver is the cost and slowness of re-certification against type-approval." },
+    2: { correct: "Correct. On a flat network, a single default-credentialed device becomes a foothold that can reach every other system on the same network — the two weaknesses compound each other.", incorrect: "Not quite. Default credentials are risky regardless of segmentation, and this combination is a well-documented finding across maritime cyber assessments, not a rare or theoretical one." },
+    3: { correct: "Correct. Many bridge and engine-control systems can only be safely taken offline during a scheduled dry-dock or a controlled maintenance window, which may not recur for years.", incorrect: "Not quite. There is no blanket regulation forbidding out-of-dry-dock patching or requiring dry-docking for any software change — the constraint is operational and safety-driven, tied to when a system can safely be taken offline." },
+    4: { correct: "Correct. Segmentation divides the network into protected zones so that a compromise in one zone is contained rather than able to spread freely to others.", incorrect: "Not quite. Segmentation limits the spread of a compromise — it does not eliminate the need for other controls, guarantee invulnerability, or replace patching." },
+    5: { correct: "Correct. Applying documented compensating controls and tracking the remediation timeline in the risk register is the approach consistent with how maritime OT risk is actually managed between dry-docks.", incorrect: "Not quite. Taking the ECDIS fully out of service, ignoring the vulnerability, or installing an unauthorized patch that could void certification are all worse outcomes than a documented, monitored compensating-control approach." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 8.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 8.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

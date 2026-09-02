@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 10: Access Control &amp; Identity Management Afloat | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 5, Lesson 10 of the Maritime Operational Technology Security curriculum: role-based access aboard ship, the shared bridge-console problem, jump-host-mediated vendor access, MFA limits at sea, and identity lifecycle across a rotating crew.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 5 · Lesson 10 · 4 Contact Hours</span>
+    <h1>Access Control &amp; Identity Management Afloat</h1>
+    <p class="tagline">Roles for master, officers, engineers, and shore-based vendors; the shared bridge-console problem; privileged remote access over satellite; and identity lifecycle across a crew that rotates every few months.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Roles Aboard</a>
+    <a href="#s2" data-section="s2">Shared Console Problem</a>
+    <a href="#s3" data-section="s3">PAM &amp; Jump Hosts</a>
+    <a href="#s4" data-section="s4">MFA at Sea</a>
+    <a href="#s5" data-section="s5">Identity Lifecycle</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>A vessel's crew is small, hierarchical, and constantly changing, and its systems were mostly designed decades before anyone expected a per-user login prompt on a bridge console. Shore-side identity and access management assumes a large, relatively stable population of employees, a help desk, and a network connection that is always there. None of that holds cleanly aboard ship. This lesson works through what <dfn id="def-iam">access control and identity management</dfn> looks like when the "workforce" is a rotating crew of a few dozen people, the "network" is a hull surrounded by water with an intermittent satellite link to the outside world, and some of the most safety-critical consoles on the vessel were never built with individual user accounts at all.</p>
+      <p>We start with who actually needs access to what — master, officers, engineers, the ship's own network administrator, and the shore-based vendors who occasionally need to reach in from outside — then work through two problems that don't have clean shore-side analogues: bridge and engine consoles built around a single shared login, and multi-factor authentication that quietly stops working the moment the vessel loses satellite coverage. We close with the identity lifecycle problem every operator eventually runs into: a crew member who signs off after a nine-month contract, and an account that nobody remembered to disable.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of a shore office's identity system as a hotel with a front desk that's staffed around the clock — badges are issued and revoked the same day, and IT is always one phone call away. A vessel's identity system is closer to a remote research station: a small, fixed roster of people who rotate in and out on a fixed schedule, no help desk down the hall, and stretches of time when nobody can call anyone. The access-control choices that make sense in the hotel — a login prompt for every door, a push notification for every sensitive action — don't always survive the trip to the research station unchanged, and this lesson is about knowing where they do and where they don't.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Describe role-based access needs aboard a vessel, including master, officers, engineers, the Electro-Technical Officer (ETO), and shore-based vendors.</li>
+        <li>Explain the "shared console" problem common on bridge and engine-room systems, and its tradeoffs for accountability.</li>
+        <li>Describe privileged access management (PAM) and jump-host patterns for remote OEM and vendor access over a satellite link.</li>
+        <li>Evaluate where multi-factor authentication (MFA) is and isn't practical on a vessel given intermittent connectivity.</li>
+        <li>Describe identity lifecycle management across a crew that rotates every few months.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧑‍✈️</span>
+      <h2>Roles aboard: who needs access to what</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>A ship's crew is organized into a strict, well-understood hierarchy long before anyone thinks about network accounts, and that hierarchy is a reasonable starting point for role-based design — as long as you remember it was built to answer "who is responsible for what," not "who should have which system login." The <dfn>master</dfn> holds ultimate responsibility for the safety of the vessel, its crew, and its cargo, and in practice that means the master needs, at minimum, administrative visibility across bridge and safety systems and the authority to approve exceptions — including authorizing a vendor's remote session — even if the master rarely operates those systems hands-on day to day.</p>
+    <p>Deck officers (chief, second, and third officer, depending on vessel size) stand navigational watches and need operational access to ECDIS, radar/ARPA, autopilot, and the bridge alarm monitoring system — the instruments a watchkeeper actually touches. Engineering officers (chief and second engineer, and others depending on vessel class) need equivalent operational access to the engine automation system, ballast control, and the engine-room side of alarm monitoring. The <dfn id="def-eto">Electro-Technical Officer (ETO)</dfn>, where the vessel carries one, is typically the only crew member with a formal network administration role — managing switches, firewalls, and user accounts across the ship's OT and IT networks — which makes the ETO's own account the single most powerful (and highest-value, from an attacker's perspective) identity aboard. Shore-based vendors and superintendents sit outside the crew roster entirely: their need for access is real but intermittent, tied to a specific piece of equipment and a specific support ticket, not to standing operational responsibility.</p>
+    <table class="compare-table">
+      <caption>Typical shipboard roles and the system access each one needs</caption>
+      <thead>
+        <tr><th scope="col">Role</th><th scope="col">Typical System Access</th><th scope="col">Why</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Master</td><td>Administrative visibility across bridge and safety systems; authority to approve exceptions and vendor sessions</td><td>Holds ultimate responsibility for vessel, crew, and cargo safety</td></tr>
+        <tr><td>Chief / 2nd / 3rd Officer</td><td>ECDIS, radar/ARPA, autopilot, bridge alarm monitoring system</td><td>Stands navigational watches and must operate collision-avoidance and course-keeping systems directly</td></tr>
+        <tr><td>Chief / 2nd Engineer</td><td>Engine automation system, ballast control, engine-room alarm monitoring</td><td>Operates and maintains propulsion, power generation, and stability systems</td></tr>
+        <tr><td>Electro-Technical Officer (ETO)</td><td>Network administration: switches, firewalls, server and workstation accounts fleet-wide aboard</td><td>Usually the only crew member with formal responsibility for the ship's OT/IT network itself</td></tr>
+        <tr><td>Shore-based vendor / superintendent</td><td>Time-boxed remote diagnostic access to one specific OEM system, no standing account</td><td>Need is intermittent and support-specific, not part of daily vessel operation</td></tr>
+      </tbody>
+    </table>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners with an IT background will want to jump straight to "just build an RBAC matrix." Let them — then ask what happens when the third officer who normally covers the 8-to-12 watch is reassigned mid-voyage to cover for an engineer who went home sick. Shipboard roles shift under operational pressure in ways a static shore-side org chart rarely has to.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔐</span>
+      <h2>The shared console problem</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Walk onto most bridges and into most engine control rooms and you'll find the same pattern: the ECDIS, the alarm monitoring system, the engine automation HMI are logged in under a single shared operator account, often left logged in for the entire voyage. This is not an oversight so much as a deliberate accommodation of how watchkeeping actually works. A watch changes hands every four hours, sometimes at short notice, often in the middle of a maneuver, a pilotage, or a weather event — and a login prompt demanding a username and password at exactly that moment is not a minor inconvenience, it is an operationally unacceptable delay on a system where a few seconds of inattention during a course change can matter.</p>
+    <p>The tradeoff this creates is squarely an accountability and audit-trail problem: if the ECDIS shows a manual route deviation at 03:40, the system log alone cannot tell an investigator which of three officers who stood watch that night made it — the login record just says "Bridge," the same account it has said for the entire voyage. Full per-user login enforcement is the obvious fix on paper and the wrong answer operationally for most bridge and engine HMIs as they exist today. Partial mitigations exist instead: physical key switches that restrict who can even reach certain functions, and — the most commonly relied-upon mitigation in practice — cross-referencing the electronic system log against the paper or electronic deck log and watch schedule, which records who was actually on watch at a given time even though the system itself doesn't.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A bulk carrier's ECDIS has been logged in under the shared "Bridge" account since departure four days earlier. An investigator reviewing a near-miss with a fishing vessel needs to know who was conning the ship at 03:40. The ECDIS log shows only "Bridge — route deviation, 03:40:12." Cross-referencing the deck log and the watch schedule narrows it to the third officer, who stood the 00:00–04:00 watch that night — a conclusion the system log alone could never have supported.</p>
+    </div>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>A shared bridge login is closer to a shift logbook at a 24-hour control room than to an individual employee badge. Nobody expects a power-plant control room operator to log out and a replacement to log back in mid-shift during an abnormal event — the handover happens by briefing and by signing the shift log, not by a screen prompt. The accountability comes from the paper trail running alongside the system, not from the system itself.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛰️</span>
+      <h2>Privileged access and jump hosts for remote vendor support</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Lesson 1 described remote vendor support as one of the four business pressures that eroded a vessel's historical isolation, and Lesson 7 covered it again as a countermeasure design problem. This module is where those two threads meet the identity question directly: when an OEM technician ashore needs to log into the autopilot or the engine automation system to diagnose a fault, what should that session actually look like?</p>
+    <p>The pattern most maritime OT security programs converge on is a <dfn id="def-jumphost">jump host</dfn> — a single, tightly controlled intermediary system that mediates every remote session rather than allowing the vendor to connect directly to the target equipment. A well-designed jump-host arrangement for shipboard use gives every remote session four properties: it is authenticated with an individually attributable credential rather than a shared one; it is logged, ideally with session recording, so there is a complete record of exactly what commands were run; it is time-boxed, opened for a specific support window rather than left standing; and — critically, for a vessel — the crew retains the physical or administrative ability to disconnect or disable the session immediately if anything looks wrong, without waiting on shore-side approval. This last property directly satisfies the intent of <dfn id="def-e26-ra">IACS UR E26</dfn>'s remote access requirement, covered in Lesson 8, which expects exactly this kind of crew-controlled, logged, and time-limited remote-access capability rather than an always-open vendor connection.</p>
+    <p>Together, this cluster of controls is what <dfn id="def-pam">privileged access management (PAM)</dfn> refers to: managing the smaller set of accounts and sessions that carry elevated or administrative capability — vendor remote sessions, the ETO's own administrative account, any shore-side account with write access to OT systems — with tighter controls than ordinary operational accounts get, because a compromise of one of these accounts is disproportionately damaging.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>An autopilot vendor requests remote access to investigate an intermittent fault. The ETO opens a two-hour session on the vessel's jump host, issues the technician a single-use credential scoped only to the autopilot's diagnostic interface, and the session is recorded. Twenty minutes in, the officer of the watch notices unexpected diagnostic traffic on the bridge network switch and terminates the jump-host session from the local console — without needing to contact anyone ashore first. The vendor calls back to request a new session once the officer is satisfied nothing unsafe is occurring.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>If your learners covered Lesson 8's UR E26 material recently, this is a good moment to have them locate the specific remote-access clause from memory and match it against the four jump-host properties listed above — it reinforces that the regulation and the practical control are the same idea described twice.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📶</span>
+      <h2>Where MFA works — and where it doesn't — at sea</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p><dfn id="def-mfa">Multi-factor authentication (MFA)</dfn> is close to a solved problem for shore-side systems: a fleet-management portal, a crewing platform, or a shore office email account can rely on a push notification or a one-time SMS code because the person authenticating almost always has a reliable data or cellular connection at the moment they need it. Aboard a vessel mid-ocean, that assumption breaks. A push-notification MFA app needs an internet connection to receive the push; an SMS-based code needs cellular service, which a ship in open water simply does not have. When the vessel is out of VSAT coverage — during a satellite handover, a weather-related outage, or a deliberately bandwidth-conserving mode — push- and SMS-based MFA can fail completely, at exactly the moment someone aboard needs to authenticate to handle whatever caused the connectivity issue in the first place.</p>
+    <p>The practical alternatives are methods that don't depend on a live connection at the moment of authentication: hardware tokens generating time-based one-time passwords (TOTP) work entirely offline once provisioned, as do offline-capable authenticator apps that generate codes locally on the device rather than receiving them by push. For shore-side portals with reliable connectivity, standard push- or app-based MFA remains appropriate and should be required. For certain shipboard systems — particularly ones where the alternative to password-only access is no access at all during an outage, and where the system is already isolated from the internet by network segmentation — password-only access, kept strong and unique per account, can be a documented, risk-accepted compromise rather than a security failure, provided that acceptance is a deliberate decision recorded in the vessel's cyber risk assessment rather than a default nobody examined.</p>
+    <table class="compare-table">
+      <caption>MFA method suitability by connectivity context</caption>
+      <thead>
+        <tr><th scope="col">MFA Method</th><th scope="col">Works Offline?</th><th scope="col">Best Fit Aboard</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Push notification</td><td>No — requires live data connection</td><td>Shore-side portals only, when the user is ashore or has confirmed connectivity</td></tr>
+        <tr><td>SMS one-time code</td><td>No — requires cellular service</td><td>Generally unsuitable at sea; fine for shore office staff</td></tr>
+        <tr><td>Hardware token (TOTP)</td><td>Yes — generates codes locally</td><td>Privileged shipboard accounts (ETO, PAM-managed sessions)</td></tr>
+        <tr><td>Offline authenticator app</td><td>Yes — codes generated on-device</td><td>Officer and engineer accounts on systems that support it</td></tr>
+        <tr><td>Password only (risk-accepted)</td><td>N/A</td><td>Segmented, non-internet-facing shipboard systems where MFA hardware isn't practical, documented as an accepted risk</td></tr>
+      </tbody>
+    </table>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Push back gently on any learner who proposes "just require MFA everywhere aboard" as a complete answer. The point of this module isn't that MFA is a bad idea at sea — it's that the specific mechanism matters, and a control that silently fails during exactly the kind of connectivity disruption that might accompany an incident is worse than a documented, deliberate exception.</p>
+    </div>
+  </section>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔄</span>
+      <h2>Identity lifecycle across a rotating crew</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Most shore-side identity programs manage employee turnover measured in years. A vessel manages turnover measured in months: contracts typically run somewhere between three and nine months depending on rank, flag state, and operator policy, which means a mid-sized crew of 20–25 can generate well over a hundred sign-on and sign-off events in a single year across the whole crew roster. Every one of those events is, in identity-management terms, a provisioning or deprovisioning action, and the <dfn id="def-lifecycle">identity lifecycle</dfn> is the discipline of making sure each one actually happens, on time, in both directions.</p>
+    <p><strong>Onboarding</strong> — provisioning access before or at the moment a crew member boards — is usually the easier half to get right, because there's a clear operational trigger (a new officer needs to stand a watch, so their ECDIS and alarm-monitoring credentials need to exist) and a clear moment it needs to happen by. <strong>Offboarding</strong> is the harder half. Revoking a departing crew member's access promptly at sign-off requires someone — usually the ETO, sometimes the master — to actually execute the deprovisioning step at the moment of departure, and that step competes for attention with everything else happening during a crew change in port. When connectivity is limited, deprovisioning that depends on syncing with a shore-based identity system can lag by days or weeks even when the local action was taken promptly, and it can be skipped entirely when it wasn't.</p>
+    <p>The accumulated result, across a vessel's operating life, is a familiar and largely preventable risk: stale accounts. An account created for a third officer's nine-month contract in 2022 that was never explicitly disabled doesn't disappear on its own — it sits there, often with a weak or long-unchanged password, on a system nobody is actively watching for exactly this. Over several years and several rounds of crew turnover, a vessel that never established a clean deprovisioning process can accumulate a meaningful number of accounts belonging to people who haven't been aboard in years — each one a credential an attacker (or a disgruntled former crew member with a memorized password) doesn't have to work very hard to find.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A second engineer completes a seven-month contract and signs off in Rotterdam. The ETO who normally handles account deprovisioning is mid-handover to a relief ETO and the departure happens during a busy two-day port call; the departing engineer's engine automation system account is never disabled. Eight months later, during a routine access review ahead of an ISM audit, the account turns up still active — unused since the sign-off date, but valid, with the same password the engineer set at the start of the contract.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is a natural bridge to Lesson 9's governance material: identity lifecycle failures are exactly the kind of finding a periodic access review (a governance control) is designed to catch, precisely because they are so easy to miss operationally in the moment.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Access Scenario to Its Best Practice</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each access scenario below, select the best-matching practice. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Access Scenario</th><th scope="col">Best-matching practice</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="jump">
+                <td>OEM technician needs to diagnose the autopilot from shore</td>
+                <td>
+                  <select aria-label="Best practice for OEM remote autopilot diagnosis">
+                    <option value="">— Select —</option>
+                    <option value="jump">Jump-host-mediated, time-boxed remote session</option>
+                    <option value="shared">Shared console with watch-log cross-reference</option>
+                    <option value="onboard">Provisioning as part of the onboarding checklist</option>
+                    <option value="offboard">Prompt deprovisioning at offboarding</option>
+                    <option value="mfa">MFA required</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="shared">
+                <td>Officer handover mid-watch on the ECDIS</td>
+                <td>
+                  <select aria-label="Best practice for mid-watch officer handover on ECDIS">
+                    <option value="">— Select —</option>
+                    <option value="jump">Jump-host-mediated, time-boxed remote session</option>
+                    <option value="shared">Shared console with watch-log cross-reference, not a hard login gate</option>
+                    <option value="onboard">Provisioning as part of the onboarding checklist</option>
+                    <option value="offboard">Prompt deprovisioning at offboarding</option>
+                    <option value="mfa">MFA required</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="onboard">
+                <td>New third officer joins the vessel</td>
+                <td>
+                  <select aria-label="Best practice for new third officer joining the vessel">
+                    <option value="">— Select —</option>
+                    <option value="jump">Jump-host-mediated, time-boxed remote session</option>
+                    <option value="shared">Shared console with watch-log cross-reference</option>
+                    <option value="onboard">Provisioning as part of the onboarding checklist</option>
+                    <option value="offboard">Prompt deprovisioning at offboarding</option>
+                    <option value="mfa">MFA required</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="offboard">
+                <td>Engineer signs off after contract ends</td>
+                <td>
+                  <select aria-label="Best practice for engineer sign-off at end of contract">
+                    <option value="">— Select —</option>
+                    <option value="jump">Jump-host-mediated, time-boxed remote session</option>
+                    <option value="shared">Shared console with watch-log cross-reference</option>
+                    <option value="onboard">Provisioning as part of the onboarding checklist</option>
+                    <option value="offboard">Prompt deprovisioning at offboarding</option>
+                    <option value="mfa">MFA required</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="mfa">
+                <td>Shore fleet-management portal login</td>
+                <td>
+                  <select aria-label="Best practice for shore fleet-management portal login">
+                    <option value="">— Select —</option>
+                    <option value="jump">Jump-host-mediated, time-boxed remote session</option>
+                    <option value="shared">Shared console with watch-log cross-reference</option>
+                    <option value="onboard">Provisioning as part of the onboarding checklist</option>
+                    <option value="offboard">Prompt deprovisioning at offboarding</option>
+                    <option value="mfa">MFA required</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: Access Model Stress Test</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Toggle each access-control choice below, in any order, to see how it affects the vessel's overall accountability posture. Some choices strengthen it, one badly weakens it. Nothing here touches a real network — this is a model of a decision, not a system.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Access-control choices">
+          <button type="button" class="sim-toggle" data-conn="peruser" aria-pressed="false">Per-user login required on bridge HMI</button>
+          <button type="button" class="sim-toggle" data-conn="sharedconsole" aria-pressed="false">Shared console with watch-log</button>
+          <button type="button" class="sim-toggle" data-conn="jumphost" aria-pressed="false">Jump-host-mediated vendor access</button>
+          <button type="button" class="sim-toggle" data-conn="standingvpn" aria-pressed="false">Standing vendor VPN credentials left active</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Accountability</span><span id="simMeterValue">45%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:45%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> no access-model decisions have been made yet — this is a rough default posture. Select a choice above to see its effect.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q1.</span>Why does the Electro-Technical Officer's (ETO's) own account deserve tighter protection than most other shipboard accounts?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> The ETO stands navigational watches and needs ECDIS access.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> The ETO's account is the only one visible to shore-based vendors.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> The ETO typically holds the vessel's only formal network administration role, making that account disproportionately powerful if compromised.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> The ETO's account is the only one used for MFA.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q2.</span>What is the core accountability problem created by a shared bridge or engine-room console login?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> Shared logins make watchkeeping handovers take longer.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> The system log cannot identify which individual performed a given action, since all watchkeepers share one account.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> Shared logins are not permitted under SOLAS.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> Shared logins prevent the ECDIS from logging any events at all.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q3.</span>Which property is NOT one of the four properties a well-designed jump-host arrangement should give a vendor's remote session?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> Individually attributable authentication rather than a shared credential</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> Logging, ideally with session recording</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> A time-boxed session rather than a standing connection</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> A guarantee that the session cannot be interrupted once started</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q4.</span>Why can push-notification or SMS-based MFA fail aboard a vessel in a way it typically doesn't ashore?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> Both methods require a live data or cellular connection at the moment of authentication, which a vessel out of satellite coverage doesn't have.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> Shipboard phones cannot install authenticator apps.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> IMO regulations prohibit MFA at sea.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> Crew members are not permitted to carry hardware tokens.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q5.</span>Why is offboarding typically the harder half of the shipboard identity lifecycle to get right, compared with onboarding?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Vessels are not permitted to disable crew accounts while under way.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Deprovisioning competes for attention during a busy crew change and can lag or be skipped, especially when syncing with shore-based systems is limited by connectivity.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Onboarding does not require any system access to be created.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Offboarding requires a satellite phone call to IMO headquarters.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner sketch a one-page access-control matrix for a hypothetical mid-sized vessel: five roles (master, deck officer, engineer, ETO, vendor) against five systems (ECDIS, engine automation, ballast control, IT admin, jump host), marking each cell as full, watch-only, time-boxed, or none. This forces the role-based reasoning from Module 1 to meet the jump-host and shared-console realities from Modules 2 and 3 in one artifact.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://pages.nist.gov/800-63-3/" target="_blank" rel="noopener noreferrer">NIST SP 800-63-3: Digital Identity Guidelines</a> — the federal reference framework for identity proofing, authentication, and federation, including guidance on authenticator assurance levels relevant to the MFA discussion in this lesson.</li>
+      <li><a href="https://www.bimco.org/about-us-and-our-members/publications/the-guidelines-on-cyber-security-onboard-ships" target="_blank" rel="noopener noreferrer">BIMCO — The Guidelines on Cyber Security Onboard Ships</a> — industry guidance covering shipboard access control, remote access, and crew-related identity practices referenced throughout this lesson.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson09.html">← Lesson 9: Governance, Risk &amp; Compliance for Maritime IT/OT</a>
+    <a class="nav-btn" href="lesson11.html">Lesson 11: Monitoring, Detection &amp; Maritime OT Incident Response →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Roles Aboard</a></li>
+      <li><a href="#s2">2. The Shared Console Problem</a></li>
+      <li><a href="#s3">3. PAM &amp; Jump Hosts</a></li>
+      <li><a href="#s4">4. MFA at Sea</a></li>
+      <li><a href="#s5">5. Identity Lifecycle</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Access Model Stress Test</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Describe role-based access needs aboard a vessel</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Explain the shared console problem</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Describe PAM and jump-host patterns for remote access</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Evaluate where MFA is and isn't practical at sea</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Describe identity lifecycle across a rotating crew</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s1"><span class="glossary-term">RBAC</span></a><span class="glossary-def">Role-based access control — granting system access according to a person's shipboard role (master, officer, engineer, ETO, vendor) rather than to each individual separately.</span></li>
+      <li><a href="#s3"><span class="glossary-term">PAM</span></a><span class="glossary-def">Privileged Access Management — the tighter set of controls applied to accounts and sessions carrying elevated capability, such as vendor remote access and network administration.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Jump Host</span></a><span class="glossary-def">A single controlled intermediary system that mediates remote sessions, providing logging, time-boxing, and crew-controlled disconnection.</span></li>
+      <li><a href="#s4"><span class="glossary-term">MFA</span></a><span class="glossary-def">Multi-factor authentication — requiring more than one form of proof of identity; some methods depend on live connectivity that a vessel may not always have.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Identity Lifecycle</span></a><span class="glossary-def">The end-to-end process of provisioning access when a crew member joins and revoking it when they leave, across a crew that rotates every few months.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson09.html">← Previous: Lesson 9 — Governance, Risk &amp; Compliance for Maritime IT/OT</a>
+      <a href="lesson11.html">Next: Lesson 11 — Monitoring, Detection &amp; Maritime OT Incident Response →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 10 · Day 5 · Access Control &amp; Identity Management Afloat<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { peruser: false, sharedconsole: false, jumphost: false, standingvpn: false };
+  var simWeights = { peruser: 20, sharedconsole: 8, jumphost: 20, standingvpn: -35 };
+  var simBase = 45;
+  var simMessages = {
+    peruser: "Per-user login required on bridge HMI: every action is now individually attributable. This is the strongest single control here — but remember it must not block a mid-watch handover, or crews will find a workaround.",
+    sharedconsole: "Shared console with watch-log: the login itself still doesn't identify the individual, but cross-referencing the deck log and watch schedule restores most of the accountability a hard login gate would have provided, without the handover delay.",
+    jumphost: "Jump-host-mediated vendor access: every remote vendor session is now individually attributed, logged, and time-boxed, with the crew able to disconnect it locally. This satisfies the intent of IACS UR E26's remote-access requirement.",
+    standingvpn: "Standing vendor VPN credentials left active: a vendor connection with no time-box and no per-session attribution is now open indefinitely. This is the single riskiest choice on this board — it erases much of the benefit of every other control."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var pct = simBase;
+    Object.keys(simState).forEach(function (k) {
+      if (simState[k]) pct += simWeights[k];
+    });
+    pct = Math.max(0, Math.min(100, pct));
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    var activeKeys = Object.keys(simState).filter(function (k) { return simState[k]; });
+    if (activeKeys.length === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> no access-model decisions have been made yet — this is a rough default posture. Select a choice above to see its effect.';
+    } else {
+      var lastKey = activeKeys.slice(-1)[0];
+      var html = '<strong>Just toggled:</strong> ' + simMessages[lastKey];
+      if (simState.standingvpn && (simState.peruser || simState.jumphost)) {
+        html += '<br><br><strong>Note:</strong> even with strong controls elsewhere, one standing, un-time-boxed vendor credential undermines accountability for the whole vessel network — a single unmonitored path is often enough.';
+      }
+      if (simState.peruser && simState.jumphost && !simState.standingvpn) {
+        html += '<br><br><strong>Result:</strong> per-user bridge login and jump-host-mediated vendor access together give strong attribution without a hard login gate blocking watch handovers — this is close to best practice for most vessels.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. The ETO usually holds the vessel's only formal network administration role, so that account is disproportionately powerful if compromised.", incorrect: "Not quite. The ETO's account matters because it is typically the only one with formal network administration capability aboard, not because of watchkeeping or MFA." },
+    2: { correct: "Correct. A shared login means the system log alone cannot identify which individual took a given action — that's why cross-referencing the watch log matters.", incorrect: "Not quite. The core issue is accountability: the system log can't distinguish between watchkeepers sharing one account. It isn't a SOLAS prohibition or a logging outage." },
+    3: { correct: "Correct. A well-designed jump-host session should always remain interruptible — the crew's ability to disconnect it immediately is one of its four defining properties, not something it should prevent.", incorrect: "Not quite. Attribution, logging, and time-boxing are all defining properties of a good jump-host session — but the crew must retain the ability to interrupt it, not be guaranteed it can't be." },
+    4: { correct: "Correct. Push and SMS MFA both require a live connection at the moment of authentication, which a vessel out of satellite coverage may not have.", incorrect: "Not quite. The failure is about connectivity dependency at the moment of authentication, not app compatibility or a regulatory restriction." },
+    5: { correct: "Correct. Deprovisioning has to compete for attention during a busy crew change and can lag when shore-side syncing is limited by connectivity — that's why it's the harder half of the lifecycle.", incorrect: "Not quite. Vessels can and do disable accounts while under way; the real difficulty is competing priorities during crew change and connectivity-limited syncing with shore systems." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 11.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 11.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

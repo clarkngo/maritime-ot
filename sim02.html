@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator: AIS / NMEA Message Analyzer | Maritime Operational Technology Security</title>
+<meta name="description" content="An interactive simulator pairing with Lesson 5: step through sample NMEA 0183 and AIS (AIVDM) sentences field by field to see what each part of a raw marine electronics message actually means.">
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface2: #eaf3f6; --border: #ccdce4;
+    --text: #0d1b26; --text-muted: #52697a; --accent: #0e7490; --accent2: #155e75;
+    --accent-light: #e0f2f4; --on-accent: #ffffff; --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10); --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b; --header-text: #ffffff;
+    --tag-safety: #b45309; --tag-safety-bg: #fdf3e3;
+    --ok: #276221; --ok-bg: #e8f5e9; --bad: #c0392b; --bad-bg: #fdecea;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c; --surface: #101d2e; --surface2: #16283d; --border: #223349;
+    --text: #e6eef5; --text-muted: #8fa3b8; --accent: #22d3ee; --accent2: #67e8f9;
+    --accent-light: #082b33; --on-accent: #04222a; --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16; --header-text: #e6eef5;
+    --tag-safety: #fbbf24; --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7; --ok-bg: #0d2010; --bad: #ef9a9a; --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; transition: background 0.3s, color 0.3s; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  p { margin: 0 0 1em; }
+  .skip-link { position: absolute; left: -999px; top: auto; }
+  .skip-link:focus { position: fixed; left: 12px; top: 12px; z-index: 400; background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero { background: linear-gradient(135deg, #0a1a2b 0%, #103a4d 60%, #0e749033 100%); color: #fff; padding: 30px 24px; }
+  .hero-inner { max-width: 860px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+  .hero p { opacity: 0.85; font-size: 0.92rem; max-width: 74ch; line-height: 1.55; margin: 0; }
+
+  .page-shell { max-width: 820px; margin: 0 auto; padding: 30px 24px 60px; }
+  .back-links { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 22px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--accent2); text-decoration: none; }
+  [data-theme="dark"] .back-link { color: var(--accent); }
+  .back-link:hover { text-decoration: underline; }
+
+  .intro p { font-size: 0.95rem; color: var(--text-muted); }
+  .intro { margin-bottom: 18px; }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  .safety-flag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700; color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety); border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 18px; }
+
+  .activity-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin: 18px 0; }
+  .activity-head { background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .btn { background: var(--accent); color: var(--on-accent); border: none; cursor: pointer; padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit; }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .sentence-counter { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; }
+  .sentence-stepper { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+  .sentence-label { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .sentence-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; }
+
+  .raw-box {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.85rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 20px;
+    word-break: break-all; color: var(--accent2);
+  }
+  [data-theme="dark"] .raw-box { color: var(--accent); }
+
+  .decoded-table-wrap { overflow-x: auto; }
+  table.decoded-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.decoded-table th, table.decoded-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.decoded-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.decoded-table tbody tr:hover { background: var(--card-hover); }
+  table.decoded-table td.field-name { font-weight: 700; white-space: nowrap; }
+  table.decoded-table td.field-value { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 0.84rem; }
+
+  .teach-note { border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin: 18px 0; font-size: 0.85rem; color: var(--text-muted); }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media print { header, .back-links { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">MOT</div>
+      <div class="brand-text">
+        <h1>Maritime Operational Technology Security</h1>
+        <p>Simulator Suite</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Simulator · Pairs with Lesson 5</span>
+    <h2>AIS / NMEA Message Analyzer</h2>
+    <p>Step through sample NMEA 0183 and AIS (AIVDM) sentences one field at a time, and see in plain English what each part of a raw marine electronics message is actually saying.</p>
+  </div>
+</div>
+
+<main class="page-shell" id="main-content">
+  <div class="back-links">
+    <a class="back-link" href="simulators.html">← Back to Simulator Suite</a>
+    <a class="back-link" href="index.html">← Course Navigation</a>
+  </div>
+
+  <div class="intro">
+    <p>Underneath ECDIS, radar, and every AIS target on a bridge display are lines of plain text: <dfn>NMEA 0183</dfn> sentences, a comma-delimited format that has carried marine instrument data since the 1980s, and the <dfn>AIVDM</dfn> sentences that carry encoded AIS traffic inside that same format. This simulator pairs with <strong>Lesson 5</strong>, where NMEA sentence structure and AIS message content are introduced field by field.</p>
+    <p>The six sentences below are illustrative examples constructed for teaching — not a live decoder that parses arbitrary pasted input. Each one is paired with a pre-built "Decoded Fields" table so you can see, field by field, what a real receiver would extract from a sentence shaped like it.</p>
+  </div>
+
+  <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+
+  <div class="activity-block">
+    <div class="activity-head">
+      <span aria-hidden="true">📡</span>
+      <h3>Sentence Analyzer</h3>
+    </div>
+    <div class="activity-body">
+      <p class="activity-instructions">Use Next / Previous to step through six sample sentences — two standard NMEA 0183 sentences and four AIS (AIVDM) sentences. Each sentence shows its raw form and a decoded field table below it.</p>
+
+      <div class="sentence-counter" id="sentenceCounter" aria-live="polite">Sentence 1 of 6</div>
+      <div class="sentence-stepper">
+        <button type="button" class="btn secondary" id="prevBtn">← Previous Sentence</button>
+        <button type="button" class="btn" id="nextBtn">Next Sentence →</button>
+      </div>
+
+      <div class="sentence-label" id="sentenceLabel"></div>
+      <div class="sentence-desc" id="sentenceDesc"></div>
+
+      <div class="raw-box" id="rawBox"></div>
+
+      <div class="decoded-table-wrap">
+        <table class="decoded-table">
+          <thead>
+            <tr><th scope="col">Field</th><th scope="col">Plain-English Meaning</th><th scope="col">Value in This Sample</th></tr>
+          </thead>
+          <tbody id="decodedBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="teach-note">
+    <span class="teach-label">What this teaches</span>
+    <p>Notice that nothing in any of these sentences — not the MMSI, not the reported position, not the navigational status — is cryptographically signed or otherwise authenticated. A receiver decodes exactly what was transmitted and has no way to verify that the transmitting station is who its MMSI claims, or that its reported position matches its true location. This is precisely the gap <strong>Lesson 6</strong> builds on: AIS carries no built-in authentication, so nothing stops a transmitted MMSI, position, or navigational status from being false — whether through equipment error or deliberate spoofing.</p>
+  </div>
+</main>
+
+<footer>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only. All exercises are simulation-based and defensive in scope.
+</footer>
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mot-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) {}
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  (function () {
+    var sentences = [
+      {
+        label: 'Sample 1 — $GPGGA (GPS Fix Data)',
+        desc: 'A standard NMEA 0183 sentence from a GPS receiver reporting a position fix.',
+        raw: '$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47',
+        fields: [
+          ['Talker ID', 'Which device/system type generated this sentence.', 'GP = GPS receiver'],
+          ['Sentence Type', 'The three-letter code identifying the sentence format.', 'GGA = Global Positioning System Fix Data'],
+          ['UTC Time', 'Time of the position fix, in hours-minutes-seconds UTC.', '12:35:19 UTC'],
+          ['Latitude', 'North/south position, in degrees and decimal minutes.', '48°07.038′ N'],
+          ['Longitude', 'East/west position, in degrees and decimal minutes.', '011°31.000′ E'],
+          ['Fix Quality', 'How the position was derived.', '1 = standard GPS fix (no differential correction)'],
+          ['Satellites Used', 'Number of satellites used to compute this fix.', '08'],
+          ['HDOP', 'Horizontal Dilution of Precision — lower is a more geometrically reliable fix.', '0.9 (good)'],
+          ['Altitude', 'Height above mean sea level.', '545.4 M — unusually high for a surface vessel, illustrating this is a constructed example, not a real ship’s fix'],
+          ['Checksum', 'A simple XOR checksum used to detect transmission errors — not a security feature.', '*47']
+        ]
+      },
+      {
+        label: 'Sample 2 — $GPRMC (Recommended Minimum Navigation)',
+        desc: 'The "recommended minimum" NMEA 0183 sentence — the most commonly parsed sentence for position, speed, and course.',
+        raw: '$GPRMC,123519,A,4807.038,N,01131.000,E,012.4,247.0,230394,003.1,W*6A',
+        fields: [
+          ['Talker ID', 'Which device/system type generated this sentence.', 'GP = GPS receiver'],
+          ['Sentence Type', 'The three-letter code identifying the sentence format.', 'RMC = Recommended Minimum Navigation Information'],
+          ['UTC Time', 'Time of this fix, in hours-minutes-seconds UTC.', '12:35:19 UTC'],
+          ['Status', 'Whether the receiver considers this fix valid.', 'A = Active / valid (V would mean void)'],
+          ['Latitude / Longitude', 'North/south and east/west position.', '48°07.038′ N, 011°31.000′ E'],
+          ['Speed Over Ground', 'Vessel speed relative to the seabed, in knots.', '012.4 knots'],
+          ['Course Over Ground', 'True-north track angle the vessel is actually moving along.', '247.0°'],
+          ['Date', 'Date of the fix (ddmmyy).', '23 March 1994'],
+          ['Magnetic Variation', 'Local difference between true and magnetic north.', '3.1° West'],
+          ['Checksum', 'A simple XOR checksum used to detect transmission errors — not a security feature.', '*6A']
+        ]
+      },
+      {
+        label: 'Sample 3 — !AIVDM Type 1 (Position Report, Vessel A)',
+        desc: 'An AIS Class A position report — the most frequently transmitted AIS message type, carried inside an NMEA AIVDM sentence.',
+        raw: '!AIVDM,1,1,,A,15MvlfPP00G?ufbE`FepT@3n00Sa,0*5C',
+        fields: [
+          ['Talker ID', 'Which device/system type generated this sentence.', 'AI = AIS station'],
+          ['Sentence Formatter', 'Identifies this as an encoded AIS VHF data-link message.', 'VDM = VHF Data-link Message'],
+          ['Message Type', 'The AIS message type encoded inside the payload.', '1 = Position Report Class A'],
+          ['MMSI', 'The Maritime Mobile Service Identity transmitted by the station — intended to uniquely identify the vessel or station.', '244670316 (example) — uniquely identifies the transmitting vessel/station, as broadcast'],
+          ['Navigational Status', 'The vessel’s self-reported operating condition.', '0 = Under way using engine'],
+          ['Speed Over Ground', 'Reported speed, in knots.', '12.3 knots'],
+          ['Position (Lat/Lon)', 'Reported position, decoded from the encoded payload.', '51°54.21′ N, 004°30.85′ E (decoded example)'],
+          ['Course Over Ground', 'Reported track angle.', '245.2°'],
+          ['True Heading', 'Reported bow heading, from the gyrocompass.', '246°']
+        ]
+      },
+      {
+        label: 'Sample 4 — !AIVDM Type 5 (Static and Voyage Data, Vessel A)',
+        desc: 'A multi-part AIS Type 5 message carrying the same vessel’s static identity and voyage details — sent far less often than position reports.',
+        raw: '!AIVDM,2,1,1,A,53nFBv01SJ<thvA20H4l4hh63l4hh000000001S3?,0*3E',
+        fields: [
+          ['Message Type', 'The AIS message type encoded inside the payload.', '5 = Static and Voyage Related Data'],
+          ['MMSI', 'Same identifier as this vessel’s position reports — the field that ties static data to a moving target.', '244670316 (same vessel as Sample 3)'],
+          ['IMO Number', 'A permanent hull identifier assigned at build, unlike the MMSI which can be reprogrammed.', '9074729 (example)'],
+          ['Call Sign', 'The vessel’s radio call sign.', 'PH7429 (example)'],
+          ['Vessel Name', 'Self-reported vessel name, as entered into the AIS unit.', 'MV EXAMPLE STAR'],
+          ['Ship Type', 'A numeric code describing vessel category.', '70 = Cargo, general'],
+          ['Destination', 'Self-reported next port, as typed in by the crew.', 'ROTTERDAM'],
+          ['ETA', 'Self-reported estimated arrival, month/day/hour/minute.', '03-22 14:00 (example)']
+        ]
+      },
+      {
+        label: 'Sample 5 — !AIVDM Type 21 (Aid-to-Navigation Report)',
+        desc: 'An AIS message type transmitted by a buoy, lighthouse, or other fixed aid-to-navigation station rather than a vessel.',
+        raw: '!AIVDM,1,1,,B,E>k`sO70VQ97aRh1T0W72V@611@=FVj35D00003vP100,4*54',
+        fields: [
+          ['Message Type', 'The AIS message type encoded inside the payload.', '21 = Aid-to-Navigation (AtoN) Report'],
+          ['MMSI', 'AtoN stations use a reserved MMSI series (starting with 99) rather than a vessel MMSI.', '992351234 (example — AtoN series)'],
+          ['AtoN Type', 'What kind of navigational aid is transmitting.', '‘Fixed’ = a lighthouse or fixed structure (vs. a floating buoy)'],
+          ['Name', 'Self-reported name of the aid.', 'EXAMPLE POINT LIGHT'],
+          ['Position', 'Reported fixed position of the aid.', '51°58.40′ N, 004°06.10′ E (decoded example)'],
+          ['Virtual AtoN Flag', 'Whether this is a physical structure or a purely virtual (broadcast-only, no physical structure) mark.', 'False = a real, physical aid — a virtual AtoN would broadcast a mark that does not physically exist']
+        ]
+      },
+      {
+        label: 'Sample 6 — !AIVDM Type 1 (Position Report, Vessel B)',
+        desc: 'A second Class A position report, from a different vessel, showing a different navigational status value for comparison.',
+        raw: '!AIVDM,1,1,,B,15Nfk`PP00o?wJVE`4jepTG208Rp,0*3A',
+        fields: [
+          ['Talker ID', 'Which device/system type generated this sentence.', 'AI = AIS station'],
+          ['Message Type', 'The AIS message type encoded inside the payload.', '1 = Position Report Class A'],
+          ['MMSI', 'Uniquely identifies the transmitting vessel/station, as broadcast.', '311045000 (example)'],
+          ['Navigational Status', 'The vessel’s self-reported operating condition — note this differs from Sample 3.', '3 = Restricted maneuverability'],
+          ['Speed Over Ground', 'Reported speed, in knots.', '4.1 knots'],
+          ['Position (Lat/Lon)', 'Reported position, decoded from the encoded payload.', '51°53.02′ N, 004°17.66′ E (decoded example)'],
+          ['Rate of Turn', 'Reported turn rate, degrees per minute.', '-127 = sensor not available (a common placeholder value)']
+        ]
+      }
+    ];
+
+    var idx = 0;
+    var counterEl = document.getElementById('sentenceCounter');
+    var labelEl = document.getElementById('sentenceLabel');
+    var descEl = document.getElementById('sentenceDesc');
+    var rawEl = document.getElementById('rawBox');
+    var bodyEl = document.getElementById('decodedBody');
+    var prevBtn = document.getElementById('prevBtn');
+    var nextBtn = document.getElementById('nextBtn');
+
+    function render() {
+      var s = sentences[idx];
+      counterEl.textContent = 'Sentence ' + (idx + 1) + ' of ' + sentences.length;
+      labelEl.textContent = s.label;
+      descEl.textContent = s.desc;
+      rawEl.textContent = s.raw;
+      bodyEl.innerHTML = '';
+      s.fields.forEach(function (f) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td class="field-name">' + f[0] + '</td><td>' + f[1] + '</td><td class="field-value">' + f[2] + '</td>';
+        bodyEl.appendChild(tr);
+      });
+      prevBtn.disabled = (idx === 0);
+      nextBtn.disabled = (idx === sentences.length - 1);
+    }
+
+    prevBtn.addEventListener('click', function () {
+      if (idx > 0) { idx--; render(); }
+    });
+    nextBtn.addEventListener('click', function () {
+      if (idx < sentences.length - 1) { idx++; render(); }
+    });
+
+    render();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clark Ngo — Author | Maritime Operational Technology Security</title>
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface2: #eaf3f6; --border: #ccdce4;
+    --text: #0d1b26; --text-muted: #52697a; --accent: #0e7490; --accent2: #155e75; --on-accent: #ffffff;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10); --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b; --header-text: #ffffff; --card-hover: #e8f2f4;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c; --surface: #101d2e; --surface2: #16283d; --border: #223349;
+    --text: #e6eef5; --text-muted: #8fa3b8; --accent: #22d3ee; --accent2: #67e8f9; --on-accent: #04222a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16; --header-text: #e6eef5; --card-hover: #16283d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 40px 24px 64px; }
+  .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 34px; }
+  .profile-top { display: flex; align-items: center; gap: 20px; margin-bottom: 22px; flex-wrap: wrap; }
+  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 800; flex-shrink: 0; }
+  .profile-top h2 { font-size: 1.4rem; font-weight: 800; }
+  .profile-top p { font-size: 0.92rem; color: var(--text-muted); margin-top: 4px; }
+  .profile-card section { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border); }
+  .profile-card section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+  .profile-card h3 { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 10px; }
+  .profile-card p { font-size: 0.92rem; line-height: 1.65; color: var(--text); margin-bottom: 10px; }
+  .profile-card p:last-child { margin-bottom: 0; }
+  .role-pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .role-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">MOT</div>
+      <div class="brand-text">
+        <h1>Maritime Operational Technology Security</h1>
+        <p>Author Profile</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="avatar">CN</div>
+      <div>
+        <h2>Clark Ngo</h2>
+        <p>Author &amp; Curriculum Developer — Maritime Operational Technology Security</p>
+      </div>
+    </div>
+
+    <section>
+      <h3>About This Curriculum</h3>
+      <p>This 12-lesson, 5-day curriculum was written to give practitioners and learners a structured path into maritime operational technology security — the systems that keep ships moving and ports running, from the bridge and engine room to the container yard. It pairs technical material with worked examples, hands-on activities, and browser-based simulations, and leans on the maritime-specific frameworks (IACS UR E26/E27, IMO's maritime cyber risk guidance) alongside the general OT standards (NIST SP 800-82, IEC 62443, MITRE ATT&amp;CK for ICS) that a maritime OT security role actually needs.</p>
+    </section>
+
+    <section>
+      <h3>Scope &amp; Intent</h3>
+      <p>Every lab and simulation in this course runs against simulated data — none of it is designed to interact with a live vessel, port terminal, or production network. The full policy is documented on the <a href="safeguards.html">Safeguards &amp; Responsible Use</a> page, and it applies to every lesson linked from the <a href="index.html">course navigation</a>.</p>
+    </section>
+
+    <section>
+      <h3>Focus Areas</h3>
+      <div class="role-pill-row">
+        <span class="role-pill">Maritime OT Security</span>
+        <span class="role-pill">ICS/SCADA</span>
+        <span class="role-pill">IACS UR E26/E27</span>
+        <span class="role-pill">Curriculum Design</span>
+        <span class="role-pill">Port &amp; Terminal Systems</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only. All exercises are simulation-based and defensive in scope.
+</footer>
+
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mot-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) {}
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+</body>
+</html>

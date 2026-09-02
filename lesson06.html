@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 6: The Maritime OT Threat Landscape | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 3, Lesson 6 of the Maritime Operational Technology Security curriculum: threat actor categories, GNSS and AIS spoofing/jamming, the 2017 NotPetya/Maersk case study, and insider and supply-chain risk in maritime OT, taught through documented incidents analyzed as case studies.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 3 · Lesson 6 · 4 Contact Hours</span>
+    <h1>The Maritime OT Threat Landscape</h1>
+    <p class="tagline">GPS and AIS spoofing/jamming, ransomware crossing from a port's business network into terminal operations, nation-state interest in shipping lanes, and crew/vendor insider risk — taught through documented incidents read as case studies.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Threat Actors</a>
+    <a href="#s2" data-section="s2">GNSS Spoofing &amp; Jamming</a>
+    <a href="#s3" data-section="s3">AIS Manipulation</a>
+    <a href="#s4" data-section="s4">Ransomware &amp; IT-OT Crossover</a>
+    <a href="#s5" data-section="s5">Insider &amp; Supply Chain</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <span class="safety-flag">⚠ Case study analysis only</span>
+      <h2>Lesson Overview</h2>
+      <p>This lesson is not a how-to. Every incident described below is drawn from public, widely reported sources — regulatory advisories, investigative journalism, post-incident company statements, and researcher reporting — and every one of them is discussed at the level of <em>cause, impact, and lesson learned</em>, never as a reproducible technique. That framing matters more here than in almost any other lesson in this course, because the subject matter is threats, and the line between "understanding a threat well enough to defend against it" and "understanding a threat well enough to reproduce it" is a line this course does not cross.</p>
+      <p>With that framing set, the lesson has one job: give you a working map of who is actually interested in maritime OT, and what documented interference with navigation, tracking, and terminal operations has actually looked like in the real world. We cover four threat actor categories, two well-documented classes of navigation-data manipulation (GNSS spoofing/jamming and AIS spoofing), the single most consequential publicly documented case of ransomware crossing from a business network into port operations — the 2017 NotPetya attack on Maersk — and the insider and supply-chain risk profile that is distinctive to a crewed vessel and its vendor ecosystem.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of this lesson as the maritime equivalent of a hospital's infection-control briefing. Nobody teaches infection control by walking staff through how to culture a pathogen — they teach how outbreaks actually started, how they spread through shared equipment and staff movement, and what containment measures worked. That is exactly this lesson's posture toward maritime cyber incidents: how they started, how they spread across shared infrastructure, and what stopped them — never the pathogen itself.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Identify the threat actor categories relevant to maritime OT — nation-state, criminal/ransomware, hacktivist, and insider — and their maritime-specific motivations.</li>
+        <li>Explain GPS/GNSS spoofing and jamming, the difference between them, and their documented real-world use against shipping.</li>
+        <li>Explain AIS spoofing and manipulation, and why AIS should be treated as an aid to navigation rather than ground truth.</li>
+        <li>Describe how ransomware has crossed from IT into port and terminal OT, using the 2017 NotPetya/Maersk incident as the primary case study.</li>
+        <li>Describe insider and supply-chain risk specific to crewed vessels and port vendors.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧭</span>
+      <h2>Threat actor categories in maritime OT</h2>
+      <span class="module-time">≈ 25 min</span>
+    </div>
+    <p>A <dfn id="def-threatactor">threat actor</dfn> is any individual or group whose actions could compromise the confidentiality, integrity, or availability of a system — or, in maritime OT terms, the safety and continuity of a vessel or port operation. Maritime OT draws interest from roughly four overlapping categories, and each one shows up in the documented incident record with a recognizably different motive.</p>
+    <p><dfn id="def-nationstate">Nation-state actors</dfn> are government-affiliated or government-directed groups with interests that track geopolitics: intelligence collection on shipping movements, positioning for potential disruption of strategic shipping lanes and chokepoints during a crisis, or degrading an adversary's logistics and situational awareness. Their maritime interest is strategic rather than transactional — a nation-state actor is rarely trying to extract a ransom from a single vessel operator; it is trying to understand or influence what an entire region's shipping traffic looks like.</p>
+    <p><dfn id="def-criminal">Criminal / ransomware actors</dfn> are financially motivated. Maritime and port logistics operators make attractive targets precisely because disruption is expensive and time-sensitive — a container terminal that cannot process gate transactions loses revenue and generates cascading delays by the hour, which is exactly the kind of pressure a ransomware operator is counting on to motivate a fast payment.</p>
+    <p><dfn id="def-hacktivist">Hacktivist actors</dfn> are motivated by a cause rather than money or state interest — protest against a specific shipping route, a cargo type (fossil fuels, live animal transport, arms shipments), or a company's environmental or labor record. Their maritime activity tends to target visibility (a defaced tracking feed, a public AIS anomaly) more than deep, sustained OT compromise.</p>
+    <p><dfn id="def-insideractor">Insiders</dfn> are people who already have legitimate access — crew, port workers, or vendor technicians — who misuse that access, whether deliberately (a disgruntled or coerced individual) or through negligence (a default password never changed, a USB drive from an unknown source plugged into a bridge PC). Because so much of maritime access control still runs on trust in a small crew or a familiar vendor technician, insiders are a persistent and often underweighted category.</p>
+    <table class="compare-table">
+      <caption>Threat actor categories and their maritime-specific motivations</caption>
+      <thead>
+        <tr><th scope="col">Category</th><th scope="col">Primary motivation</th><th scope="col">Typical maritime target of interest</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nation-state</td><td>Strategic / intelligence</td><td>Shipping lanes, chokepoints, situational awareness in a region</td></tr>
+        <tr><td>Criminal / ransomware</td><td>Financial extortion</td><td>High-value cargo and logistics operators; port and terminal operations</td></tr>
+        <tr><td>Hacktivist</td><td>Activism / visibility</td><td>Specific vessels, routes, or cargoes tied to a cause</td></tr>
+        <tr><td>Insider</td><td>Varies — grievance, coercion, negligence</td><td>Whatever system the individual already has legitimate access to</td></tr>
+      </tbody>
+    </table>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners often expect a fifth category — "terrorist" — modeled on aviation or land-transport security training. Point out that in the documented maritime incident record, the categories above account for nearly everything publicly attributed, and that lumping every serious incident under "terrorism" tends to produce worse risk analysis, not better, because it obscures the very different motives and capabilities in play.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📡</span>
+      <h2>GPS/GNSS spoofing and jamming</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p><dfn id="def-jamming">GNSS jamming</dfn> and <dfn id="def-spoofing">GNSS spoofing</dfn> are both forms of interference with satellite navigation, but they work by denial versus deception, and the distinction matters for how a bridge team should respond to each. Jamming overwhelms the very weak GNSS signal with noise on the same frequency, so a receiver loses its fix entirely — the equipment typically knows it has lost signal and alarms accordingly. Spoofing is more insidious: it presents a receiver with a signal that looks legitimate but carries false position or time data, and a receiver that has been successfully spoofed often has no built-in way to know its fix is wrong — it reports the false position with the same confidence it would report a true one.</p>
+    <p>Neither of these is theoretical. Multiple governments, researchers, and maritime safety authorities have published advisories over the past decade documenting sustained GNSS interference affecting commercial shipping in specific regions — most consistently reported in the Black Sea and in the Persian Gulf / Strait of Hormuz, where the U.S. Maritime Administration (MARAD) and the U.S. Coast Guard Navigation Center have both issued vessel-facing advisories describing observed interference. Publicly reported effects have included vessels' navigation systems and AIS-derived tracks showing positions many miles from a ship's actual location, tracks appearing to move at physically impossible speeds, and, in some widely circulated cases, ship icons on tracking maps appearing to sit on dry land or overlapping an airport runway. This lesson describes those documented, observed effects — not the technical means by which any specific interference was produced.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Jamming is a jackhammer outside your window during a phone call — you can't hear anything, and you know it. Spoofing is someone quietly cutting into the phone line and impersonating the person you thought you were talking to, fluently enough that you keep believing them. A bridge team can usually tell when jamming has knocked out their GPS fix, because the equipment says so. A spoofed fix, by contrast, can look completely normal on the display while being entirely wrong.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A bridge team transiting a region with documented GNSS interference notices their ECDIS-displayed position has jumped several kilometers inland in a matter of seconds, with no corresponding change in heading, speed, or engine order. Radar and visual references — coastline, other vessel traffic, a known landmark — still show the ship exactly where the crew expects it to be. The confusion this creates is exactly the point of this module: the electronic picture and physical reality have diverged, and the correct response is not to trust whichever display looks more confident, but to cross-check GNSS-derived position against radar, visual fixes, and, if needed, revert to the dead-reckoning and celestial-navigation skills covered in Lesson 1 as a backup.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is a good moment to reinforce a theme that will recur through Lesson 9's governance material: regulatory guidance in this area consistently tells crews to report suspected interference and to maintain proficiency in non-GNSS position-fixing methods — not to expect a purely technical fix. Treat "GNSS can be wrong and not know it" as the single takeaway you want every learner to leave this module with.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛰️</span>
+      <h2>AIS spoofing and manipulation</h2>
+      <span class="module-time">≈ 25 min</span>
+    </div>
+    <p>Lesson 5 established that <dfn id="def-ais-recap">AIS</dfn> messages carry no built-in authentication — any transmitter broadcasting on the AIS frequencies with a plausible-looking message is accepted by receivers at face value. That design choice, made when AIS was built primarily as a collision-avoidance aid among cooperating vessels, is exactly what makes AIS data manipulation possible, and it has been documented in several forms in open-source maritime research and investigative reporting.</p>
+    <p>Documented patterns include vessels broadcasting a false <dfn id="def-mmsi-spoof">Maritime Mobile Service Identity (MMSI)</dfn> or identity to obscure their true origin or ownership — a pattern researchers and sanctions-monitoring organizations have associated with vessels seeking to obscure movements subject to trade restrictions; AIS tracks showing a vessel's reported position diverging sharply from independent satellite-imagery or radar confirmation of its actual location; and, in isolated but well-documented cases, transmission of fabricated distress or navigational-warning messages. Because AIS is broadcast in the open and easy to monitor, these manipulations are also comparatively easy for researchers, coast guards, and vessel-tracking services to detect and cross-reference after the fact — which is one reason so much of this pattern is publicly documented rather than merely suspected.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A watch officer on a vessel approaching a busy strait sees an AIS target on the ECDIS reporting a vessel name, course, and speed that appear entirely ordinary. Radar, however, shows no corresponding return anywhere near that reported position, and a separate AIS target with a different identity appears to occupy the physical location where a return does exist. The correct response, consistent with how officers are already trained to use AIS, is to treat the AIS picture as one input among several — never as a substitute for radar and visual observation — and to report the anomaly through the vessel's normal safety-reporting channel.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Tie this directly back to Lesson 5's protocol-level point about AIS lacking authentication. Learners retain "AIS is an aid, not ground truth" far better when they can connect it to the specific technical reason (no authentication in the message format) rather than treating it as an arbitrary rule.</p>
+    </div>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🦠</span>
+      <h2>Ransomware crossing from IT into port operations</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>The single most consequential, most thoroughly publicly documented example of ransomware disrupting maritime operations is the June 2017 <dfn id="def-notpetya">NotPetya</dfn> attack and its impact on A.P. Moller–Maersk. NotPetya was a fast-spreading, destructive piece of malware — publicly attributed by multiple Western governments to Russian state-linked actors and widely assessed to have been aimed primarily at Ukrainian organizations via a compromised accounting-software update — that spread far beyond its apparent original target once it reached organizations with shared, unsegmented Windows domain infrastructure. Maersk, which had a Ukrainian office running the compromised software, was one of many multinational companies caught in that wider spread.</p>
+    <p>The publicly reported operational impact was severe: Maersk has stated that the malware forced the company to rebuild its core IT environment — reported at roughly four thousand servers and forty-five thousand PCs — over about ten days, and that container-terminal operations at multiple ports handled by Maersk-affiliated terminal operators (including APM Terminals facilities) were disrupted, in some cases forcing staff to fall back to manual processes for booking, gate transactions, and vessel-loading coordination while systems were rebuilt. Maersk publicly estimated the total financial impact in the hundreds of millions of dollars. Critically, NotPetya was not written to target maritime OT specifically — the disruption at the terminals happened because business-network systems (domain controllers, DNS, and the terminal operating systems that coordinate gate and crane operations) sat close enough to the compromised business network that the malware's automated spread reached them anyway.</p>
+    <p>The general pattern this case illustrates recurs across many less-publicized maritime and port incidents: ransomware rarely starts on an OT network. It starts with a foothold on the business side — a phishing email, a compromised remote-access credential, a vulnerable internet-facing service — and then spreads laterally using whatever shared infrastructure connects business systems to operational ones. When a terminal operating system, a gate-control application, or a crane scheduling system depends on the same Windows domain, the same DNS servers, or the same flat network as the business systems that were compromised first, that operational system can be knocked offline even though no attacker ever specifically targeted it.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Resist the temptation to let learners conclude "so OT was never really the target, therefore OT security wasn't the issue." The opposite lesson is the one this course wants to land: because OT and IT shared infrastructure with no meaningful boundary, an attack that never targeted OT still took it down. That is precisely the ungoverned-convergence problem Lesson 1 previewed and Lesson 2 built a zone model to address — and it is the direct throughline into this lesson's simulation and into Lesson 7's segmentation module.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🪪</span>
+      <h2>Insider and supply-chain risk</h2>
+      <span class="module-time">≈ 25 min</span>
+    </div>
+    <p>Two risk categories are distinctive to the maritime environment in ways that don't map cleanly onto a typical shore-based IT security program: crew-related insider risk, and the vendor/shipyard supply chain.</p>
+    <p>A vessel's crew rotates on a cycle measured in weeks to a few months, not years — a very different turnover rate than a typical shore office. Every rotation is an opportunity for access to be granted, and every departure is an opportunity for access to be forgotten rather than formally revoked. Shared bridge and engine-room consoles, generic logins used across a whole watch rotation, and contractor or port-agent access granted for a single call and never cleanly closed out are all recurring findings in maritime cyber assessments. Lesson 10 will build a full identity lifecycle model — provisioning, rotation, and deprovisioning — around exactly this problem; this lesson's job is simply to name it as a distinct risk category and connect it to the insider-actor category from Module 1.</p>
+    <p>The vendor and shipyard <dfn id="def-supplychain">supply chain</dfn> is the second distinctive category. Bridge and engine-control equipment, ECDIS software, and satellite communication terminals are all built, configured, and periodically updated by outside vendors — sometimes remotely, sometimes during a yard period. Each of those touchpoints is a potential path for risk that has nothing to do with the vessel's own security posture: a vendor's remote-support channel with standing credentials, a firmware or software update package that carries unexpected code because the vendor's own build or distribution process was compromised, or hardware delivered with an insecure default configuration nobody on the vessel side ever reviewed. Because the vessel operator typically cannot inspect a vendor's internal development or distribution security, supply-chain risk has to be managed contractually and architecturally — through vetting, update verification, and the segmentation and remote-access controls Lesson 7 covers — rather than assumed away.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Insider and supply-chain risk are two versions of the same underlying problem: trust extended to someone who is not, in that moment, standing where you can watch them. A crew member with forgotten bridge access is trust that was never revoked. A vendor's compromised update package is trust that was extended to a company you can't audit yourself. Neither requires a malicious actor aboard the ship at all — that is exactly why both categories are so persistently underweighted.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Incident Pattern to Its Threat Category</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each observed incident pattern below, select the threat category or pattern it best illustrates. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Observed incident pattern</th><th scope="col">Best-matching threat category</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="ais">
+                <td>An AIS track shows a vessel positioned on dry land</td>
+                <td>
+                  <select aria-label="Threat category for AIS track shown on dry land">
+                    <option value="">— Select —</option>
+                    <option value="ais">AIS spoofing / manipulation</option>
+                    <option value="gnss">GNSS jamming or spoofing</option>
+                    <option value="ransom">Ransomware / IT-OT crossover</option>
+                    <option value="insider">Insider risk</option>
+                    <option value="supply">Supply chain risk</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="ransom">
+                <td>A terminal gate system goes down after unrelated ransomware spreads from an office network</td>
+                <td>
+                  <select aria-label="Threat category for terminal gate system down after ransomware spread">
+                    <option value="">— Select —</option>
+                    <option value="ais">AIS spoofing / manipulation</option>
+                    <option value="gnss">GNSS jamming or spoofing</option>
+                    <option value="ransom">Ransomware / IT-OT crossover</option>
+                    <option value="insider">Insider risk</option>
+                    <option value="supply">Supply chain risk</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="insider">
+                <td>A departing crew member's account still has bridge system access weeks later</td>
+                <td>
+                  <select aria-label="Threat category for departed crew member retaining bridge access">
+                    <option value="">— Select —</option>
+                    <option value="ais">AIS spoofing / manipulation</option>
+                    <option value="gnss">GNSS jamming or spoofing</option>
+                    <option value="ransom">Ransomware / IT-OT crossover</option>
+                    <option value="insider">Insider risk</option>
+                    <option value="supply">Supply chain risk</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="gnss">
+                <td>Multiple vessels in a region report the same incorrect GPS position simultaneously</td>
+                <td>
+                  <select aria-label="Threat category for multiple vessels reporting same incorrect GPS position">
+                    <option value="">— Select —</option>
+                    <option value="ais">AIS spoofing / manipulation</option>
+                    <option value="gnss">GNSS jamming or spoofing</option>
+                    <option value="ransom">Ransomware / IT-OT crossover</option>
+                    <option value="insider">Insider risk</option>
+                    <option value="supply">Supply chain risk</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="supply">
+                <td>A firmware update from a legitimate vendor contains unexpected code</td>
+                <td>
+                  <select aria-label="Threat category for firmware update from legitimate vendor containing unexpected code">
+                    <option value="">— Select —</option>
+                    <option value="ais">AIS spoofing / manipulation</option>
+                    <option value="gnss">GNSS jamming or spoofing</option>
+                    <option value="ransom">Ransomware / IT-OT crossover</option>
+                    <option value="insider">Insider risk</option>
+                    <option value="supply">Supply chain risk</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: The Incident Chain Reconstructor</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Retrospective case-study reconstruction — not attacker guidance</span>
+    <p>Click each stage below, in order, to reconstruct — after the fact — how a composite incident modeled on the publicly documented NotPetya/Maersk pattern escalated from a business-network compromise into a terminal-operations disruption. This model narrates a documented pattern of cause and consequence; it does not simulate, and cannot be used to perform, any technical intrusion step.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Incident stages">
+          <button type="button" class="sim-toggle" data-stage="phish" aria-pressed="false">Business network compromised via phishing</button>
+          <button type="button" class="sim-toggle" data-stage="spread" aria-pressed="false">Malware spreads via shared Windows domain infrastructure</button>
+          <button type="button" class="sim-toggle" data-stage="tos" aria-pressed="false">Terminal operating system becomes unavailable</button>
+          <button type="button" class="sim-toggle" data-stage="manual" aria-pressed="false">Manual gate operations invoked as fallback</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Operational disruption</span><span id="simMeterValue">0%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:0%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> the business network is intact and terminal operations are running normally. Select a stage above to reconstruct how the incident unfolded.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q1.</span>Which threat actor category is best described as strategically motivated — interested in shipping-lane disruption or intelligence gathering rather than direct financial extortion?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> Nation-state actor</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> Criminal / ransomware actor</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> Hacktivist</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> Insider</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q2.</span>What is the key operational difference between GNSS jamming and GNSS spoofing?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> Jamming only affects AIS; spoofing only affects radar.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> Spoofing is always easier for a receiver to detect than jamming.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> Jamming denies the signal and is usually detected by the receiver; spoofing deceives the receiver with false data that can look entirely normal.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> Jamming and spoofing are two names for the same interference technique.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q3.</span>Why should AIS data be treated as an aid to navigation rather than ground truth?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> AIS transponders are unreliable hardware that fails frequently.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> AIS messages carry no built-in authentication, so false identities or positions can be broadcast and accepted at face value.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> AIS was decommissioned by the IMO in 2015.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> AIS only operates in port, not at sea.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q4.</span>What is the central lesson of the 2017 NotPetya/Maersk case study for maritime OT security?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> NotPetya was written specifically to target shipboard navigation systems.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> Terminal operations were unaffected because OT and IT were already well segmented.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> Ransomware cannot disrupt physical operations, only data availability.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> Malware that never targeted OT still disrupted terminal operations because shared infrastructure — domain services, DNS, terminal operating systems — connected the business network to operations.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>Why are crew turnover and vendor remote-support access treated as distinct maritime risk categories rather than folded into general IT insider risk?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Because maritime crews and vendors are legally exempt from standard access-control requirements.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Because vessels never grant vendors any form of remote access.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Because rapid crew rotation and reliance on external vendors for equipment support create access-lifecycle and supply-chain exposure patterns that don't map cleanly onto a typical shore-based IT program.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Because insider risk cannot occur aboard a vessel under SOLAS.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner write a short paragraph identifying which of the four threat actor categories they consider the highest-priority planning concern for a mid-sized container-terminal operator, and justify the choice using one of the documented patterns discussed in this lesson (not a hypothetical technique). This keeps the assessment anchored to case-study reasoning rather than speculative attack planning, consistent with this lesson's framing.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://www.cisa.gov/topics/critical-infrastructure-security-and-resilience/critical-infrastructure-sectors/transportation-systems-sector" target="_blank" rel="noopener noreferrer">CISA — Transportation Systems Sector (Maritime)</a> — the Cybersecurity and Infrastructure Security Agency's advisories and resources covering the maritime transportation subsector, including guidance on GNSS interference and ransomware preparedness.</li>
+      <li><a href="https://www.imo.org/en/OurWork/Security/Pages/Cyber-security.aspx" target="_blank" rel="noopener noreferrer">IMO — Maritime Cyber Risk Management</a> — the International Maritime Organization's overview page for the guidance and resolution covered in depth in Lesson 8, including references to reported navigation-system interference.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson05.html">← Lesson 5: Maritime &amp; Industrial Communication Protocols</a>
+    <a class="nav-btn" href="lesson07.html">Lesson 7: Vulnerabilities &amp; Countermeasures →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Threat Actor Categories</a></li>
+      <li><a href="#s2">2. GNSS Spoofing &amp; Jamming</a></li>
+      <li><a href="#s3">3. AIS Spoofing &amp; Manipulation</a></li>
+      <li><a href="#s4">4. Ransomware &amp; IT-OT Crossover</a></li>
+      <li><a href="#s5">5. Insider &amp; Supply Chain Risk</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Incident Chain Reconstructor</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Identify threat actor categories relevant to maritime OT</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Explain GNSS spoofing and jamming and their documented use</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Explain AIS spoofing and why AIS is not ground truth</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Describe the NotPetya/Maersk ransomware crossover case study</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Describe insider and supply-chain risk in maritime OT</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s2"><span class="glossary-term">GNSS Spoofing</span></a><span class="glossary-def">Broadcasting false satellite-navigation signals so a receiver computes and reports an incorrect position or time as if it were valid.</span></li>
+      <li><a href="#s3"><span class="glossary-term">AIS Spoofing</span></a><span class="glossary-def">Broadcasting false AIS identity, position, or status data, exploiting AIS's lack of built-in authentication.</span></li>
+      <li><a href="#s4"><span class="glossary-term">Ransomware</span></a><span class="glossary-def">Malware that disrupts or extorts access to systems or data, which can cross from a business network into OT via shared infrastructure even without targeting OT directly.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Insider Risk</span></a><span class="glossary-def">Risk arising from people who already hold legitimate access — crew, port staff, or vendors — misusing or losing control of that access.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Supply Chain Risk</span></a><span class="glossary-def">Risk introduced through equipment, software updates, or remote-support channels provided by outside vendors and shipyards.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson05.html">← Previous: Lesson 5 — Maritime &amp; Industrial Communication Protocols</a>
+      <a href="lesson07.html">Next: Lesson 7 — Vulnerabilities &amp; Countermeasures →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 6 · Day 3 · The Maritime OT Threat Landscape<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { phish: false, spread: false, tos: false, manual: false };
+  var simMessages = {
+    phish: "Business network compromised via phishing: a foothold is established on the shore-side business network — the same starting point publicly described in the NotPetya/Maersk case. At this stage, operational technology is still untouched.",
+    spread: "Malware spreads via shared Windows domain infrastructure: because business systems and operational-adjacent systems share the same domain controllers and DNS, the malware's automated spread reaches systems far beyond its original foothold — without ever being directed at OT specifically.",
+    tos: "Terminal operating system becomes unavailable: the software coordinating gate transactions, vessel-load planning, and crane scheduling goes offline. This is the moment a business-network incident becomes a physical-operations incident.",
+    manual: "Manual gate operations invoked as fallback: staff revert to paper-based processes to keep essential cargo movement running. Throughput drops sharply and recovery becomes a matter of days, not hours — consistent with publicly reported recovery timelines from the case this model is built on."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = activeCount * 25;
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct <= 25 ? 'var(--ok)' : (pct <= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> the business network is intact and terminal operations are running normally. Select a stage above to reconstruct how the incident unfolded.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Stage reached:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Retrospective summary:</strong> all four stages of this composite, retrospective reconstruction are now active. Every stage traces back to shared infrastructure sitting between a compromised business network and physical terminal operations — the exact governance gap Lesson 2\'s zone model and Lesson 7\'s segmentation module exist to close.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-stage');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. Nation-state actors are motivated by strategic and intelligence interests — shipping-lane awareness or disruption — rather than direct financial extortion.", incorrect: "Not quite. Criminal actors are financially motivated, hacktivists are cause-driven, and insiders act through existing legitimate access — none of those is the strategic, intelligence-oriented profile described here." },
+    2: { correct: "Correct. Jamming denies the signal outright and is usually detected by the receiver; spoofing deceives the receiver with false but plausible-looking data, which can go undetected.", incorrect: "Not quite. Jamming and spoofing affect the same GNSS signal but work differently — denial versus deception — and spoofing is generally harder, not easier, for a receiver to detect." },
+    3: { correct: "Correct. AIS has no built-in authentication, so any transmitter can broadcast a plausible-looking but false message, and receivers accept it at face value.", incorrect: "Not quite. AIS remains an active, mandatory system; the reason to treat it cautiously is the lack of built-in authentication in the message format, not hardware unreliability or decommissioning." },
+    4: { correct: "Correct. NotPetya was not built to target OT, but shared infrastructure between the business network and terminal operations meant the disruption reached physical operations anyway.", incorrect: "Not quite. The malware wasn't OT-specific and terminal operations were disrupted — the lesson is precisely that shared, ungoverned infrastructure let a non-OT-targeted attack reach operational systems." },
+    5: { correct: "Correct. Rapid crew rotation and dependence on external vendors create access-lifecycle and supply-chain patterns that a standard shore-based IT insider-risk program doesn't fully anticipate.", incorrect: "Not quite. Vessels do grant vendor remote access and insider risk absolutely can occur aboard a vessel — the distinct risk comes from the maritime-specific turnover and vendor-dependency pattern." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 7.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 7.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>
