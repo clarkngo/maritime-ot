@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator: Access Control Matrix Builder | Maritime Operational Technology Security</title>
+<meta name="description" content="An interactive simulator pairing with Lesson 10: assign least-privilege access levels across five shipboard roles and five systems, then check the assignments against a model maritime access policy.">
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface2: #eaf3f6; --border: #ccdce4;
+    --text: #0d1b26; --text-muted: #52697a; --accent: #0e7490; --accent2: #155e75;
+    --accent-light: #e0f2f4; --on-accent: #ffffff; --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10); --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b; --header-text: #ffffff;
+    --tag-safety: #b45309; --tag-safety-bg: #fdf3e3;
+    --ok: #276221; --ok-bg: #e8f5e9; --bad: #c0392b; --bad-bg: #fdecea;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c; --surface: #101d2e; --surface2: #16283d; --border: #223349;
+    --text: #e6eef5; --text-muted: #8fa3b8; --accent: #22d3ee; --accent2: #67e8f9;
+    --accent-light: #082b33; --on-accent: #04222a; --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16; --header-text: #e6eef5;
+    --tag-safety: #fbbf24; --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7; --ok-bg: #0d2010; --bad: #ef9a9a; --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; transition: background 0.3s, color 0.3s; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  p { margin: 0 0 1em; }
+  .skip-link { position: absolute; left: -999px; top: auto; }
+  .skip-link:focus { position: fixed; left: 12px; top: 12px; z-index: 400; background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero { background: linear-gradient(135deg, #0a1a2b 0%, #103a4d 60%, #0e749033 100%); color: #fff; padding: 30px 24px; }
+  .hero-inner { max-width: 860px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+  .hero p { opacity: 0.85; font-size: 0.92rem; max-width: 74ch; line-height: 1.55; margin: 0; }
+
+  .page-shell { max-width: 900px; margin: 0 auto; padding: 30px 24px 60px; }
+  .back-links { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 22px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--accent2); text-decoration: none; }
+  [data-theme="dark"] .back-link { color: var(--accent); }
+  .back-link:hover { text-decoration: underline; }
+
+  .intro p { font-size: 0.95rem; color: var(--text-muted); }
+  .intro { margin-bottom: 18px; }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  .safety-flag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700; color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety); border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 18px; }
+
+  .activity-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin: 18px 0; }
+  .activity-head { background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .btn { background: var(--accent); color: var(--on-accent); border: none; cursor: pointer; padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit; }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 9px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; white-space: nowrap; }
+  table.mapping-table tbody th { background: var(--surface2); font-weight: 700; white-space: nowrap; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 6px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.85rem;
+  }
+  .map-row.match td.mx { border-left: 4px solid var(--ok); }
+  .map-row.over td.mx { border-left: 4px solid var(--bad); }
+  .map-row.under td.mx { border-left: 4px solid var(--tag-safety); }
+
+  .matrix-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+
+  .result-summary { margin-top: 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; font-size: 0.87rem; display: none; }
+  .result-summary.show { display: block; }
+  .result-summary .rline { margin-bottom: 6px; font-weight: 700; }
+  .result-summary .rline:last-child { margin-bottom: 0; }
+  .result-summary .r-ok { color: var(--ok); }
+  .result-summary .r-bad { color: var(--bad); }
+  .result-summary .r-under { color: var(--tag-safety); }
+
+  .teach-note { border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin: 18px 0; font-size: 0.85rem; color: var(--text-muted); }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media print { header, .back-links { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">MOT</div>
+      <div class="brand-text">
+        <h1>Maritime Operational Technology Security</h1>
+        <p>Simulator Suite</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Simulator · Pairs with Lesson 10</span>
+    <h2>Access Control Matrix Builder</h2>
+    <p>Assign an access level for every role and system combination aboard a vessel, then check your matrix against a model least-privilege policy.</p>
+  </div>
+</div>
+
+<main class="page-shell" id="main-content">
+  <div class="back-links">
+    <a class="back-link" href="simulators.html">← Back to Simulator Suite</a>
+    <a class="back-link" href="index.html">← Course Navigation</a>
+  </div>
+
+  <div class="intro">
+    <p>The principle of <dfn>least privilege</dfn> says every role should have exactly the access it needs to do its job — no more. This simulator pairs with <strong>Lesson 10</strong>, where shared-console risk and jump-host-mediated vendor access are introduced as the practical countermeasures to over-broad shipboard access.</p>
+    <p>Below is a 5×5 matrix: five roles across five shipboard systems. Assign an access level to every cell, then check your matrix against a model maritime access policy to see where you were over-privileged, under-privileged, or exactly right.</p>
+  </div>
+
+  <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+
+  <div class="activity-block">
+    <div class="activity-head">
+      <span aria-hidden="true">🔐</span>
+      <h3>Shipboard Access Control Matrix</h3>
+    </div>
+    <div class="activity-body">
+      <p class="activity-instructions">For each of the 25 role/system combinations, select an access level: <strong>None</strong>, <strong>View</strong>, <strong>Operate</strong>, or <strong>Admin</strong>. Then select "Check Against Least Privilege" to compare your matrix against a model policy.</p>
+
+      <div class="mapping-table-wrap">
+        <table class="mapping-table" id="matrixTable">
+          <thead>
+            <tr>
+              <th scope="col">Role</th>
+              <th scope="col">ECDIS</th>
+              <th scope="col">Autopilot</th>
+              <th scope="col">Engine Control</th>
+              <th scope="col">Ballast Control</th>
+              <th scope="col">Crew Wi-Fi</th>
+            </tr>
+          </thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
+      </div>
+
+      <div class="matrix-actions">
+        <button class="btn" id="checkMatrix">Check Against Least Privilege</button>
+        <button class="btn secondary" id="resetMatrix">Reset Matrix</button>
+      </div>
+
+      <div class="result-summary" id="resultSummary" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="teach-note">
+    <span class="teach-label">What this teaches</span>
+    <p>This ties directly to Lesson 10's shared-console and jump-host content: a matrix like this is exactly what a least-privilege review produces before anyone touches a physical console. The key teaching point is the <strong>Shore Vendor row</strong> — the model policy assigns <em>None</em> across all five systems by default. That is not an oversight; it reflects Lesson 10's core recommendation that vendor access should be granted per-session through a jump-host pattern, logged and time-bounded, rather than standing as a permanent entry in the access matrix. A vendor row with any standing access at all is, by itself, worth flagging in a real review — regardless of what that access level is.</p>
+  </div>
+</main>
+
+<footer>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only. All exercises are simulation-based and defensive in scope.
+</footer>
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mot-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) {}
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  (function () {
+    var systems = ['ecdis', 'autopilot', 'engine', 'ballast', 'wifi'];
+    var roles = [
+      { key: 'master', label: 'Master', model: { ecdis: 'operate', autopilot: 'operate', engine: 'view', ballast: 'view', wifi: 'admin' } },
+      { key: 'ceng', label: 'Chief Engineer', model: { ecdis: 'view', autopilot: 'none', engine: 'admin', ballast: 'operate', wifi: 'view' } },
+      { key: 'officer2', label: '2nd Officer', model: { ecdis: 'operate', autopilot: 'operate', engine: 'none', ballast: 'none', wifi: 'view' } },
+      { key: 'eto', label: 'Electro-Technical Officer (ETO)', model: { ecdis: 'admin', autopilot: 'admin', engine: 'admin', ballast: 'admin', wifi: 'admin' } },
+      { key: 'vendor', label: 'Shore Vendor', model: { ecdis: 'none', autopilot: 'none', engine: 'none', ballast: 'none', wifi: 'none' } }
+    ];
+    var levels = [
+      { value: 'none', label: 'None' },
+      { value: 'view', label: 'View' },
+      { value: 'operate', label: 'Operate' },
+      { value: 'admin', label: 'Admin' }
+    ];
+    var rank = { none: 0, view: 1, operate: 2, admin: 3 };
+
+    var body = document.getElementById('matrixBody');
+    roles.forEach(function (role) {
+      var tr = document.createElement('tr');
+      tr.className = 'map-row';
+      tr.setAttribute('data-role', role.key);
+      var th = document.createElement('th');
+      th.scope = 'row';
+      th.textContent = role.label;
+      tr.appendChild(th);
+      systems.forEach(function (sys) {
+        var td = document.createElement('td');
+        td.className = 'mx';
+        var select = document.createElement('select');
+        select.setAttribute('data-system', sys);
+        select.setAttribute('aria-label', role.label + ' access to ' + sys);
+        levels.forEach(function (lvl) {
+          var opt = document.createElement('option');
+          opt.value = lvl.value;
+          opt.textContent = lvl.label;
+          select.appendChild(opt);
+        });
+        select.value = 'none';
+        td.appendChild(select);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+
+    var summaryEl = document.getElementById('resultSummary');
+
+    document.getElementById('checkMatrix').addEventListener('click', function () {
+      var matchCount = 0, overCount = 0, underCount = 0;
+      roles.forEach(function (role) {
+        var tr = body.querySelector('tr[data-role="' + role.key + '"]');
+        tr.classList.remove('match', 'over', 'under');
+        var rowVerdicts = [];
+        systems.forEach(function (sys) {
+          var select = tr.querySelector('select[data-system="' + sys + '"]');
+          var chosen = select.value;
+          var expected = role.model[sys];
+          if (chosen === expected) {
+            matchCount++;
+            rowVerdicts.push('match');
+          } else if (rank[chosen] > rank[expected]) {
+            overCount++;
+            rowVerdicts.push('over');
+          } else {
+            underCount++;
+            rowVerdicts.push('under');
+          }
+        });
+        if (rowVerdicts.indexOf('over') !== -1) {
+          tr.classList.add('over');
+        } else if (rowVerdicts.indexOf('under') !== -1) {
+          tr.classList.add('under');
+        } else {
+          tr.classList.add('match');
+        }
+      });
+
+      var vendorNote = '';
+      var vendorRow = body.querySelector('tr[data-role="vendor"]');
+      var vendorHasAccess = systems.some(function (sys) {
+        return vendorRow.querySelector('select[data-system="' + sys + '"]').value !== 'none';
+      });
+      if (vendorHasAccess) {
+        vendorNote = '<div class="rline r-bad">⚠ The Shore Vendor row has standing access to at least one system. The model policy keeps vendor access at None by default — vendor access should be granted per-session via a jump host, not as a standing matrix entry.</div>';
+      } else {
+        vendorNote = '<div class="rline r-ok">✓ Shore Vendor correctly held at None across all systems — matching the jump-host, per-session access pattern from Lesson 10.</div>';
+      }
+
+      summaryEl.innerHTML =
+        '<div class="rline r-ok">' + matchCount + ' cells matching the model policy</div>' +
+        '<div class="rline r-bad">' + overCount + ' cells over-privileged (more access than the model grants)</div>' +
+        '<div class="rline r-under">' + underCount + ' cells under-privileged (less access than the model grants)</div>' +
+        vendorNote;
+      summaryEl.classList.add('show');
+    });
+
+    document.getElementById('resetMatrix').addEventListener('click', function () {
+      body.querySelectorAll('select').forEach(function (s) { s.value = 'none'; });
+      body.querySelectorAll('tr').forEach(function (tr) { tr.classList.remove('match', 'over', 'under'); });
+      summaryEl.classList.remove('show');
+      summaryEl.innerHTML = '';
+    });
+  })();
+</script>
+</body>
+</html>

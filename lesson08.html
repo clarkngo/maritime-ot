@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 8: Frameworks for Maritime OT Security | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 4, Lesson 8 of the Maritime Operational Technology Security curriculum: how IACS UR E26/E27, IMO MSC-FAL.1/MSC.428(98), NIST SP 800-82, and IEC 62443/MITRE ATT&amp;CK for ICS overlap and differ, and how to choose one as a primary spine.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 4 · Lesson 8 · 4 Contact Hours</span>
+    <h1>Frameworks for Maritime OT Security</h1>
+    <p class="tagline">IACS UR E26/E27 cyber resilience requirements, IMO's maritime cyber risk guidelines, NIST SP 800-82, and IEC 62443 — how they overlap, where they differ, and how to pick one spine for a course instead of teaching four at once.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Four Frameworks</a>
+    <a href="#s2" data-section="s2">IACS UR E26/E27</a>
+    <a href="#s3" data-section="s3">IMO MSC-FAL.1</a>
+    <a href="#s4" data-section="s4">NIST &amp; IEC 62443</a>
+    <a href="#s5" data-section="s5">Choosing a Spine</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>Ask four different people in maritime cybersecurity which framework matters most and you will likely get four different, confidently held answers — and all four could be defensible, because they are usually answering slightly different questions. A shipyard project manager quoting a newbuild contract needs a design requirement with teeth. A superintendent preparing for a flag-state audit needs a document that maps to the vessel's Safety Management System. A port authority building a shore-side OT security program needs a general risk-management vocabulary that has nothing to do with vessels at all. A threat analyst trying to understand how a ransomware crew actually breaches an engine control network needs none of the above — they need a catalog of real adversary behavior.</p>
+      <p>This lesson introduces the four frameworks a maritime OT security program most commonly encounters — <a href="iacs-e26-e27.html"><dfn id="def-iacs">IACS UR E26 &amp; E27</dfn></a>, <a href="imo-msc-fal.html"><dfn id="def-imo">IMO MSC-FAL.1/Circ.3 and Resolution MSC.428(98)</dfn></a>, <a href="nist80082.html"><dfn id="def-nist">NIST SP 800-82</dfn></a>, and <a href="attack-ics.html"><dfn id="def-attack">MITRE ATT&amp;CK for ICS</dfn></a> — not to teach any one of them to reference depth (each has its own dedicated page on this site for that), but to teach the map: what kind of instrument each one is, what problem it solves, where they reinforce each other, and — critically — how to choose one as your primary spine instead of trying to comply with, or teach, all four with equal weight in a single sitting.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of these four frameworks the way you would think of a building's fire code, its insurance policy, a national fire-safety handbook, and a database of how fires have actually started in similar buildings. The fire code (IACS UR E26/E27) is a mandatory design requirement enforced at construction. The insurance policy's safety clauses (IMO MSC-FAL.1/MSC.428(98)) get audited against your existing operating procedures, not the building's architecture. The national handbook (NIST SP 800-82, alongside IEC 62443's zone concepts) gives you shared vocabulary and general good practice that applies whether or not this specific building was ever inspected under the fire code. And the incident database (MITRE ATT&amp;CK for ICS) tells you how fires like this one actually start, so you know what to check for. You would not read all four documents with equal urgency on day one of owning the building — you would pick the one that answers the question in front of you.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Identify the four core frameworks covered in this lesson and classify each by type — mandatory class requirement, regulatory guideline, federal guidance, or general design standard.</li>
+        <li>Explain what specific problem each framework was built to solve.</li>
+        <li>Explain how the frameworks overlap and reinforce each other, including the shared zones-and-conduits concept that appears in both IEC 62443 and IACS UR E26.</li>
+        <li>Evaluate which framework is the right primary reference for a given organizational scenario.</li>
+        <li>Explain why a course or organization should pick one framework as its primary spine rather than attempting to teach or comply with all four with equal depth.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🗺️</span>
+      <h2>Four frameworks, four different jobs</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>The four frameworks this lesson covers did not emerge from a single coordinated effort. Each was written by a different body, for a different audience, to solve a different problem, and each has its own dedicated reference page on this site — <a href="iacs-e26-e27.html">IACS UR E26 &amp; E27</a>, <a href="imo-msc-fal.html">IMO MSC-FAL.1/Circ.3 &amp; Resolution MSC.428(98)</a>, <a href="nist80082.html">NIST SP 800-82 Rev. 3</a>, and <a href="attack-ics.html">MITRE ATT&amp;CK for ICS</a> — that you should treat as the deep-dive companion to the brief orientation given here.</p>
+    <p><a href="iacs-e26-e27.html"><dfn>IACS UR E26/E27</dfn></a> is a mandatory unified requirement issued by the International Association of Classification Societies. It is a <em>design</em> instrument: it tells a shipyard and its system integrators what cyber resilience properties a new vessel's networks and onboard computer-based systems must have, and it is enforced the same way structural and stability requirements are — through classification society plan approval, survey, and certification during newbuild.</p>
+    <p><a href="imo-msc-fal.html"><dfn>IMO MSC-FAL.1/Circ.3 and Resolution MSC.428(98)</dfn></a> is a regulatory guideline from the International Maritime Organization. Rather than specifying network architecture, it requires that cyber risk be addressed within a vessel's existing <dfn>Safety Management System (SMS)</dfn> under the ISM Code — making it an <em>operational and audit</em> instrument, not a design one, and one that applies to essentially the entire SOLAS-regulated fleet, new and existing alike.</p>
+    <p><a href="nist80082.html"><dfn>NIST SP 800-82</dfn></a> is general U.S. federal guidance on operational technology security. It was never written with ships in mind — its examples run toward power grids, water treatment, and manufacturing — but its risk-management structure and control vocabulary are broadly portable, and it is widely adopted by port authorities and terminal operators who have no maritime-specific OT standard of their own to reach for.</p>
+    <p><a href="attack-ics.html"><dfn>MITRE ATT&amp;CK for ICS</dfn></a> is different in kind from the other three: it is not a compliance framework at all, but a descriptive, continuously updated knowledge base of real-world adversary tactics and techniques against industrial control systems. It answers "how do attacks like this actually happen," which none of the other three frameworks are designed to do.</p>
+    <table class="compare-table">
+      <caption>Four frameworks compared</caption>
+      <thead>
+        <tr><th scope="col">Framework</th><th scope="col">Type</th><th scope="col">Authority</th><th scope="col">Mandatory?</th><th scope="col">Primary use</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="iacs-e26-e27.html">IACS UR E26/E27</a></td><td>Mandatory class design requirement</td><td>International Association of Classification Societies</td><td>Yes, for covered newbuilds contracted from 1 July 2024</td><td>Specifying and certifying cyber resilience in newbuild vessel design</td></tr>
+        <tr><td><a href="imo-msc-fal.html">IMO MSC-FAL.1 / MSC.428(98)</a></td><td>Regulatory guideline tied to the ISM Code</td><td>International Maritime Organization</td><td>Effectively yes, via the ISM Code's SMS audit cycle</td><td>Folding cyber risk into a vessel's Safety Management System and flag-state audits</td></tr>
+        <tr><td><a href="nist80082.html">NIST SP 800-82</a></td><td>Federal OT risk-management guidance</td><td>U.S. National Institute of Standards and Technology</td><td>No — voluntary, widely adopted by reference</td><td>General OT security program structure, especially shore-side ports and terminals</td></tr>
+        <tr><td><a href="attack-ics.html">MITRE ATT&amp;CK for ICS</a></td><td>Descriptive threat-intelligence knowledge base</td><td>MITRE Corporation</td><td>No — reference resource, not a compliance standard</td><td>Threat modeling, detection engineering, and incident analysis</td></tr>
+      </tbody>
+    </table>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners will want to rank these four frameworks from "most important" to "least important." Resist that framing early — the honest answer is "it depends what question you're asking," and Module 5 gives them a structured way to answer that question rather than a memorized ranking.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛠️</span>
+      <h2>IACS UR E26/E27 in brief</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>IACS Unified Requirements E26 and E27 split cyber resilience into two complementary levels. <dfn>UR E26</dfn> addresses the ship as a whole — network segmentation into security zones, boundary protection between zones, remote access control, and resilience of the vessel's overall computer-based system architecture. <dfn>UR E27</dfn> addresses individual onboard computer-based systems — the design, development, and testing requirements each system and its supplier must meet, including secure configuration, malware defense, and the ability to recover from a cyber incident.</p>
+    <p>Both requirements apply to <strong>new ships contracted for construction from 1 July 2024 onward</strong>, and both work in <dfn>security zones</dfn> — logically and physically grouped systems that share a boundary and a consistent set of protections — organized around a set of <dfn>capability categories</dfn> (identify, protect, detect, respond, recover — deliberately mirroring the well-known NIST Cybersecurity Framework functions) that each zone and system must demonstrate.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A shipyard building a container vessel under a contract signed in September 2024 must show its classification society plan approval that the propulsion control zone, the navigation zone, and the crew Wi-Fi zone are each separately defined, that the boundaries between them are protected and monitored, and that individual systems within each zone — the ECDIS, the engine control system — meet UR E27's system-level design and testing requirements. This is enforced the same way hull strength calculations are: no approved plan, no class certificate, no delivery.</p>
+    </div>
+    <p>This lesson deliberately stays at the orientation level. For zone definitions, the full capability-category breakdown, and applicability edge cases, see the dedicated <a href="iacs-e26-e27.html">IACS UR E26 &amp; E27 reference page</a>.</p>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📋</span>
+      <h2>IMO MSC-FAL.1/Circ.3 and Resolution MSC.428(98) in brief</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Where IACS UR E26/E27 is a design requirement enforced at newbuild, the IMO's approach took a different, older instrument and pointed it at a new problem. <dfn>Resolution MSC.428(98)</dfn>, adopted in 2017, affirmed that <strong>existing risk management requirements already in the ISM Code</strong> apply to cyber risk — it did not create a new, separate compliance regime. <dfn>MSC-FAL.1/Circ.3</dfn> is the accompanying guidance that spells out what that means in practice: cyber risk should be identified, assessed, and managed within the vessel's <dfn>Safety Management System (SMS)</dfn>, the same document set already used to manage every other operational risk aboard.</p>
+    <p>This is precisely why MSC-FAL.1/MSC.428(98) matters for the whole SOLAS-regulated fleet, not just new construction: an SMS audit happens every year, on every certified vessel, whether it was built in 1998 or 2025, and whether or not it falls under the newer IACS UR E26/E27 newbuild requirements. Folding cyber risk into the SMS made it a routine, recurring flag-state audit matter rather than a one-time design checkbox — which is also why it took effect at the <strong>first annual SMS verification after 1 January 2021</strong>, giving operators a lead-in period to update their SMS documentation rather than facing an audit finding on day one.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>If UR E26/E27 is a building code enforced once, at construction, MSC.428(98) is closer to a fire marshal who now checks your existing fire-safety plan every year — not because the building changed, but because the definition of what a responsible fire-safety plan has to cover changed.</p>
+    </div>
+    <p>Full audit-cycle mechanics and the relationship to the ISPS Code are covered in Lesson 9; for the guidance text itself, see the dedicated <a href="imo-msc-fal.html">IMO Maritime Cyber Risk Management reference page</a>.</p>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧱</span>
+      <h2>NIST SP 800-82 and IEC 62443 as general-purpose reinforcement</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Neither IACS UR E26/E27 nor IMO MSC-FAL.1 was written with a container terminal's crane control network or a port authority's shore-side SCADA system in mind — both are fundamentally vessel-centric instruments. That gap is exactly where <a href="nist80082.html"><dfn>NIST SP 800-82</dfn></a> and <dfn>IEC 62443</dfn> earn their keep. Neither is maritime-specific, and neither is mandatory in most jurisdictions, but both supply something the maritime-specific frameworks don't: a general-purpose vocabulary and structure for OT risk management and secure network design that applies just as well to a shore-side terminal as it does to a chemical plant.</p>
+    <p>NIST SP 800-82 gives a maritime OT program a shared risk-management structure — asset identification, threat and vulnerability characterization, risk assessment, and a control catalog — that a port or terminal can adopt wholesale even though it will never see a class surveyor. IEC 62443 contributes something more specific: the <dfn>zones-and-conduits</dfn> design vocabulary, which should sound familiar — it's the same conceptual pattern IACS UR E26 uses for shipboard security zones, just generalized to any industrial network. A security architect who learns zones-and-conduits from IEC 62443 while working on a shore terminal can carry that exact mental model onto a ship's UR E26 zone diagram without relearning the concept from scratch, and vice versa.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A port authority operating container-handling cranes, gate systems, and terminal operating system servers has no IACS UR E26/E27 obligation — none of that equipment is a vessel — and no ISM Code SMS to fold cyber risk into. Its security team instead builds its OT risk register directly on NIST SP 800-82's structure, and designs its network segmentation using IEC 62443 zones and conduits: a crane-control zone, a gate-automation zone, and a business-IT zone, each separated by a documented, monitored conduit. When that same team later works with a shipping line on ship-to-shore data exchange, the zones-and-conduits vocabulary they already use maps directly onto the vessel side's UR E26 zones.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is a good moment to name the overlap explicitly rather than let learners discover it on their own: zones-and-conduits is not two competing ideas, it's one idea that shows up in both a mandatory ship-design requirement (UR E26) and a voluntary general-purpose standard (IEC 62443). Frameworks reinforce each other more often than they compete — this module is the clearest example of it in the lesson.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧭</span>
+      <h2>Choosing a spine: how to pick one framework as primary</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>An instructor designing a course, or a security manager standing up a real program, faces the same practical problem: there is not enough time or budget to teach or comply with all four frameworks with equal depth, and trying to do so tends to produce shallow familiarity with everything and working competence with nothing. The fix is to pick a <dfn>primary spine</dfn> — the one framework that structures your program's core documentation and decisions — and treat the other three as reference material you pull in when the spine framework's scope runs out.</p>
+    <p>A simple decision rule covers most real situations:</p>
+    <ul class="lo-display">
+      <li><strong>Securing a newbuild vessel?</strong> Start with IACS UR E26/E27 — it's the mandatory design requirement your shipyard and class society will already be enforcing.</li>
+      <li><strong>Auditing an existing fleet's Safety Management System?</strong> Start with IMO MSC-FAL.1/MSC.428(98) — it's the instrument your flag-state auditor is actually checking against.</li>
+      <li><strong>Building a general OT security program spanning ships and shore-side ports?</strong> Start with NIST SP 800-82 for overall structure, and pull in IEC 62443's zones-and-conduits vocabulary for network design.</li>
+      <li><strong>Threat-modeling a specific incident or system?</strong> Pull in MITRE ATT&amp;CK for ICS regardless of which spine you chose — it's a reference tool for that one job, not a competing spine.</li>
+    </ul>
+    <p>None of this means the other three frameworks disappear from view — a newbuild program built on UR E26/E27 still benefits from ATT&amp;CK-informed threat modeling, and a port program built on NIST SP 800-82 still needs to understand MSC.428(98) if it ever handles vessel-facing systems. Choosing a spine is about where you start and what structures your primary documentation, not about ignoring the rest.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>If you only have time to leave learners with one takeaway from this lesson, make it this: the question is never "which framework is correct," it's "which framework answers the question I actually have right now." A learner who leaves able to route a scenario to the right framework has learned more than one who has memorized all four in equal, shallow depth.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Scenario to Its Primary Framework</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each scenario below, select the framework that should be the primary reference. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Scenario</th><th scope="col">Primary framework</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="iacs">
+                <td>Specifying cyber resilience requirements in a newbuild contract</td>
+                <td>
+                  <select aria-label="Primary framework for specifying newbuild cyber resilience requirements">
+                    <option value="">— Select —</option>
+                    <option value="iacs">IACS UR E26/E27</option>
+                    <option value="imo">IMO MSC-FAL.1/MSC.428(98)</option>
+                    <option value="nist">NIST SP 800-82</option>
+                    <option value="attack">MITRE ATT&amp;CK for ICS</option>
+                    <option value="iec">IEC 62443</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="imo">
+                <td>Preparing for a flag-state ISM audit</td>
+                <td>
+                  <select aria-label="Primary framework for preparing for a flag-state ISM audit">
+                    <option value="">— Select —</option>
+                    <option value="iacs">IACS UR E26/E27</option>
+                    <option value="imo">IMO MSC-FAL.1/MSC.428(98)</option>
+                    <option value="nist">NIST SP 800-82</option>
+                    <option value="attack">MITRE ATT&amp;CK for ICS</option>
+                    <option value="iec">IEC 62443</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="nist">
+                <td>Building a general OT risk register for a port terminal</td>
+                <td>
+                  <select aria-label="Primary framework for building a general OT risk register for a port terminal">
+                    <option value="">— Select —</option>
+                    <option value="iacs">IACS UR E26/E27</option>
+                    <option value="imo">IMO MSC-FAL.1/MSC.428(98)</option>
+                    <option value="nist">NIST SP 800-82</option>
+                    <option value="attack">MITRE ATT&amp;CK for ICS</option>
+                    <option value="iec">IEC 62443</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="attack">
+                <td>Researching how attackers have targeted similar ICS environments</td>
+                <td>
+                  <select aria-label="Primary framework for researching attacker behavior against similar ICS environments">
+                    <option value="">— Select —</option>
+                    <option value="iacs">IACS UR E26/E27</option>
+                    <option value="imo">IMO MSC-FAL.1/MSC.428(98)</option>
+                    <option value="nist">NIST SP 800-82</option>
+                    <option value="attack">MITRE ATT&amp;CK for ICS</option>
+                    <option value="iec">IEC 62443</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="iec">
+                <td>Designing network zones and conduits for a shore control room</td>
+                <td>
+                  <select aria-label="Primary framework for designing network zones and conduits for a shore control room">
+                    <option value="">— Select —</option>
+                    <option value="iacs">IACS UR E26/E27</option>
+                    <option value="imo">IMO MSC-FAL.1/MSC.428(98)</option>
+                    <option value="nist">NIST SP 800-82</option>
+                    <option value="attack">MITRE ATT&amp;CK for ICS</option>
+                    <option value="iec">IEC 62443</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: Framework Selector</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live systems or real compliance determinations</span>
+    <p>Click each organizational scenario below, in any order, to see which framework (or combination) is the best-fit primary reference and why. Nothing here replaces a real compliance assessment — this is a model of a decision, not a determination.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Organizational scenarios">
+          <button type="button" class="sim-toggle" data-conn="newbuild" aria-pressed="false">Newbuild shipyard contract</button>
+          <button type="button" class="sim-toggle" data-conn="ismaudit" aria-pressed="false">Existing fleet ISM audit prep</button>
+          <button type="button" class="sim-toggle" data-conn="port" aria-pressed="false">Port terminal OT risk program</button>
+          <button type="button" class="sim-toggle" data-conn="incident" aria-pressed="false">Incident threat-modeling exercise</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Framework landscape explored</span><span id="simMeterValue">0%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:0%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> no scenario selected yet. Choose an organizational context above to see its best-fit framework.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q1.</span>Which framework is a mandatory design requirement enforced through classification society plan approval and survey?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> IACS UR E26/E27</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> IMO MSC-FAL.1/MSC.428(98)</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> NIST SP 800-82</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> MITRE ATT&amp;CK for ICS</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q2.</span>Why does IMO MSC.428(98) matter for essentially the whole SOLAS-regulated fleet, not just new construction?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> It replaced the ISM Code with a new cyber-specific certification.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> It only applies to vessels built after 1 July 2024.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> It folds cyber risk into the existing Safety Management System, which every certified vessel is audited against annually regardless of build date.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> It is optional guidance with no audit consequence.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q3.</span>A design concept called "zones and conduits" appears in both IACS UR E26 and which general-purpose standard?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> IMO MSC-FAL.1</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> MITRE ATT&amp;CK for ICS</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> NIST SP 800-82's risk-management structure alone</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> IEC 62443</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q4.</span>A port authority is building an OT risk register for its container terminal, which has no vessel-specific obligations. Which framework should structure that program?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> IACS UR E26/E27, because it covers all cyber-physical systems everywhere.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> NIST SP 800-82, because it offers general OT risk-management structure not tied to vessel-specific instruments.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> IMO MSC-FAL.1, because every industrial facility must maintain an SMS.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> MITRE ATT&amp;CK for ICS, because it is the only mandatory framework.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>Why should a course or organization choose one framework as a primary spine rather than teaching or complying with all four with equal depth?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> Only one of the four frameworks is legally valid at a time.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> The other three frameworks are obsolete and no longer maintained.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> Trying to cover all four with equal depth tends to produce shallow familiarity everywhere and real competence nowhere; a spine framework anchors the program while the others are pulled in as needed.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> IMO regulations prohibit referencing more than one framework in a single program.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner pick a real or hypothetical maritime organization (a shipyard, a fleet operator, a port authority) and write a short framework-selection memo: which framework should be that organization's primary spine, which of the other three it should still pull in and for what purpose, and one sentence justifying the choice. This mirrors the actual decision a security manager makes when standing up a program.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://iacs.org.uk/publications/unified-requirements/ur-e/ur-e26/" target="_blank" rel="noopener noreferrer">IACS — Unified Requirement E26: Cyber Resilience of Ships</a> — the association's publication page for the unified requirement covered in Module 2, and in full depth on this site's <a href="iacs-e26-e27.html">IACS UR E26 &amp; E27 reference page</a>.</li>
+      <li><a href="https://www.imo.org/en/OurWork/Security/Pages/Cyber-security.aspx" target="_blank" rel="noopener noreferrer">IMO — Maritime Cyber Risk Management</a> — the International Maritime Organization's overview page for MSC-FAL.1/Circ.3 and Resolution MSC.428(98), covered in Module 3 and in full depth on this site's <a href="imo-msc-fal.html">IMO MSC-FAL.1 reference page</a>.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson07.html">← Lesson 7: Vulnerabilities &amp; Countermeasures</a>
+    <a class="nav-btn" href="lesson09.html">Lesson 9: Governance, Risk &amp; Compliance for Maritime IT/OT →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Four Frameworks, Four Jobs</a></li>
+      <li><a href="#s2">2. IACS UR E26/E27 in Brief</a></li>
+      <li><a href="#s3">3. IMO MSC-FAL.1 in Brief</a></li>
+      <li><a href="#s4">4. NIST &amp; IEC 62443</a></li>
+      <li><a href="#s5">5. Choosing a Spine</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Framework Selector</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Identify the four frameworks and their type</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Explain what problem each framework solves</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Explain how the frameworks overlap and reinforce each other</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Evaluate the right framework for a given scenario</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Explain why a program should pick one primary spine</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s2"><span class="glossary-term">IACS UR E26/E27</span></a><span class="glossary-def">Mandatory unified requirements from the classification societies covering ship-level (E26) and system-level (E27) cyber resilience for new vessels.</span></li>
+      <li><a href="#s3"><span class="glossary-term">IMO MSC-FAL.1</span></a><span class="glossary-def">IMO guidance, paired with Resolution MSC.428(98), that folds cyber risk into a vessel's ISM Code Safety Management System.</span></li>
+      <li><a href="#s4"><span class="glossary-term">NIST SP 800-82</span></a><span class="glossary-def">General U.S. federal guidance on operational technology security, widely applied to ports and terminals lacking maritime-specific OT standards.</span></li>
+      <li><a href="#s4"><span class="glossary-term">IEC 62443</span></a><span class="glossary-def">A general industrial cybersecurity standard contributing the zones-and-conduits design vocabulary used across both shore and shipboard architectures.</span></li>
+      <li><a href="#s1"><span class="glossary-term">MITRE ATT&amp;CK for ICS</span></a><span class="glossary-def">A descriptive knowledge base of real-world adversary tactics and techniques against industrial control systems, used for threat modeling.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson07.html">← Previous: Lesson 7 — Vulnerabilities &amp; Countermeasures</a>
+      <a href="lesson09.html">Next: Lesson 9 — Governance, Risk &amp; Compliance for Maritime IT/OT →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 8 · Day 4 · Frameworks for Maritime OT Security<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { newbuild: false, ismaudit: false, port: false, incident: false };
+  var simMessages = {
+    newbuild: "Newbuild shipyard contract: your primary spine is IACS UR E26/E27. It's the mandatory design requirement your shipyard and classification society will already be enforcing through plan approval and survey — start your specification and acceptance criteria there.",
+    ismaudit: "Existing fleet ISM audit prep: your primary spine is IMO MSC-FAL.1/Resolution MSC.428(98). The flag-state auditor is checking whether cyber risk is documented and managed inside your Safety Management System — that's the instrument to build your audit evidence around.",
+    port: "Port terminal OT risk program: your primary spine is NIST SP 800-82, for general OT risk-management structure, with IEC 62443's zones-and-conduits vocabulary layered in for network design. Neither UR E26/E27 nor MSC-FAL.1 was written for shore-side equipment, so a maritime-specific instrument isn't the right anchor here.",
+    incident: "Incident threat-modeling exercise: pull in MITRE ATT&CK for ICS regardless of which framework is your overall spine. It's a reference tool for understanding adversary behavior, not a competing compliance framework — it slots in alongside whichever spine you've already chosen."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = activeCount * 25;
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> no scenario selected yet. Choose an organizational context above to see its best-fit framework.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Best fit:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> you\'ve now explored all four organizational contexts. Notice that no single framework was the answer to every scenario — that\'s the whole point of Module 5: pick the spine that matches the question in front of you, and pull the others in as reference when you need them.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. IACS UR E26/E27 is enforced through classification society plan approval and survey, the same mechanism used for structural requirements.", incorrect: "Not quite. MSC-FAL.1/MSC.428(98) is an audit instrument tied to the SMS, NIST SP 800-82 is voluntary federal guidance, and ATT&CK for ICS is a descriptive knowledge base — none are enforced through class plan approval." },
+    2: { correct: "Correct. Because cyber risk sits inside the existing SMS, it is checked at every annual SMS audit on every certified vessel, not just new construction.", incorrect: "Not quite. MSC.428(98) did not replace the ISM Code or create a new certification, is not limited to post-2024 newbuilds, and does carry real audit consequences through the existing SMS audit cycle." },
+    3: { correct: "Correct. IEC 62443's zones-and-conduits vocabulary is the general-purpose version of the same concept UR E26 applies specifically to ship networks.", incorrect: "Not quite. MSC-FAL.1, ATT&CK for ICS, and NIST SP 800-82's risk-management structure alone don't define the zones-and-conduits design pattern — that comes from IEC 62443." },
+    4: { correct: "Correct. NIST SP 800-82 supplies general OT risk-management structure that doesn't depend on a vessel-specific instrument, which is exactly what a shore-side terminal needs.", incorrect: "Not quite. UR E26/E27 and MSC-FAL.1 are vessel-centric instruments, and ATT&CK for ICS is a threat-intelligence resource, not a program-structuring framework — none fit a port terminal's general risk register as well as NIST SP 800-82." },
+    5: { correct: "Correct. Spreading equal depth across four frameworks tends to produce shallow familiarity everywhere; picking a spine and pulling in the rest as needed produces real competence.", incorrect: "Not quite. All four frameworks remain valid and current — the reason to pick a spine is about focus and depth, not legal exclusivity or obsolescence." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 9.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 9.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

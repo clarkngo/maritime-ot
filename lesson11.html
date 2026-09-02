@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 11: Monitoring, Detection &amp; Maritime OT Incident Response | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 5, Lesson 11 of the Maritime Operational Technology Security curriculum: passive asset discovery, alarm monitoring system log coverage gaps, GNSS-derived time synchronization and what spoofing does to log correlation, fleet SOC triage over constrained satellite bandwidth, and incident response constraints unique to a vessel underway.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 5 · Lesson 11 · 4 Contact Hours</span>
+    <h1>Monitoring, Detection &amp; Maritime OT Incident Response</h1>
+    <p class="tagline">Passive asset discovery on a vessel LAN, alarm-log coverage gaps, GNSS-derived time synchronization (and what spoofing does to it), fleet-wide SOC triage over constrained bandwidth, and incident response when you cannot simply unplug a ship mid-voyage.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Passive Asset Discovery</a>
+    <a href="#s2" data-section="s2">Alarm Log Gaps</a>
+    <a href="#s3" data-section="s3">GNSS Time Sync</a>
+    <a href="#s4" data-section="s4">Fleet SOC Triage</a>
+    <a href="#s5" data-section="s5">IR at Sea</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>Everything in this course so far has been about reducing the odds that something goes wrong on a vessel's OT network — segmentation, governed convergence, access control, framework compliance. This lesson is about what happens once you accept that, despite all of that work, something eventually will. <dfn id="def-monitoring">Monitoring and detection</dfn> aboard ship has to answer a narrower, harder question than its shore-side counterpart: how do you build visibility into a network you cannot safely probe the way an IT team probes an office LAN, using log sources that were never designed with an investigator in mind, over a link too thin to just ship everything home, on a platform you usually cannot simply take offline the moment something looks wrong?</p>
+      <p>We start with how a vessel builds an asset inventory (the one Lesson 9 told you to build) without ever sending a single unsolicited packet at a live piece of bridge or engine equipment. From there we look at where the alarm monitoring system — the closest thing most vessels have to a security event log — quietly stops telling you anything useful, and at how GNSS spoofing, introduced in Lesson 6, does its real damage not to navigation but to an investigator's ability to line up events across systems after the fact. We close with the two constraints that make maritime incident response its own discipline rather than a copy of shore-side IT incident response: a shore-based fleet security operations center that has to prioritize blind, over a satellite link, which of dozens of vessels actually needs attention right now; and a master who may not be able to isolate an affected system without creating a safety problem worse than the cyber one.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>A shore-side security operations center is like a hospital's emergency department: patients (alerts) arrive continuously, staff triage them in person, and a doctor can order any test needed on the spot. A fleet SOC watching forty vessels over VSAT is more like a telemedicine service covering forty remote clinics that can each only send a short, expensive text message describing symptoms — the SOC has to decide, from that text message alone, which clinic gets a call back first, and which one gets asked to run the expensive full diagnostic panel and mail in the results. Good triage in that world isn't about reacting to everything; it's about knowing which thin signal is worth escalating.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Explain why passive asset discovery, not active scanning, is the preferred way to build and maintain an asset inventory on a vessel OT network.</li>
+        <li>Describe common alarm-monitoring-system log coverage gaps on field devices, and the investigative blind spots they create.</li>
+        <li>Explain how GNSS spoofing undermines time-based log correlation across onboard systems, building on Lessons 4 and 6.</li>
+        <li>Describe how a shore-based fleet SOC triages alerts across many vessels over constrained satellite bandwidth.</li>
+        <li>Describe incident response constraints unique to a vessel that cannot simply be isolated or shut down mid-voyage.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔍</span>
+      <h2>Why passive asset discovery, not active scanning</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Lesson 9 told you to build an asset inventory — device, zone, criticality, vendor, firmware version, last service date — as the foundation everything else in a maritime OT security program stands on. It did not say how to build one on a live vessel network, and that turns out to matter a great deal. In shore-side IT, the default way to discover what's on a network is <dfn id="def-active">active scanning</dfn>: a tool like an network mapper sends probe packets to every address in a range and infers what's there from the responses. On an OT network, and especially a shipboard one, that same technique is a well-documented way to break things.</p>
+    <p>Many marine electronics and industrial controllers — legacy PLCs, older sensor gateways, single-purpose alarm points — run minimal, resource-constrained TCP/IP stacks that were built to handle exactly the traffic their one talking partner sends them, and nothing else. A scan that floods a switch segment with unexpected connection attempts, malformed packets, or simply an unfamiliar volume of traffic can cause one of these devices to hang, reboot, or drop out of the control loop it was quietly running — on a network where "the device that just crashed" might be reading a tank level or feeding the alarm monitoring system. <dfn id="def-passive">Passive monitoring</dfn> avoids this entirely: instead of sending anything, it listens. A <dfn id="def-tap">network tap</dfn> or a switch's <dfn id="def-span">span (mirror) port</dfn> copies existing traffic to a monitoring device, which builds its picture of the network — what devices exist, what protocols they speak, who talks to whom, how often — purely by observing normal operation. Nothing is injected onto the wire; a device that has never once been probed can still be fully inventoried, as long as it talks to something else during the observation window.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A security assessor preparing a vessel's Lesson 9-style asset inventory considers running a quick active scan of the engine control network to save time. The ETO flags that the network still includes a fifteen-year-old temperature sensor gateway that has never been patched and was not designed to handle unsolicited connection attempts. The assessor instead connects a laptop to a span port configured on the switch, captures forty-eight hours of normal operating traffic, and builds the inventory from what the gateway and its neighbors actually say to each other during routine operation — arriving at the same device list without sending it a single packet it wasn't already expecting.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners with an IT security background will sometimes push back that modern vulnerability scanners have safe modes and rate limiting. That's a fair point to acknowledge — but the underlying lesson is about default posture: on a network you cannot fully characterize in advance, and where equipment age is unusually wide, passive discovery is the safer starting assumption, not a fallback for when active scanning "isn't available."</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔔</span>
+      <h2>Alarm monitoring system log coverage gaps</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>The <dfn id="def-ams">alarm monitoring system (AMS)</dfn> is the closest thing most vessels have to a centralized security event log, and it is tempting to treat it as one. It isn't — it was designed to tell a watchkeeper that a defined condition has crossed a threshold (high engine temperature, low tank level, a system fault), not to give an investigator a complete record of what led up to that condition. Two coverage gaps show up on nearly every vessel an investigator examines after the fact.</p>
+    <p>First, many field devices simply don't report to the AMS at all. Older sensors and simple PLCs wired for local control may never have been integrated into the ship-wide alarm bus, either because they predate it or because nobody saw a reason to connect a device that "just does one thing" to a centralized system. Second, and more subtly, even devices that do report to the AMS frequently log only the alarm state itself — "high temperature alarm active" — without the underlying telemetry that would explain how the reading got there. The AMS tells you a threshold was crossed; it usually cannot tell you the trend leading up to that moment, because it was never asked to store readings that didn't cross a threshold.</p>
+    <table class="compare-table">
+      <caption>Common alarm monitoring system coverage patterns</caption>
+      <thead>
+        <tr><th scope="col">Device type</th><th scope="col">Typical AMS reporting behavior</th><th scope="col">Investigative gap it creates</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Modern integrated bridge/engine HMI</td><td>Reports both alarm states and underlying values continuously</td><td>Minimal — usually the best-instrumented part of the ship</td></tr>
+        <tr><td>Networked sensor with alarm threshold logic</td><td>Reports alarm state only when threshold is crossed</td><td>No visibility into the trend before the alarm fired</td></tr>
+        <tr><td>Legacy PLC or simple sensor gateway</td><td>Not integrated into the AMS bus at all</td><td>No record in the AMS of the device's behavior, alarmed or not</td></tr>
+        <tr><td>Third-party OEM subsystem (e.g. a standalone reefer or cargo monitoring unit)</td><td>Logs locally to its own proprietary system, not the AMS</td><td>Data exists but sits outside the record an investigator would normally check first</td></tr>
+      </tbody>
+    </table>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>An investigator reconstructing an engine trip pulls the AMS log and finds a single entry: "Main engine lube oil pressure — low alarm, 09:14:52." The AMS was never configured to store the pressure trend leading up to that alarm, and the sensor feeding it is not integrated with the ship's separate condition-monitoring platform, which does retain trend data but was not the investigator's first stop. Two extra days pass — and two extra requests to the vessel — before the investigator learns the trend data exists at all, in a system nobody thought to mention because it isn't called an "alarm" system.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is a good moment to have learners generate their own list of "systems on a ship that keep some kind of log" beyond the AMS — condition monitoring platforms, OEM diagnostic tools, network switch logs, the VDR. The point isn't that the AMS is useless; it's that treating it as the single source of truth is exactly the assumption that costs investigators time.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛰️</span>
+      <h2>GNSS time sync and what spoofing does to correlation</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Lesson 4 made the case for why vessels commonly use a GNSS receiver as the master time source for shipboard NTP: it's accurate, it's already being received continuously for navigation, and it doesn't depend on the VSAT link being up. That module flagged, and deferred, one consequence — if the GNSS signal itself can be manipulated, the ship's sense of time is exposed to the same manipulation as its sense of position. Lesson 6 then covered GNSS spoofing directly: a receiver fed a plausible-looking but false signal typically has no way to know its fix — of position <em>or</em> time — is wrong, and reports it with full confidence.</p>
+    <p>For an investigator, that has a specific and serious consequence: <dfn id="def-correlation">log correlation</dfn>. Reconstructing an incident timeline means lining up entries from the AMS, the VDR, and network traffic captures against a shared clock, so that "alarm fired," "helm order given," and "unusual network traffic observed" can be placed in the correct sequence relative to one another. That only works if every source's timestamps trace back to a trustworthy shared reference. If the GNSS-derived NTP source was spoofed or degraded during the window under investigation — even briefly — some or all of those timestamps may be systematically offset, and nothing about the individual logs will announce that fact. Two systems that actually recorded events six seconds apart can appear to show them happening in the wrong order, or three minutes apart, and an investigator working from the logs alone has no built-in way to detect the distortion.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Investigating an incident without a trustworthy shared clock is like trying to reconstruct a car accident from three witnesses' accounts when each witness's watch is silently running at a different, unknown speed. Each witness can still tell you what they saw — but "it happened right before the horn" from one witness and "it happened right after the horn" from another might both be true statements from watches that were never actually synchronized, and you have no way to tell which witness to trust without an independent reference clock to check them against.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>During a suspected GNSS interference event in a region flagged by MARAD advisories, a vessel's shipboard NTP server — sourced from GNSS, per Lesson 4's default configuration — briefly accepted a spoofed time signal along with the spoofed position data. Two hours later, investigators reviewing an unrelated network anomaly pull the AMS log, the VDR data, and a network capture, expecting all three to share a common timeline. The AMS entries, timestamped from the (temporarily) corrupted NTP source, are offset by several minutes relative to the VDR, which draws its own timestamp from a separate onboard clock. The investigation stalls until someone thinks to check whether the vessel transited a known GNSS interference area during the window in question — the same interference that had already been logged, and shrugged off, as a navigation issue.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Tie this explicitly back for learners: Lesson 4 introduced GNSS-sourced NTP as a sensible design choice, and Lesson 6 introduced GNSS spoofing as a documented navigation threat. This module is where those two facts combine into a security consequence neither lesson stated on its own — an independent, non-GNSS time reference (even a simple onboard clock with its own drift-monitoring) is a meaningful resilience measure, not just a navigation backup.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖧</span>
+      <h2>Fleet SOC triage over constrained bandwidth</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Lesson 4 established that a vessel's total VSAT bandwidth is a scarce, often metered resource shared across every system and every crew member aboard. A shore-based <dfn id="def-fleetsoc">fleet security operations center</dfn> (fleet SOC) watching a fleet of dozens of vessels has to build its entire monitoring model around that constraint, because the obvious shore-side answer — pull continuous full packet captures and verbose logs from every vessel, all the time — is neither affordable nor, in most cases, technically possible over the link available.</p>
+    <p>The pattern most fleet SOCs converge on instead is tiered: each vessel periodically sends a compact <dfn id="def-heartbeat">heartbeat or summary report</dfn> — a small message covering system health indicators, alarm counts by category, and basic connectivity status, typically every few hours — rather than raw logs. The SOC's analysts watch for patterns across the fleet in these summaries: a vessel whose alarm count spikes relative to its own baseline, a vessel that misses a scheduled heartbeat entirely, several vessels in the same region reporting similar anomalies at the same time. Only when a summary crosses a threshold that warrants a closer look does the SOC escalate to requesting a targeted data pull from that specific vessel — a bounded set of logs or a short packet capture covering a defined window, sized and scoped deliberately because every megabyte pulled over VSAT has a bandwidth and cost impact the vessel's other systems and crew will also feel.</p>
+    <table class="compare-table">
+      <caption>Fleet SOC reporting tiers and when each is used</caption>
+      <thead>
+        <tr><th scope="col">Reporting pattern</th><th scope="col">Typical frequency / size</th><th scope="col">When the SOC relies on it</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Heartbeat / summary report</td><td>Every few hours; a few kilobytes</td><td>Continuous baseline monitoring across the whole fleet</td></tr>
+        <tr><td>Targeted log pull</td><td>On demand; scoped to a system and time window</td><td>A summary anomaly warrants a closer look at one vessel</td></tr>
+        <tr><td>Full packet capture request</td><td>Rare; can be large and slow over VSAT</td><td>A confirmed or suspected incident requires forensic-quality evidence</td></tr>
+      </tbody>
+    </table>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A fleet SOC covering 35 vessels notices, from routine heartbeat reports, that one bulk carrier's alarm-count summary has run roughly 40% above its own six-month baseline for two consecutive reporting cycles, with no corresponding weather or maintenance event logged. That pattern alone doesn't justify pulling a full packet capture — the cost and bandwidth impact would be disproportionate to what's known so far. Instead, the SOC requests a scoped, twelve-hour AMS log export from that one vessel, reviews it ashore, and only escalates to a full capture request once the export shows a pattern consistent with a genuine anomaly rather than a sensor recalibration the crew had simply not logged.</p>
+    </div>
+  </section>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⚓</span>
+      <h2>Incident response when you can't just unplug the ship</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>A typical shore-side IT incident response playbook treats isolation as an early, almost reflexive step: disconnect the compromised host from the network, contain the blast radius, investigate from a position of safety. Aboard a vessel mid-voyage, that reflex can be exactly the wrong first move. A navigation or propulsion-adjacent system suspected of compromise may also, at that exact moment, be the system keeping the vessel safely on its intended course through a traffic separation scheme, a strait, or a stretch of heavy weather. Isolating it without a plan for what replaces its function is not a purely cybersecurity decision anymore — it's a decision that can create a safety hazard more immediate than the incident it was meant to contain.</p>
+    <p>This is why maritime incident response puts a specific person in a specific role that shore-side IT playbooks don't have an equivalent for: the <dfn id="def-master-auth">master's authority</dfn> to weigh safety against security containment and decide, in the moment, which risk is larger. A <dfn id="def-riskcontain">risk-based containment</dfn> decision on a vessel might mean continuing to operate a suspect system under close manual supervision until the ship reaches safe water, open sea with sea room to maneuver, or a scheduled port call — deliberately delaying full isolation rather than accepting an immediate safety risk to address a security one. That is not a failure to follow procedure; on a vessel, it frequently <em>is</em> the procedure, and it is the master, not a shore-based security team, who has the authority and the responsibility to make that call.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Isolating a shore office's compromised file server is like turning off a room's lights to stop a fire from an electrical fault — inconvenient, but nobody in the building depends on that particular light staying on to avoid walking into a wall. Isolating a vessel's steering or engine control system mid-transit is closer to turning off a patient's ventilator to investigate a fault in it — the fix has to account for what keeps the patient alive while you work, not just for stopping the fault. A vessel's containment plan has to answer the "what keeps us safe in the meantime" question before it answers the "how do we cut this off" question.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>The bridge crew observes unexplained diagnostic traffic from the autopilot's network interface while transiting a narrow, heavily trafficked channel. Fully isolating the autopilot would force the watch officer onto manual steering during the most demanding stretch of the transit — a moment of genuinely elevated collision risk. The master decides to keep the autopilot in service, with an officer stationed to manually override at the first sign of erratic behavior, until the vessel clears the channel into open water roughly ninety minutes later — at which point the autopilot is isolated, the jump-host access log from Lesson 10 is pulled, and the ETO begins recovery using the vessel's UR E26-mandated backup and recovery procedure, covered in Lesson 8, rather than waiting for a shore IT team that cannot physically reach the ship.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Connect this directly to Lesson 8's IACS UR E26 material: UR E26 requires a documented, tested means of recovering critical systems after a cyber incident precisely because a ship mid-voyage cannot wait for outside help to arrive. Post-incident recovery planning is not a separate topic from the containment discussion in this module — a vessel's containment posture and its recovery capability have to be designed together, because a decision to delay isolation only makes sense if there is a tested plan for what recovery looks like once it's safe to act.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Monitoring/IR Practice to Its Purpose</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each monitoring or incident-response practice below, select the purpose it best serves. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Practice</th><th scope="col">Best-matching purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="tap">
+                <td>Network tap on a span port</td>
+                <td>
+                  <select aria-label="Purpose of a network tap on a span port">
+                    <option value="">— Select —</option>
+                    <option value="tap">Passive asset discovery without touching live equipment</option>
+                    <option value="gap">Coverage gap to document as a known limitation</option>
+                    <option value="corr">Correlation risk during a spoofing event</option>
+                    <option value="heartbeat">Bandwidth-constrained fleet SOC triage</option>
+                    <option value="contain">Risk-based containment decision</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="gap">
+                <td>Alarm-only logging on a legacy sensor</td>
+                <td>
+                  <select aria-label="Purpose of alarm-only logging on a legacy sensor">
+                    <option value="">— Select —</option>
+                    <option value="tap">Passive asset discovery without touching live equipment</option>
+                    <option value="gap">Coverage gap to document as a known limitation</option>
+                    <option value="corr">Correlation risk during a spoofing event</option>
+                    <option value="heartbeat">Bandwidth-constrained fleet SOC triage</option>
+                    <option value="contain">Risk-based containment decision</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="corr">
+                <td>GNSS-sourced NTP with no independent cross-check</td>
+                <td>
+                  <select aria-label="Purpose of GNSS-sourced NTP with no independent cross-check">
+                    <option value="">— Select —</option>
+                    <option value="tap">Passive asset discovery without touching live equipment</option>
+                    <option value="gap">Coverage gap to document as a known limitation</option>
+                    <option value="corr">Correlation risk during a spoofing event</option>
+                    <option value="heartbeat">Bandwidth-constrained fleet SOC triage</option>
+                    <option value="contain">Risk-based containment decision</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="heartbeat">
+                <td>Heartbeat summary report from each vessel every few hours</td>
+                <td>
+                  <select aria-label="Purpose of a heartbeat summary report from each vessel every few hours">
+                    <option value="">— Select —</option>
+                    <option value="tap">Passive asset discovery without touching live equipment</option>
+                    <option value="gap">Coverage gap to document as a known limitation</option>
+                    <option value="corr">Correlation risk during a spoofing event</option>
+                    <option value="heartbeat">Bandwidth-constrained fleet SOC triage</option>
+                    <option value="contain">Risk-based containment decision</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="contain">
+                <td>Master defers full isolation of an affected system until safe passage</td>
+                <td>
+                  <select aria-label="Purpose of the master deferring full isolation until safe passage">
+                    <option value="">— Select —</option>
+                    <option value="tap">Passive asset discovery without touching live equipment</option>
+                    <option value="gap">Coverage gap to document as a known limitation</option>
+                    <option value="corr">Correlation risk during a spoofing event</option>
+                    <option value="heartbeat">Bandwidth-constrained fleet SOC triage</option>
+                    <option value="contain">Risk-based containment decision</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: Incident Correlation Timeline Simulator</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Toggle each available data source below, in any order, to see how much of a fictional incident timeline becomes reconstructable. Watch what happens to the other three sources' value if you switch the time source off after turning others on. Nothing here touches a real system — this is a model of an investigation, not a network.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Available data sources">
+          <button type="button" class="sim-toggle" data-conn="ams" aria-pressed="false">Alarm monitoring system log</button>
+          <button type="button" class="sim-toggle" data-conn="vdr" aria-pressed="false">VDR data</button>
+          <button type="button" class="sim-toggle" data-conn="netcap" aria-pressed="false">Network traffic capture</button>
+          <button type="button" class="sim-toggle" data-conn="time" aria-pressed="false">Synchronized accurate time source</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Investigation confidence</span><span id="simMeterValue">0%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:0%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> no data sources have been pulled into the investigation yet. Select a source above to see what becomes reconstructable.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q1.</span>Why is passive monitoring generally preferred over active scanning for building an asset inventory on a vessel OT network?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> Active scanning is prohibited under SOLAS.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> Passive monitoring is faster than active scanning in every case.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> Active scanning can crash fragile, resource-constrained legacy devices, while passive monitoring observes existing traffic without injecting anything onto the wire.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> Passive monitoring does not require a network tap or span port.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q2.</span>What is the more subtle of the two common alarm monitoring system (AMS) coverage gaps described in this lesson?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> The AMS cannot store any data at all.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> A device may report to the AMS but log only the alarm state, without the underlying telemetry trend leading up to it.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> The AMS only works when the VSAT link is up.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> The AMS automatically deletes logs older than 24 hours.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q3.</span>How does GNSS spoofing specifically undermine an incident investigation, beyond the navigation risk covered in Lesson 6?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> If GNSS-derived NTP is spoofed, timestamps across the AMS, VDR, and network logs can be silently offset, breaking the ability to correlate events into a correct sequence.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> GNSS spoofing physically deletes log files on affected systems.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> GNSS spoofing only affects the ECDIS display and has no effect on any other system.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> GNSS spoofing always triggers an alarm that investigators can rely on to flag the affected window automatically.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q4.</span>Why does a shore-based fleet SOC typically rely on periodic heartbeat/summary reports rather than continuous full packet captures from every vessel?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> Full packet captures are not technically possible from any vessel.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> Vessels are prohibited from sending log data ashore.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> Heartbeat reports are more accurate than full packet captures.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> Continuous full packet captures over VSAT would be slow and costly across a whole fleet, so the SOC prioritizes with compact summaries and escalates to targeted pulls only when warranted.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q5.</span>Why might a vessel's master deliberately delay fully isolating a suspect navigation or propulsion-adjacent system during an incident?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> IACS UR E26 forbids isolating any system while under way.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Immediate isolation could create an acute safety hazard — such as loss of steering during a narrow-channel transit — that outweighs the immediate security risk.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> The vessel's crew is not authorized to make containment decisions without shore approval.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Delaying isolation has no safety or security tradeoff either way.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner sketch a one-page "evidence map" for a hypothetical shipboard incident: list the data sources available (AMS, VDR, network capture, time source), mark which ones would actually be reachable given a constrained VSAT link, and note the one dependency (a trustworthy time source) that determines whether the rest can be correlated at all. This forces Modules 1 through 4's material to meet the containment reasoning of Module 5 in a single artifact.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://csrc.nist.gov/pubs/sp/800/61/r2/final" target="_blank" rel="noopener noreferrer">NIST SP 800-61 Rev. 2: Computer Security Incident Handling Guide</a> — the standard federal reference for incident-response lifecycle stages, useful background for the containment and recovery discussion in Module 5.</li>
+      <li><a href="https://www.sans.org/white-papers/five-ics-cybersecurity-critical-controls/" target="_blank" rel="noopener noreferrer">SANS Institute — The Five ICS Cybersecurity Critical Controls</a> — industry guidance covering ICS network visibility monitoring and an ICS-specific incident response plan, both directly relevant to this lesson's passive monitoring and fleet SOC material.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson10.html">← Lesson 10: Access Control &amp; Identity Management Afloat</a>
+    <a class="nav-btn" href="lesson12.html">Lesson 12: Capstone — Build and Teach Your Own Maritime OT Module →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Passive Asset Discovery</a></li>
+      <li><a href="#s2">2. Alarm Log Coverage Gaps</a></li>
+      <li><a href="#s3">3. GNSS Time Sync &amp; Correlation</a></li>
+      <li><a href="#s4">4. Fleet SOC Triage</a></li>
+      <li><a href="#s5">5. Incident Response at Sea</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Correlation Timeline</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Explain why passive discovery is preferred over active scanning</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Describe alarm monitoring system log coverage gaps</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Explain how GNSS spoofing undermines log correlation</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Describe fleet SOC triage over constrained bandwidth</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Describe IR constraints unique to a vessel underway</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s1"><span class="glossary-term">Passive Monitoring</span></a><span class="glossary-def">Building network visibility by observing existing traffic through a tap or span port, without sending probe packets to live equipment.</span></li>
+      <li><a href="#s2"><span class="glossary-term">Alarm Monitoring System</span></a><span class="glossary-def">The shipboard system that reports threshold-crossing conditions; not a complete security event log, since many devices don't report to it or report alarm states only.</span></li>
+      <li><a href="#s3"><span class="glossary-term">GNSS Time Sync</span></a><span class="glossary-def">Using a GNSS receiver as the master time source for shipboard NTP; accurate and convenient, but exposed to the same spoofing risk as GNSS position.</span></li>
+      <li><a href="#s4"><span class="glossary-term">Fleet SOC</span></a><span class="glossary-def">A shore-based security operations center that triages alerts across many vessels using compact heartbeat reports rather than continuous full data feeds.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Containment</span></a><span class="glossary-def">The decision to isolate or restrict an affected system; on a vessel, weighed against the immediate safety consequences of doing so mid-voyage.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson10.html">← Previous: Lesson 10 — Access Control &amp; Identity Management Afloat</a>
+      <a href="lesson12.html">Next: Lesson 12 — Capstone: Build and Teach Your Own Maritime OT Module →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 11 · Day 5 · Monitoring, Detection &amp; Maritime OT Incident Response<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { ams: false, vdr: false, netcap: false, time: false };
+  var simDescriptions = {
+    ams: "Alarm monitoring system log: you know which alarms fired and roughly when, according to the AMS's own clock.",
+    vdr: "VDR data: bridge audio, ECDIS screen capture, and helm/engine order records are available for the same window.",
+    netcap: "Network traffic capture: you can see what devices were actually communicating on the network, not just what the AMS chose to log.",
+    time: "Synchronized accurate time source: every timestamp above can now be trusted to line up against the others to within a fraction of a second."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function computeConfidence() {
+    var pct = 0;
+    if (simState.time) pct += 15;
+    var dataSourcesOn = ['ams', 'vdr', 'netcap'].filter(function (k) { return simState[k]; }).length;
+    pct += dataSourcesOn * (simState.time ? 25 : 10);
+    return pct;
+  }
+
+  function updateSim() {
+    var pct = computeConfidence();
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 65 ? 'var(--ok)' : (pct >= 30 ? 'var(--accent)' : 'var(--bad)');
+
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> no data sources have been pulled into the investigation yet. Select a source above to see what becomes reconstructable.';
+      return;
+    }
+
+    var lines = [];
+    ['ams', 'vdr', 'netcap', 'time'].forEach(function (k) {
+      if (simState[k]) lines.push(simDescriptions[k]);
+    });
+    var html = '<strong>Available now:</strong><br>' + lines.join('<br>');
+
+    var dataSourcesOn = ['ams', 'vdr', 'netcap'].filter(function (k) { return simState[k]; }).length;
+    if (dataSourcesOn > 0 && !simState.time) {
+      html += '<br><br><strong>Correlation warning:</strong> without a synchronized, trustworthy time source, none of the raw data above can be reliably lined up against the others. You have more raw material, but not a more reliable timeline — this is exactly what GNSS spoofing does to an investigation even when every other log is intact.';
+    } else if (simState.time && dataSourcesOn === 3) {
+      html += '<br><br><strong>Result:</strong> with all three data sources sharing a trustworthy clock, the AMS, VDR, and network capture can now be merged into a single, defensible timeline of the incident.';
+    }
+    simReadout.innerHTML = html;
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. Active scanning can destabilize fragile, resource-constrained legacy devices; passive monitoring builds the same inventory by observing existing traffic only.", incorrect: "Not quite. The key distinction is risk to fragile legacy devices from injected traffic — passive monitoring avoids that by only listening." },
+    2: { correct: "Correct. A device can report to the AMS and still only log the alarm state itself, with no record of the trend that led up to it.", incorrect: "Not quite. The subtler gap is alarm-only logging without underlying telemetry — not total data loss, connectivity dependence, or automatic deletion." },
+    3: { correct: "Correct. A spoofed GNSS-derived time source can silently offset timestamps across systems, breaking event correlation even when the underlying logs are otherwise intact.", incorrect: "Not quite. GNSS spoofing doesn't delete logs or announce itself with a reliable alarm — its damage to an investigation is through undetected timestamp offset." },
+    4: { correct: "Correct. Continuous full captures from every vessel would be slow and expensive over VSAT, so fleet SOCs triage with compact summaries and escalate selectively.", incorrect: "Not quite. Full captures are technically possible but costly and slow at fleet scale — that's why SOCs default to lightweight heartbeat reporting." },
+    5: { correct: "Correct. A vessel's master weighs the immediate safety risk of losing a navigation or propulsion-adjacent system against the security risk of leaving it connected, and may deliberately delay isolation.", incorrect: "Not quite. There is a real safety-versus-security tradeoff, and it is the master's authority and responsibility to weigh it — not a blanket rule against isolation or a shore-approval requirement." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 12.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 12.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

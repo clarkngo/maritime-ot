@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1: From Isolated Bridges to Converged Fleets | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 1, Lesson 1 of the Maritime Operational Technology Security curriculum: how shipboard control grew up apart from shore IT, from mechanical telegraphs to integrated bridge systems, and the satellite links that finally converged vessel networks with the rest of the world.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 1 · Lesson 1 · 4 Contact Hours</span>
+    <h1>From Isolated Bridges to Converged Fleets</h1>
+    <p class="tagline">How shipboard control grew up apart from shore IT — and the business pressures that finally forced vessel networks onto the same satellite link as everything else.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Telegraphs &amp; Manual Navigation</a>
+    <a href="#s2" data-section="s2">Radar to GPS to ECDIS</a>
+    <a href="#s3" data-section="s3">IBS &amp; Fleet Monitoring</a>
+    <a href="#s4" data-section="s4">Serial to Ethernet</a>
+    <a href="#s5" data-section="s5">Convergence</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>For most of the twentieth century, the bridge of a ship and the office ashore ran on two completely different clocks. Shore-side business computing chased faster processors, cheaper storage, and shared networks. The bridge and engine room chased something else entirely: a course, a speed, and an engine that respond exactly the same way in a mid-ocean gale as they did the day the vessel was commissioned, twenty-five years earlier. That difference in mission is the whole reason <dfn id="def-convergence">maritime operational technology</dfn> (<abbr>OT</abbr>) and shore-based information technology (<abbr>IT</abbr>) grew up as separate worlds, with separate vocabularies, separate vendors, and — until fairly recently — no reliable link between a moving ship and land at all.</p>
+      <p>This lesson traces that separation from its origin (mechanical engine order telegraphs and manual chart plotting) through the arrival of radar, gyrocompass autopilots, and satellite navigation, into the two architectural families that grew out of them — the <dfn id="def-ibs">integrated bridge system</dfn> aboard a single vessel and the <dfn id="def-fleetops">shore-based fleet monitoring center</dfn> watching many vessels at once — and finally into the business pressures that pulled once-isolated ship networks onto the same VSAT satellite link the crew now also uses for email and streaming video. By the end of the lesson you should be able to explain, in a way a skeptical colleague from either side would accept, why the gap between a ship's OT and the outside world was never really a design — it was a side effect of an industry that simply hadn't had a reliable, affordable link to shore yet.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>Think of a ship's OT and shore-side IT as two branches of the same family separated not by distance but by an unreliable phone line. For a century, a vessel at sea could receive a telegram or a radio message, but nothing resembling a continuous conversation — you simply couldn't call the ship whenever you wanted. Satellite broadband changed that math entirely: once a ship could carry a always-on internet connection the way an office building does, every system aboard that could theoretically benefit from talking to shore — cargo systems, engine monitoring, even the crew's personal phones — eventually found a reason to. Convergence is what happens once the phone line stops being the bottleneck, and a lot of today's maritime OT security problems are what happens when systems that were never designed to be reachable from shore suddenly are.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Explain how shipboard navigation and control evolved from mechanical telegraphs and manual plotting to radar, satellite navigation, and electronic chart systems.</li>
+        <li>Identify the defining characteristics of an integrated bridge system (IBS) and a shore-based fleet monitoring architecture, and the problem each was built to solve.</li>
+        <li>Compare serial-based marine electronics communication with Ethernet-based communication in terms of underlying design assumptions.</li>
+        <li>Describe the business pressures that drove convergence between shore IT and vessel OT networks.</li>
+        <li>Evaluate why a vessel's historical isolation from shore networks eroded as satellite connectivity improved.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⚙️</span>
+      <h2>Before radar: mechanical telegraphs and manual navigation</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Before there was any electronic navigation aid, ship control was built from mechanical and hydraulic linkages. The <dfn id="def-eot">engine order telegraph (EOT)</dfn> let the officer on the bridge signal a desired engine state — "Full Ahead," "Slow Astern," "Stop" — to the engine room using a mechanical dial and pointer connected by cables or hydraulic lines. An engineer in the engine room watched the corresponding dial and physically operated the throttle to match. There was no automatic execution: a human on each end, connected by nothing more than a mechanical linkage and a shared understanding of what each position meant.</p>
+    <p>Navigation was even more manually intensive. Officers fixed the ship's position using <dfn>dead reckoning</dfn> — plotting speed, heading, and elapsed time on a paper chart — corrected periodically by <dfn>celestial navigation</dfn> (sextant sightings of the sun or stars) or, closer to shore, visual bearings on known landmarks and lighthouses. A magnetic compass, later a gyrocompass, gave heading. None of this involved anything that could be called a network; it involved trained officers, paper, brass instruments, and a great deal of practiced judgment.</p>
+    <div class="icon-row" aria-hidden="true">
+      <div class="icon-item">
+        <svg width="52" height="52" viewBox="0 0 52 52" focusable="false">
+          <circle cx="26" cy="26" r="18" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+          <line x1="26" y1="26" x2="26" y2="12" stroke="var(--accent)" stroke-width="2.5"/>
+          <line x1="26" y1="26" x2="34" y2="30" stroke="var(--text-muted)" stroke-width="2"/>
+          <circle cx="26" cy="26" r="2.5" fill="var(--accent)"/>
+        </svg>
+        Engine telegraph
+      </div>
+      <div class="icon-item">
+        <svg width="52" height="52" viewBox="0 0 52 52" focusable="false">
+          <rect x="10" y="14" width="32" height="24" rx="2" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+          <line x1="26" y1="14" x2="26" y2="38" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <path d="M14 30 L20 22 L26 28 L38 18" stroke="var(--accent)" stroke-width="2" fill="none"/>
+        </svg>
+        Paper chart
+      </div>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A 1955 cargo vessel changes speed on the bridge officer's order: the officer moves the EOT handle to "Half Ahead," a bell rings in the engine room, and an engineer confirms by moving the matching handle on the engine-room telegraph before adjusting the throttle by hand. If the bridge and engine room disagree about the last order given, there is no log to check — only the position of two mechanical pointers and the memory of the people standing at them.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Most learners have never stood at an engine order telegraph or plotted a dead-reckoning fix. If you have access to a retired EOT or a photo of a chart table mid-voyage, use it here — the fully manual, human-in-the-loop nature of this equipment is what makes the leap to radar and autopilot land later in the lesson.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📡</span>
+      <h2>From radar to GPS to ECDIS: electronic navigation arrives</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>Shipborne radar moved from wartime experiment to standard commercial fitting through the 1940s and 1950s, giving officers, for the first time, an electronic picture of nearby traffic regardless of visibility. The 1956 collision between the <em>Andrea Doria</em> and the <em>Stockholm</em> — a disaster in which both vessels carried radar but still collided in fog — became a defining case study in the limits of a single sensor and the training gap around interpreting it, and it accelerated later requirements for <dfn id="def-arpa">Automatic Radar Plotting Aids (ARPA)</dfn> that could compute another vessel's course and closest point of approach automatically rather than leaving that arithmetic to the watch officer.</p>
+    <p>Satellite navigation followed a similar arc: the U.S. Navy's TRANSIT system gave merchant vessels their first practical satellite fixes starting in the 1960s and 70s, though only intermittently as satellites passed overhead. The Global Positioning System reached full operational capability in 1995, giving continuous, worldwide position fixing for the first time in maritime history — and effectively ending dead reckoning as a primary means of navigation, even though it remained (and remains) a required backup skill. The IMO adopted performance standards for <dfn id="def-ecdis">Electronic Chart Display and Information Systems (ECDIS)</dfn> in 1995, and progressively mandated ECDIS carriage across SOLAS ship types on a phased schedule running from 2012 into the early 2020s, formally replacing the paper chart as the primary means of navigation on those vessels.</p>
+    <div class="timeline-wrap">
+      <div class="timeline" role="img" aria-label="Timeline: 1946 shipborne radar becomes standard commercial fitting; 1956 Andrea Doria-Stockholm collision drives ARPA development; 1970s TRANSIT satellite navigation reaches merchant fleets; 1995 GPS reaches full operational capability and IMO adopts ECDIS performance standards; 2002 AIS carriage becomes mandatory under SOLAS; 2012 onward ECDIS mandatory carriage phases in and VSAT broadband becomes common.">
+        <div class="timeline-node">
+          <div class="dot"></div>
+          <div class="timeline-year">1946</div>
+          <div class="timeline-label">Radar standard</div>
+          <div class="timeline-desc">Commercial shipborne fitting</div>
+        </div>
+        <div class="timeline-node">
+          <div class="dot"></div>
+          <div class="timeline-year">1956</div>
+          <div class="timeline-label">Andrea Doria</div>
+          <div class="timeline-desc">Drives ARPA development</div>
+        </div>
+        <div class="timeline-node">
+          <div class="dot"></div>
+          <div class="timeline-year">1970s</div>
+          <div class="timeline-label">TRANSIT SATNAV</div>
+          <div class="timeline-desc">First satellite fixes</div>
+        </div>
+        <div class="timeline-node">
+          <div class="dot"></div>
+          <div class="timeline-year">1995</div>
+          <div class="timeline-label">GPS + ECDIS standards</div>
+          <div class="timeline-desc">Full GPS constellation, IMO adopts ECDIS</div>
+        </div>
+        <div class="timeline-node">
+          <div class="dot"></div>
+          <div class="timeline-year">2002</div>
+          <div class="timeline-label">AIS mandatory</div>
+          <div class="timeline-desc">SOLAS carriage requirement</div>
+        </div>
+        <div class="timeline-node">
+          <div class="dot"></div>
+          <div class="timeline-year">2012+</div>
+          <div class="timeline-label">ECDIS &amp; VSAT</div>
+          <div class="timeline-desc">Mandatory carriage phase-in, broadband arrives</div>
+        </div>
+      </div>
+    </div>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>If ARPA is the maritime world's equivalent of cruise control that also watches the cars around you, ECDIS is the equivalent of replacing every paper road atlas in the vehicle with a single continuously updating GPS-linked map — one that other systems (radar, AIS) can now draw directly onto. Once that map became the electronic center of the bridge, it also became the electronic center of the bridge's <em>network</em>, in a way a stack of paper charts never could be.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A bulk carrier built in 2008 was delivered with paper charts as primary and a radar-only ARPA suite. During a 2014 retrofit ahead of its SOLAS-mandated ECDIS carriage deadline, the yard installed a networked ECDIS that ingests position data from GPS, heading from the gyrocompass, and target data from both radar and the vessel's new AIS transponder — the first time all four of those systems on this ship were wired to talk to a common display rather than being read independently by the watch officer.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🚢</span>
+      <h2>Two architectures grow out of it: the IBS and the fleet monitoring center</h2>
+      <span class="module-time">≈ 45 min</span>
+    </div>
+    <p>Once bridge systems could be networked together, two distinct architectural families emerged — not because anyone designed them in parallel on purpose, but because two very different problems needed solving.</p>
+    <p>An <dfn>integrated bridge system (IBS)</dfn> is what you get when a single vessel's navigation, propulsion control, and monitoring systems are wired into one tightly coupled, vendor-integrated network — ECDIS, radar/ARPA, autopilot, conning display, and alarm monitoring, all sharing data in real time from a single bridge. An IBS is built around continuous situational awareness: heading, speed, and target data updated many times a second, all presented from one console.</p>
+    <p>A <dfn>shore-based fleet monitoring center</dfn> solves a different problem: supervising equipment spread across an entire fleet of vessels, potentially scattered across every ocean at once. A fleet operations center doesn't run anything resembling real-time control the way an IBS does; it receives periodic reports — noon position reports, engine performance data, fuel consumption — sent over satellite at intervals (often hourly to daily), because the vessels are too far apart and the satellite bandwidth too limited and expensive for anything faster.</p>
+    <table class="compare-table">
+      <caption>Comparing integrated bridge systems and fleet monitoring centers</caption>
+      <thead>
+        <tr><th scope="col">Characteristic</th><th scope="col">Integrated Bridge System (IBS)</th><th scope="col">Fleet Monitoring Center</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Typical setting</td><td>Single vessel</td><td>Shore office supervising a dispersed fleet</td></tr>
+        <tr><td>Control style</td><td>Continuous, tightly coupled situational awareness</td><td>Supervisory — periodic reporting and occasional guidance</td></tr>
+        <tr><td>Update rate</td><td>Sub-second to a few seconds, ship-wide</td><td>Hourly to daily, per vessel</td></tr>
+        <tr><td>Remote assets</td><td>Rare — most sensors are local to the ship</td><td>Central to the design — every vessel is a remote reporting site</td></tr>
+        <tr><td>Vendor model</td><td>Historically a single bridge-system vendor's integrated stack</td><td>Often mixed-vendor: shore platform plus many onboard reporting systems</td></tr>
+      </tbody>
+    </table>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — IBS</span>
+      <p>A modern container ship's IBS ties ECDIS, radar/ARPA, autopilot, and the conning display into one network in the wheelhouse. When the autopilot begins a course change, that heading update appears on the ECDIS and the conning display within a fraction of a second — the whole point of the architecture is that no officer has to cross-check three separate instruments manually to know what the ship is doing right now.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — Fleet monitoring</span>
+      <p>A tanker operator's shore-based performance center receives an automated report every six hours from each of its 40 vessels — position, speed, fuel consumption, and main engine load — over a low-bandwidth satellite data link. Analysts in the shore office can flag a vessel burning unusually high fuel for its speed and radio the ship to investigate, but they cannot see or influence anything happening aboard in real time — the reporting interval and the link's cost simply don't support that.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners with a networking background will want to map the IBS and fleet monitoring onto "LAN vs. WAN." That's a useful first approximation, but push further: the real distinction is control philosophy — continuous shipboard situational awareness versus periodic shore-side supervisory oversight — and geography is just the reason each philosophy makes sense where it does.</p>
+    </div>
+  </section>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔌</span>
+      <h2>From serial links to Ethernet</h2>
+      <span class="module-time">≈ 40 min</span>
+    </div>
+    <p>For most of the history covered so far, marine electronics talked to each other over point-to-point serial links using <dfn id="def-nmea">NMEA 0183</dfn>, a simple text-based sentence format carried over RS-422 wiring, typically at 4,800 bits per second. A GPS receiver sends a position sentence out one dedicated wire to one listening device — an ECDIS, say — and that is the entire conversation. These links were slow and limited to a small number of talkers and listeners per circuit, but they were also simple, predictable, and physically isolated in the same way an industrial RS-485 link is: there is no such thing as an unexpected device joining an NMEA 0183 circuit the way a laptop can join a Wi-Fi network.</p>
+    <p>Two developments changed that. <dfn id="def-nmea2000">NMEA 2000</dfn>, based on the CAN bus used in automotive and industrial control, let multiple marine devices share a single network bus instead of needing a dedicated wire per connection. Then <dfn id="def-lwe">IEC 61162-450</dfn> — the marine industry's own Ethernet-based interconnection standard, sometimes called "Lightweight Ethernet" — defined how NMEA sentences could ride over standard Ethernet and UDP multicast, letting a bridge's entire sensor suite share the same switched network a ship's business systems and, eventually, crew Wi-Fi would also use.</p>
+    <table class="compare-table">
+      <caption>Serial versus Ethernet-based marine electronics communication</caption>
+      <thead>
+        <tr><th scope="col">Characteristic</th><th scope="col">Serial (NMEA 0183)</th><th scope="col">Ethernet (IEC 61162-450)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Physical topology</td><td>Point-to-point, one dedicated wire per link</td><td>Shared switched network, many devices per segment</td></tr>
+        <tr><td>Who else is on the wire</td><td>Only the one device that link was wired to</td><td>Potentially any device with network access on that switch</td></tr>
+        <tr><td>Typical speed</td><td>4,800 bps</td><td>10 Mbps–1 Gbps and higher</td></tr>
+        <tr><td>Built-in authentication</td><td>None — trust is physical (you have to touch the wire)</td><td>None by default — the underlying NMEA sentence format wasn't redesigned for a shared network</td></tr>
+        <tr><td>Design-era assumption</td><td>Isolated by wiring, so security wasn't a design goal</td><td>Convenient and flexible, but the old "no authentication" assumption came along for the ride</td></tr>
+      </tbody>
+    </table>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>An NMEA 0183 link is a landline extension cord — one dedicated circuit, one conversation, and the only way to eavesdrop is to physically tap that specific wire. An IEC 61162-450 Ethernet backbone is a shared intercom system wired through the whole ship: efficient and flexible, and able to carry every sensor's data over the same infrastructure — but now anything else plugged into that same switch can, in principle, listen in, because the sentence format itself was never asked to prove who sent it.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A ferry originally wired its GPS receiver directly to its radar via a single NMEA 0183 serial line at 4,800 bps. During a bridge modernization, the yard replaced that link with an IEC 61162-450 Ethernet network carrying the same GPS sentences as UDP multicast packets — now readable by the ECDIS, the autopilot, the voyage data recorder, and, because it shared a switch with the vessel's business LAN, potentially by anything else plugged into that switch too. The upgrade solved a real wiring problem; it also quietly turned a single dedicated conversation into a broadcast.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📈</span>
+      <h2>Why the isolation disappeared: the business case for convergence</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>A ship's historical isolation from shore networks was never really a security architecture that anyone deliberately engineered end to end. It was mostly just what you got by default when there was no affordable, always-on way to talk to a vessel in the middle of an ocean. Once broadband VSAT made a continuous link between ship and shore technically routine, that isolation survived only as long as nobody had a business reason to cross it. That didn't last.</p>
+    <p>Four pressures, arriving roughly together over the 2000s and 2010s as satellite bandwidth got cheaper, made crossing that gap look less like a risk and more like an obvious decision to any operator who wasn't thinking about security:</p>
+    <ul class="lo-display">
+      <li><strong>Real-time visibility.</strong> Charterers and operators wanted live position, speed, and fuel data on a shore dashboard instead of waiting for a noon report keyed in by hand.</li>
+      <li><strong>Predictive maintenance.</strong> Engine manufacturers wanted vibration, temperature, and cycle-count data streamed continuously so failing turbochargers and bearings could be serviced before a breakdown at sea.</li>
+      <li><strong>Remote vendor support.</strong> Bridge and engine-control system vendors wanted a network path to diagnose and patch their own equipment without flying a technician to the next port of call.</li>
+      <li><strong>Crew welfare and enterprise integration.</strong> Operators wanted crew Wi-Fi for morale and retention, and wanted voyage data flowing automatically into charter-party reporting and fleet-management systems instead of being re-keyed by hand.</li>
+    </ul>
+    <p>Each of these, taken alone, sounds entirely reasonable — and each one is a request to open a path between a shore system (or a crew member's personal device) and a bridge or engine-control network that was never designed to be reachable from anywhere. Multiply that by every vendor, every dashboard project, and every "just this one connection" exception request across a decade, and you get exactly the converged, under-governed vessel network that most maritime OT security programs are hired to clean up today.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is the moment to preview Lesson 2 out loud: convergence itself isn't the mistake — it's <em>ungoverned</em> convergence. The fix isn't to try to rebuild the old isolation (unaffordable and, for most operators, undesirable); it's to replace an accidental architecture with a deliberate one — segmented zones, conduits, and a documented boundary between navigation/control systems and everything else, including crew Wi-Fi. That's exactly where the next lesson picks up.</p>
+    </div>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Technology to Its Network Reality</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each technology below, select the network characteristic that best matches it. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Technology</th><th scope="col">Best-matching network characteristic</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="seq">
+                <td>Mechanical engine order telegraph (pre-1960s)</td>
+                <td>
+                  <select aria-label="Network characteristic for mechanical engine order telegraph">
+                    <option value="">— Select —</option>
+                    <option value="seq">Mechanical linkage — no networking at all</option>
+                    <option value="plant">Centralized, ship-wide integrated network</option>
+                    <option value="wide">Wide-area periodic reporting from remote sites</option>
+                    <option value="serial">Point-to-point serial link</option>
+                    <option value="conv">Converged Ethernet, shared with crew Wi-Fi</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="plant">
+                <td>Modern integrated bridge system (IBS)</td>
+                <td>
+                  <select aria-label="Network characteristic for modern IBS">
+                    <option value="">— Select —</option>
+                    <option value="seq">Mechanical linkage — no networking at all</option>
+                    <option value="plant">Centralized, ship-wide integrated network</option>
+                    <option value="wide">Wide-area periodic reporting from remote sites</option>
+                    <option value="serial">Point-to-point serial link</option>
+                    <option value="conv">Converged Ethernet, shared with crew Wi-Fi</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="wide">
+                <td>Shore fleet center receiving six-hourly vessel reports</td>
+                <td>
+                  <select aria-label="Network characteristic for shore fleet monitoring center">
+                    <option value="">— Select —</option>
+                    <option value="seq">Mechanical linkage — no networking at all</option>
+                    <option value="plant">Centralized, ship-wide integrated network</option>
+                    <option value="wide">Wide-area periodic reporting from remote sites</option>
+                    <option value="serial">Point-to-point serial link</option>
+                    <option value="conv">Converged Ethernet, shared with crew Wi-Fi</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="serial">
+                <td>GPS receiver wired to radar over NMEA 0183</td>
+                <td>
+                  <select aria-label="Network characteristic for GPS wired to radar over NMEA 0183">
+                    <option value="">— Select —</option>
+                    <option value="seq">Mechanical linkage — no networking at all</option>
+                    <option value="plant">Centralized, ship-wide integrated network</option>
+                    <option value="wide">Wide-area periodic reporting from remote sites</option>
+                    <option value="serial">Point-to-point serial link</option>
+                    <option value="conv">Converged Ethernet, shared with crew Wi-Fi</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="conv">
+                <td>ECDIS on an IEC 61162-450 Ethernet backbone shared with the vessel's business LAN</td>
+                <td>
+                  <select aria-label="Network characteristic for ECDIS on shared Ethernet backbone">
+                    <option value="">— Select —</option>
+                    <option value="seq">Mechanical linkage — no networking at all</option>
+                    <option value="plant">Centralized, ship-wide integrated network</option>
+                    <option value="wide">Wide-area periodic reporting from remote sites</option>
+                    <option value="serial">Point-to-point serial link</option>
+                    <option value="conv">Converged Ethernet, shared with crew Wi-Fi</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🖥️</span>
+      <h2>Simulation: The Isolation Erosion Model</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Click each business pressure below, in any order, to see how a single reasonable request quietly narrows the gap between a vessel's OT network and the outside world. Nothing here touches a real network — this is a model of a decision, not a network scan.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Business pressures">
+          <button type="button" class="sim-toggle" data-conn="vendor" aria-pressed="false">Remote vendor support</button>
+          <button type="button" class="sim-toggle" data-conn="dashboard" aria-pressed="false">Live position dashboard</button>
+          <button type="button" class="sim-toggle" data-conn="predictive" aria-pressed="false">Engine telemetry feed</button>
+          <button type="button" class="sim-toggle" data-conn="wifi" aria-pressed="false">Crew Wi-Fi on the same VSAT link</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Network isolation</span><span id="simMeterValue">100%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:100%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> the vessel's OT network has no path to shore or the internet. Select a pressure above to see what it costs.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q1.</span>Why did the 1956 <em>Andrea Doria</em>–<em>Stockholm</em> collision matter for how radar was used aboard ship?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> It proved radar sets were unreliable and should be removed from ships.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> Both vessels carried radar but still collided, exposing the limits of a single sensor without automated plotting — accelerating the case for ARPA.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> It was the first recorded use of GPS at sea.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> It led directly to the mandatory carriage of ECDIS.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q2.</span>A vessel needs continuous, ship-wide situational awareness — heading, target, and position data all updated in real time on one bridge. Which architecture is this?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> A fleet monitoring center, because it is designed for continuous oversight.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> An engine order telegraph, because it scales to any number of instruments.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> An integrated bridge system (IBS), because it is built for tightly coupled, ship-wide real-time awareness.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> NMEA 0183, because serial links handle high update rates best.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q3.</span>What is the defining reason a shore fleet monitoring center receives reports every few hours rather than continuous real-time data from each vessel?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> Vessels are geographically dispersed and satellite bandwidth is limited and costly.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> Shipboard sensors are technically incapable of reporting more often.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> Faster reporting would violate the ISM Code.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> Crews are not permitted to send data more than once every few hours.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q4.</span>What changed, technically, when marine electronics moved from NMEA 0183 serial links to an IEC 61162-450 Ethernet backbone?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> NMEA sentences gained built-in authentication for the first time.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> Devices became immune to network-based interference.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> Serial NMEA 0183 was retired and replaced entirely by a new, secure format.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> Devices went from a dedicated, single-conversation wire to a shared network that other devices on the same switch could also reach.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>Which statement best describes why most vessels' isolation from shore networks eroded?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> A single mandatory IMO regulation required all vessels to connect to the internet.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> Satellite hardware stopped being manufactured, forcing vessels onto shore networks.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> A series of individually reasonable business requests — dashboards, predictive maintenance, remote vendor access, crew Wi-Fi — each opened a path that had never existed before.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> Bridge officers deliberately redesigned vessel networks to match shore IT architecture.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner submit a one-paragraph written response identifying one real or hypothetical piece of equipment they've encountered (a chartplotter, a home marine radio, a fleet-tracking app) and classify the network reality it likely uses — serial, isolated ship-wide network, wide-area periodic reporting, or converged Ethernet — with a one-sentence justification. This is a low-stakes way to confirm the vocabulary transferred before Lesson 2 builds architecture decisions on top of it.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://www.imo.org/en/OurWork/Security/Pages/Cyber-security.aspx" target="_blank" rel="noopener noreferrer">IMO — Maritime Cyber Risk Management</a> — the International Maritime Organization's overview page for the guidance and resolution covered in Lesson 8.</li>
+      <li><a href="https://csrc.nist.gov/pubs/sp/800/82/r3/final" target="_blank" rel="noopener noreferrer">NIST SP 800-82 Rev. 3: Guide to Operational Technology (OT) Security</a> — the standard federal reference for OT architectures, risk, and controls; useful background for the frameworks lesson later in the week.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="index.html">← Course Home</a>
+    <a class="nav-btn" href="lesson02.html">Lesson 2: IT/OT Security Principles at Sea →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Telegraphs &amp; Manual Navigation</a></li>
+      <li><a href="#s2">2. Radar to GPS to ECDIS</a></li>
+      <li><a href="#s3">3. IBS &amp; Fleet Monitoring</a></li>
+      <li><a href="#s4">4. Serial to Ethernet</a></li>
+      <li><a href="#s5">5. Convergence Pressures</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Isolation Erosion</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Explain the evolution from mechanical telegraphs to electronic navigation</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Identify IBS and fleet monitoring characteristics</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Compare serial and Ethernet marine communication</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Describe convergence business pressures</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Evaluate why vessel isolation eroded</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s2"><span class="glossary-term">ECDIS</span></a><span class="glossary-def">Electronic Chart Display and Information System — the mandated electronic replacement for paper charts as the primary means of navigation.</span></li>
+      <li><a href="#s3"><span class="glossary-term">IBS</span></a><span class="glossary-def">Integrated bridge system — a tightly coupled, ship-wide network combining ECDIS, radar/ARPA, autopilot, and conning display.</span></li>
+      <li><a href="#s3"><span class="glossary-term">Fleet Monitoring</span></a><span class="glossary-def">A shore-based system for periodically supervising a dispersed fleet of vessels over satellite links.</span></li>
+      <li><a href="#s5"><span class="glossary-term">Convergence</span></a><span class="glossary-def">The merging of previously separate shore IT and vessel OT networks, driven by dashboards, predictive maintenance, remote support, and crew connectivity.</span></li>
+      <li><a href="#s4"><span class="glossary-term">NMEA 0183</span></a><span class="glossary-def">A serial, text-based marine electronics protocol carried point-to-point over RS-422 wiring, historically the default way instruments talked to each other.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <span class="disabled">← Previous: none (first lesson)</span>
+      <a href="lesson02.html">Next: Lesson 2 — IT/OT Security Principles at Sea →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 1 · Day 1 · From Isolated Bridges to Converged Fleets<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { vendor: false, dashboard: false, predictive: false, wifi: false };
+  var simMessages = {
+    vendor: "Remote vendor support: the bridge or engine-control system vendor now has a network path into the ship's OT network to diagnose and patch their equipment. Convenient — and it means the ship's isolation now depends on that vendor's security practices too.",
+    dashboard: "Live position dashboard: navigation and voyage data now flow continuously from the ship to a shore-facing dashboard. The path may be one-way in theory, but the wire itself doesn't enforce that — a firewall rule does, if someone configured one.",
+    predictive: "Engine telemetry feed: sensor data streams out to an OEM analytics platform, often hosted by a third party ashore. Another outbound path, another vendor's cloud environment now indirectly connected to the engine room.",
+    wifi: "Crew Wi-Fi on the same VSAT link: personal devices now share bandwidth — and often the same onboard network gear — with navigation and control traffic. This is usually the request the crew cares about most, and the one most likely to get approved without OT security in the room."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = 100 - (activeCount * 25);
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> the vessel\'s OT network has no path to shore or the internet. Select a pressure above to see what it costs.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Just connected:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> all four pressures are now active. The old isolation is gone in every practical sense — not because anyone decided to remove it, but because four separate, individually reasonable requests each opened one more path. This is exactly the starting condition Lesson 2 designs a governed architecture to address.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. Both vessels carried radar but still collided in fog — exposing the limits of a single sensor without automated plotting, and accelerating the case for ARPA.", incorrect: "Not quite. The defining lesson was the limits of manually interpreted radar without automated plotting — not GPS, sensor unreliability, or a direct ECDIS mandate." },
+    2: { correct: "Correct. An IBS is purpose-built for tightly coupled, ship-wide real-time situational awareness.", incorrect: "Not quite. Fleet monitoring centers and serial links are built for wide-area periodic reporting, not tight real-time integration — that's what an IBS is for." },
+    3: { correct: "Correct. The reporting interval is a direct consequence of geography and satellite bandwidth cost, not a protocol limitation or a rule.", incorrect: "Not quite. The interval reflects the physical and economic reality of dispersed vessels and costly satellite links, not a technical ceiling or an external mandate." },
+    4: { correct: "Correct. The core change was topological: a dedicated, single-conversation wire became a shared network reachable by other devices on the same switch.", incorrect: "Not quite. Moving to Ethernet didn't add authentication or immunity to interference — it added exposure, because the network became shared rather than dedicated." },
+    5: { correct: "Correct. Isolation eroded gradually, through a series of individually reasonable business requests — not a mandate, a hardware shortage, or a deliberate OT redesign.", incorrect: "Not quite. There was no single mandate or hardware shortage — isolation eroded through a series of individually reasonable business requests, each opening one more path." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 2.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 2.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>

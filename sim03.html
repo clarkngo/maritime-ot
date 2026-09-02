@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator: Alarm Log Correlation Trainer | Maritime Operational Technology Security</title>
+<meta name="description" content="An interactive simulator pairing with Lesson 11: read a scrollable alarm monitoring system log and spot timestamp gaps, out-of-order entries, and a suspicious access sequence.">
+<style>
+  :root {
+    --bg: #f2f6f8; --surface: #ffffff; --surface2: #eaf3f6; --border: #ccdce4;
+    --text: #0d1b26; --text-muted: #52697a; --accent: #0e7490; --accent2: #155e75;
+    --accent-light: #e0f2f4; --on-accent: #ffffff; --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10); --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b; --header-text: #ffffff;
+    --tag-safety: #b45309; --tag-safety-bg: #fdf3e3;
+    --ok: #276221; --ok-bg: #e8f5e9; --bad: #c0392b; --bad-bg: #fdecea;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c; --surface: #101d2e; --surface2: #16283d; --border: #223349;
+    --text: #e6eef5; --text-muted: #8fa3b8; --accent: #22d3ee; --accent2: #67e8f9;
+    --accent-light: #082b33; --on-accent: #04222a; --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40); --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16; --header-text: #e6eef5;
+    --tag-safety: #fbbf24; --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7; --ok-bg: #0d2010; --bad: #ef9a9a; --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; transition: background 0.3s, color 0.3s; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  p { margin: 0 0 1em; }
+  .skip-link { position: absolute; left: -999px; top: auto; }
+  .skip-link:focus { position: fixed; left: 12px; top: 12px; z-index: 400; background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+
+  header { background: var(--header-bg); color: var(--header-text); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: var(--on-accent); flex-shrink: 0; letter-spacing: -0.5px; }
+  .brand-text h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 0.74rem; opacity: 0.65; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-pill, .theme-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: var(--header-text); cursor: pointer; padding: 7px 13px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; white-space: nowrap; }
+  .back-pill:hover, .theme-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  .hero { background: linear-gradient(135deg, #0a1a2b 0%, #103a4d 60%, #0e749033 100%); color: #fff; padding: 30px 24px; }
+  .hero-inner { max-width: 860px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .hero h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+  .hero p { opacity: 0.85; font-size: 0.92rem; max-width: 74ch; line-height: 1.55; margin: 0; }
+
+  .page-shell { max-width: 820px; margin: 0 auto; padding: 30px 24px 60px; }
+  .back-links { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 22px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--accent2); text-decoration: none; }
+  [data-theme="dark"] .back-link { color: var(--accent); }
+  .back-link:hover { text-decoration: underline; }
+
+  .intro p { font-size: 0.95rem; color: var(--text-muted); }
+  .intro { margin-bottom: 18px; }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  .safety-flag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700; color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety); border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 18px; }
+
+  .activity-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin: 18px 0; }
+  .activity-head { background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .btn { background: var(--accent); color: var(--on-accent); border: none; cursor: pointer; padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit; }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .log-panel {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.82rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); max-height: 360px; overflow-y: auto; margin-bottom: 20px;
+  }
+  .log-line { padding: 7px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; }
+  .log-line:last-child { border-bottom: none; }
+  .log-line .lts { color: var(--text-muted); flex-shrink: 0; width: 6.5em; }
+  .log-line .lsev { flex-shrink: 0; width: 4.2em; font-weight: 700; }
+  .log-line .lsrc { flex-shrink: 0; width: 9.5em; color: var(--accent2); }
+  [data-theme="dark"] .log-line .lsrc { color: var(--accent); }
+  .log-line .lmsg { flex: 1; min-width: 200px; color: var(--text); }
+  .log-line.sev-info .lsev { color: var(--text-muted); }
+  .log-line.sev-warn .lsev { color: var(--tag-safety); }
+  .log-line.sev-alarm .lsev { color: var(--bad); }
+  .log-line.sev-alarm { background: var(--bad-bg); }
+  .log-line.marked { outline: 2px dashed var(--accent); outline-offset: -2px; }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; margin-top: 4px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none; }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 16px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+  .quiz-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+
+  .teach-note { border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin: 18px 0; font-size: 0.85rem; color: var(--text-muted); }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  footer { text-align: center; padding: 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media print { header, .back-links { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">MOT</div>
+      <div class="brand-text">
+        <h1>Maritime Operational Technology Security</h1>
+        <p>Simulator Suite</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a class="back-pill" href="index.html">← Course Navigation</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Simulator · Pairs with Lesson 11</span>
+    <h2>Alarm Log Correlation Trainer</h2>
+    <p>Scroll a realistic slice of an alarm monitoring system log and practice spotting the kind of anomalies a correlation review is built to catch — timestamp gaps, out-of-order entries, and traffic from the wrong place at the wrong time.</p>
+  </div>
+</div>
+
+<main class="page-shell" id="main-content">
+  <div class="back-links">
+    <a class="back-link" href="simulators.html">← Back to Simulator Suite</a>
+    <a class="back-link" href="index.html">← Course Navigation</a>
+  </div>
+
+  <div class="intro">
+    <p>An <dfn>alarm monitoring system (AMS)</dfn> log is one of the richest sources of evidence available after an incident — but only if someone actually reads it with a critical eye. This simulator pairs with <strong>Lesson 11</strong>, where alarm monitoring coverage gaps and log correlation are covered as core investigative skills.</p>
+    <p>Below is a fixed, scrollable slice of a real-looking AMS log spanning about 25 minutes on a single watch. Read through it, then answer the questions beneath it about what you notice.</p>
+  </div>
+
+  <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+
+  <div class="activity-block">
+    <div class="activity-head">
+      <span aria-hidden="true">🖥️</span>
+      <h3>Alarm Monitoring System — Watch Log</h3>
+    </div>
+    <div class="activity-body">
+      <p class="activity-instructions">Scroll through the full log before answering. Three entries in this excerpt represent anomalies worth flagging in a real correlation review.</p>
+      <div class="log-panel" id="logPanel" role="log" aria-label="Alarm monitoring system log"></div>
+
+      <div class="quiz-block" id="quizBlock">
+        <div class="q-card" data-answer="b">
+          <div class="q-stem"><span class="q-num">Q1.</span>One entry in this log is timestamped <em>earlier</em> than the entry immediately before it, even though it appears later in the scrolling order. What does that represent?</div>
+          <ul class="q-opts">
+            <li class="q-opt"><label><input type="radio" name="q1" value="a"> A normal daylight-saving-time adjustment.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q1" value="b"> The 02:12:40 AIS-XPDR entry, which appears after the 02:18:10 entry despite its earlier timestamp — an out-of-order log entry.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q1" value="c"> The 02:35:02 BRIDGE-NAV autopilot entry.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q1" value="d"> There is no out-of-order entry in this log.</label></li>
+          </ul>
+          <div class="q-feedback" id="fb1"></div>
+        </div>
+
+        <div class="q-card" data-answer="c">
+          <div class="q-stem"><span class="q-num">Q2.</span>Between the 02:21:09 badge scan and the 02:31:57 alarm, the AMS-CORE heartbeat — which otherwise appears roughly every 1–3 minutes — is missing entirely. What does the 02:31:57 entry represent?</div>
+          <ul class="q-opts">
+            <li class="q-opt"><label><input type="radio" name="q2" value="a"> A routine scheduled maintenance message.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q2" value="b"> Confirmation that Zone 4 was operating normally the whole time.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q2" value="c"> A heartbeat timeout alarm surfacing an unexplained ~11-minute coverage gap from Zone 4 (Engine Room) — exactly the kind of gap a correlation review should treat as suspicious, not just noisy.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q2" value="d"> A duplicate of the 02:20:01 cylinder temperature alarm.</label></li>
+          </ul>
+          <div class="q-feedback" id="fb2"></div>
+        </div>
+
+        <div class="q-card" data-answer="a">
+          <div class="q-stem"><span class="q-num">Q3.</span>Which log line represents a device/access event occurring somewhere it plausibly shouldn't, worth flagging on its own even without any alarm severity attached?</div>
+          <ul class="q-opts">
+            <li class="q-opt"><label><input type="radio" name="q3" value="a"> 02:36:18 WARN ACCESS-CTRL — Shore Vendor badge scan at the Bridge Wing door, unscheduled.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q3" value="b"> 02:14:03 INFO BALLAST-CTRL — Tank 2 level nominal.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q3" value="c"> 02:33:40 WARN CARGO-MON — Reefer temperature deviation.</label></li>
+            <li class="q-opt"><label><input type="radio" name="q3" value="d"> 02:15:11 INFO ECDIS — Route waypoint advance.</label></li>
+          </ul>
+          <div class="q-feedback" id="fb3"></div>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn" id="gradeQuiz">Check Answers</button>
+        <button class="btn secondary" id="resetQuiz">Reset</button>
+      </div>
+      <div class="quiz-score" id="quizScore">
+        <span class="quiz-score-big" id="quizScoreBig">0 / 3</span>
+        <span id="quizScoreText"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="teach-note">
+    <span class="teach-label">What this teaches</span>
+    <p>This is the practical shape of Lesson 11's alarm monitoring coverage-gap discussion: an AMS is only as trustworthy as its continuity, and a missing heartbeat is itself a signal, not an absence of one. It also previews why accurate time matters so much for this work — an out-of-order entry is only visible <em>because</em> every device is assumed to be reporting against the same clock. Lesson 11 covers GNSS-derived time synchronization as the quiet dependency underneath every correlation review like this one; when that shared clock can't be trusted, neither can the order of events you're looking at.</p>
+  </div>
+</main>
+
+<footer>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only. All exercises are simulation-based and defensive in scope.
+</footer>
+<script>
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+    try { localStorage.setItem('mot-theme', theme); } catch (e) {}
+  }
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) {}
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  (function () {
+    var logLines = [
+      ['02:14:03', 'INFO', 'AMS-CORE', 'Heartbeat OK — all zones reporting'],
+      ['02:14:03', 'INFO', 'BALLAST-CTRL', 'Tank 2 level nominal (52%)'],
+      ['02:15:11', 'INFO', 'ECDIS', 'Route waypoint advance: WP12 → WP13'],
+      ['02:16:47', 'WARN', 'ENGINE-CTRL', 'Cylinder 3 exhaust temp elevated (412°C)'],
+      ['02:17:02', 'INFO', 'AMS-CORE', 'Heartbeat OK — all zones reporting'],
+      ['02:17:55', 'WARN', 'FIRE-DET', 'Zone 4 (Engine Room) smoke sensor drift detected'],
+      ['02:18:10', 'INFO', 'BALLAST-CTRL', 'Valve V-12 command: OPEN'],
+      ['02:12:40', 'INFO', 'AIS-XPDR', 'Position report transmitted'],
+      ['02:19:22', 'INFO', 'AMS-CORE', 'Heartbeat OK — all zones reporting'],
+      ['02:20:01', 'ALARM', 'ENGINE-CTRL', 'Cylinder 3 exhaust temp HIGH-HIGH (468°C) — auto load reduction engaged'],
+      ['02:20:03', 'INFO', 'ENGINE-CTRL', 'Load reduced to 62% ordered ahead'],
+      ['02:20:45', 'INFO', 'BALLAST-CTRL', 'Tank 2 level nominal (54%)'],
+      ['02:21:09', 'INFO', 'ACCESS-CTRL', 'Badge scan: Engine Room hatch — Chief Engineer'],
+      ['02:31:57', 'ALARM', 'AMS-CORE', 'Heartbeat TIMEOUT — Zone 4 (Engine Room) silent 11m47s'],
+      ['02:32:00', 'WARN', 'NETWORK', 'Switch SW-ER2 link flap detected (Engine Room)'],
+      ['02:32:14', 'INFO', 'AMS-CORE', 'Heartbeat OK — all zones reporting (recovered)'],
+      ['02:33:40', 'WARN', 'CARGO-MON', 'Reefer container C-114 temp deviation +1.8°C'],
+      ['02:35:02', 'INFO', 'BRIDGE-NAV', 'Autopilot heading adjustment: 246° → 248°'],
+      ['02:36:18', 'WARN', 'ACCESS-CTRL', 'Badge scan: Bridge Wing door — Shore Vendor (unscheduled)'],
+      ['02:38:29', 'INFO', 'AMS-CORE', 'Heartbeat OK — all zones reporting']
+    ];
+
+    var panel = document.getElementById('logPanel');
+    logLines.forEach(function (l) {
+      var div = document.createElement('div');
+      div.className = 'log-line sev-' + l[1].toLowerCase();
+      div.innerHTML = '<span class="lts">' + l[0] + '</span><span class="lsev">' + l[1] + '</span><span class="lsrc">' + l[2] + '</span><span class="lmsg">' + l[3] + '</span>';
+      panel.appendChild(div);
+    });
+
+    var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+    var quizNames = ['q1', 'q2', 'q3'];
+    var quizFeedback = {
+      1: { correct: 'Correct. The 02:12:40 AIS-XPDR entry appears in the log stream after the 02:18:10 entry, even though its own timestamp is earlier — a classic out-of-order log entry that could indicate a delayed write, a clock issue on that device, or a tampered log.', incorrect: 'Not quite. Look for the entry whose own timestamp is earlier than the line directly above it in the log — that is the out-of-order entry.' },
+      2: { correct: 'Correct. Roughly eleven minutes pass with no heartbeat at all before AMS-CORE reports a timeout for Zone 4 — a coverage gap that a correlation review should treat as suspicious on its own, independent of whatever caused it.', incorrect: 'Not quite. The 02:31:57 line is an alarm surfacing a real gap in reporting, not a routine or duplicate message.' },
+      3: { correct: 'Correct. A shore vendor badging into the Bridge Wing, unscheduled, is a device/access event happening somewhere it plausibly should not — worth flagging even though its severity is only WARN.', incorrect: 'Not quite. The other options are routine, in-zone events. Look for the entry describing an access event in an unexpected location.' }
+    };
+
+    document.getElementById('gradeQuiz').addEventListener('click', function () {
+      var correctCount = 0;
+      quizCards.forEach(function (card, i) {
+        var qNum = i + 1;
+        var name = quizNames[i];
+        var selected = card.querySelector('input[name="' + name + '"]:checked');
+        var fb = document.getElementById('fb' + qNum);
+        var correctVal = card.getAttribute('data-answer');
+        fb.className = 'q-feedback show';
+        if (!selected) {
+          fb.classList.add('unanswered');
+          fb.textContent = 'Not answered — select an option above, then check again.';
+          return;
+        }
+        if (selected.value === correctVal) {
+          fb.classList.add('correct');
+          fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+          correctCount++;
+        } else {
+          fb.classList.add('incorrect');
+          fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+        }
+      });
+      var scoreBox = document.getElementById('quizScore');
+      var scoreBig = document.getElementById('quizScoreBig');
+      var scoreText = document.getElementById('quizScoreText');
+      scoreBox.classList.add('show');
+      scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+      scoreText.textContent = correctCount === quizCards.length
+        ? 'All three — you caught every anomaly in this excerpt.'
+        : 'Review the flagged entries and try again.';
+    });
+
+    document.getElementById('resetQuiz').addEventListener('click', function () {
+      quizCards.forEach(function (card, i) {
+        var qNum = i + 1;
+        card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+        var fb = document.getElementById('fb' + qNum);
+        fb.className = 'q-feedback';
+        fb.textContent = '';
+      });
+      document.getElementById('quizScore').classList.remove('show');
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4: IT Protocols Inside Shipboard &amp; Port Networks | Maritime Operational Technology Security</title>
+<meta name="description" content="Day 2, Lesson 4 of the Maritime Operational Technology Security curriculum: how Ethernet, TCP/IP, VLANs, DHCP, DNS, and NTP actually behave on a vessel LAN and in a port terminal network, and why satellite backhaul and GNSS-derived time change the way these familiar IT protocols get used and secured.">
+<style>
+  :root {
+    --bg: #f2f6f8;
+    --surface: #ffffff;
+    --surface2: #eaf3f6;
+    --border: #ccdce4;
+    --text: #0d1b26;
+    --text-muted: #52697a;
+    --accent: #0e7490;
+    --accent2: #155e75;
+    --accent-light: #e0f2f4;
+    --on-accent: #ffffff;
+    --card-hover: #e8f2f4;
+    --shadow: 0 2px 8px rgba(9,30,43,0.10);
+    --shadow-hover: 0 8px 24px rgba(9,30,43,0.16);
+    --header-bg: #0a1a2b;
+    --header-text: #ffffff;
+    --tag-safety: #b45309;
+    --tag-safety-bg: #fdf3e3;
+    --ok: #276221;
+    --ok-bg: #e8f5e9;
+    --bad: #c0392b;
+    --bad-bg: #fdecea;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="dark"] {
+    --bg: #08121c;
+    --surface: #101d2e;
+    --surface2: #16283d;
+    --border: #223349;
+    --text: #e6eef5;
+    --text-muted: #8fa3b8;
+    --accent: #22d3ee;
+    --accent2: #67e8f9;
+    --accent-light: #082b33;
+    --on-accent: #04222a;
+    --card-hover: #16283d;
+    --shadow: 0 2px 8px rgba(0,0,0,0.40);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.55);
+    --header-bg: #050d16;
+    --header-text: #e6eef5;
+    --tag-safety: #fbbf24;
+    --tag-safety-bg: #2a1c05;
+    --ok: #a5d6a7;
+    --ok-bg: #0d2010;
+    --bad: #ef9a9a;
+    --bad-bg: #2a1010;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  p { margin: 0 0 1em; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 300;
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 700;
+    text-decoration: none;
+  }
+  .skip-link:focus { left: 0; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+  .back-link:hover { color: var(--accent); }
+  .topbar-inst { color: var(--text-muted); text-align: right; }
+
+  .lesson-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 28px 24px 22px;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent2);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    display: inline-block; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  [data-theme="dark"] .eyebrow { color: var(--accent); }
+  .lesson-header h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 8px; max-width: 46rem; }
+  .tagline { font-size: 1.02rem; opacity: 0.82; margin: 0 0 18px; max-width: 44rem; }
+  .meta-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.9; }
+  .meta-item { display: flex; align-items: center; gap: 6px; }
+  .header-actions { display: flex; gap: 10px; margin-left: auto; }
+  .btn-header {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--header-text);
+    cursor: pointer; padding: 8px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.22); }
+
+  .section-nav {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .section-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
+  .section-nav a {
+    display: inline-block; padding: 12px 14px; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-muted); text-decoration: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .section-nav a:hover { color: var(--accent); }
+  .section-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .layout { max-width: 1280px; margin: 0 auto; padding: 30px 24px 60px; display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+  main { min-width: 0; }
+  .sidebar { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 18px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px;
+  }
+  .card h2, .card h3 { margin-top: 0; }
+  .sidebar-title {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-muted); margin: 0 0 12px;
+  }
+
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+  .toc-list a { color: var(--text); text-decoration: none; display: block; padding: 4px 0; }
+  .toc-list a:hover { color: var(--accent); }
+
+  .progress-bar-track { height: 8px; background: var(--surface2); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+  .progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .lo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lo-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; }
+  .lo-check {
+    flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); cursor: pointer;
+  }
+  .lo-item label { cursor: pointer; }
+  .lo-item.done label { color: var(--text-muted); text-decoration: line-through; }
+
+  .glossary-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.83rem; }
+  .glossary-term { font-weight: 700; color: var(--accent); }
+  .glossary-list a { text-decoration: none; }
+  .glossary-def { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .prevnext-links { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
+  .prevnext-links a { text-decoration: none; color: var(--text); font-weight: 600; }
+  .prevnext-links a:hover { color: var(--accent); }
+  .prevnext-links .disabled { color: var(--text-muted); font-weight: 400; }
+
+  .part-banner {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 800;
+    font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 40px 0 18px;
+  }
+  section.module { margin-bottom: 40px; scroll-margin-top: 80px; }
+  section.module:first-of-type { margin-top: 0; }
+  .module-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .module-icon { font-size: 1.3rem; }
+  .module-head h2 { font-size: 1.4rem; margin: 0; }
+  .module-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+  .overview-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .lo-display { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .lo-display li { padding-left: 26px; position: relative; font-size: 0.95rem; }
+  .lo-display li::before { content: "▸"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+
+  .analogy-box {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 16px 20px; margin: 18px 0;
+  }
+  .analogy-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent2); display: block; margin-bottom: 6px; }
+  [data-theme="dark"] .analogy-label { color: var(--accent); }
+  .analogy-box p:last-child { margin-bottom: 0; }
+
+  .worked-example {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; margin: 18px 0;
+  }
+  .worked-example-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .worked-example p:last-child { margin-bottom: 0; }
+
+  .safety-flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 700;
+    color: var(--tag-safety); background: var(--tag-safety-bg); border: 1px solid var(--tag-safety);
+    border-radius: 8px; padding: 4px 10px; letter-spacing: 0.02em; margin-bottom: 14px;
+  }
+
+  dfn { font-style: normal; font-weight: 700; color: var(--text); border-bottom: 1px dotted var(--accent); }
+
+  table.compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  table.compare-table caption { text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+  table.compare-table th, table.compare-table td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.compare-table thead th { background: var(--header-bg); color: var(--header-text); font-weight: 700; }
+  table.compare-table tbody tr:hover { background: var(--card-hover); }
+
+  .timeline-wrap { overflow-x: auto; margin: 18px 0; padding-bottom: 6px; }
+  .timeline { display: flex; gap: 0; min-width: 760px; }
+  .timeline-node { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .timeline-node .dot {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    margin: 0 auto 8px; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent);
+  }
+  .timeline-node::before {
+    content: ""; position: absolute; top: 8px; left: 0; right: 0; height: 2px; background: var(--border); z-index: 0;
+  }
+  .timeline-node:first-child::before { left: 50%; }
+  .timeline-node:last-child::before { right: 50%; }
+  .timeline-node .dot { position: relative; z-index: 1; }
+  .timeline-year { font-size: 0.78rem; font-weight: 800; color: var(--accent2); }
+  [data-theme="dark"] .timeline-year { color: var(--accent); }
+  .timeline-label { font-size: 0.82rem; font-weight: 600; margin-top: 2px; }
+  .timeline-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 700px) {
+    .timeline { flex-direction: column; gap: 20px; min-width: 0; }
+    .timeline-node::before { display: none; }
+  }
+
+  .activity-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin: 18px 0;
+  }
+  .activity-head {
+    background: var(--surface2); padding: 14px 20px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-head h3 { margin: 0; font-size: 1.05rem; }
+  .activity-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+  .activity-structure {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); background: var(--accent-light); padding: 3px 9px; border-radius: 12px;
+  }
+  [data-theme="dark"] .activity-structure { color: var(--accent); }
+  .activity-body { padding: 20px; }
+  .activity-instructions { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
+
+  .mapping-table-wrap { overflow-x: auto; }
+  table.mapping-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  table.mapping-table th, table.mapping-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+  table.mapping-table thead th { background: var(--surface2); font-weight: 700; }
+  table.mapping-table select {
+    width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem;
+  }
+  .map-row.correct td:first-child { border-left: 4px solid var(--ok); }
+  .map-row.incorrect td:first-child { border-left: 4px solid var(--bad); }
+  .mapping-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .mapping-result { font-size: 0.85rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent); color: var(--on-accent); border: none; cursor: pointer;
+    padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.87rem; font-family: inherit;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn.secondary:hover { background: var(--accent-light); }
+
+  .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .sim-toggle {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .sim-toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .sim-meter-wrap { margin-bottom: 18px; }
+  .sim-meter-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+  .sim-meter-track { height: 14px; background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .sim-meter-fill { height: 100%; background: var(--ok); transition: width 0.4s ease, background 0.4s ease; }
+  .sim-readout {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px 16px; font-size: 0.87rem; min-height: 3.5em;
+  }
+  .sim-readout strong { color: var(--accent2); }
+  [data-theme="dark"] .sim-readout strong { color: var(--accent); }
+
+  .quiz-block { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+  .q-stem { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; }
+  .q-num { color: var(--accent); margin-right: 6px; }
+  .q-opts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .q-opt { display: flex; align-items: flex-start; gap: 8px; font-size: 0.87rem; }
+  .q-opt input { margin-top: 3px; accent-color: var(--accent); }
+  .q-feedback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; display: none;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.correct { background: var(--ok-bg); color: var(--ok); }
+  .q-feedback.incorrect { background: var(--bad-bg); color: var(--bad); }
+  .q-feedback.unanswered { background: var(--tag-safety-bg); color: var(--tag-safety); }
+  .quiz-score {
+    margin-top: 6px; background: var(--header-bg); color: var(--header-text);
+    border-radius: var(--radius-sm); padding: 16px 20px; font-weight: 700; display: none;
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .quiz-score.show { display: flex; }
+  .quiz-score-big { font-size: 1.4rem; }
+
+  .resource-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .resource-list li {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 0.88rem;
+  }
+  .resource-list a { font-weight: 700; text-decoration: none; }
+  .resource-list a:hover { text-decoration: underline; }
+
+  .teach-note {
+    border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px 16px;
+    margin: 16px 0; font-size: 0.85rem; color: var(--text-muted);
+  }
+  .teach-label { font-weight: 800; color: var(--accent2); display: block; margin-bottom: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  [data-theme="dark"] .teach-label { color: var(--accent); }
+
+  .icon-row { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); width: 84px; text-align: center; }
+
+  .lesson-nav-bottom {
+    display: flex; justify-content: space-between; gap: 16px; margin-top: 46px; flex-wrap: wrap;
+  }
+  .nav-btn {
+    text-decoration: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 18px; font-weight: 700; color: var(--text);
+    box-shadow: var(--shadow); font-size: 0.88rem;
+  }
+  .nav-btn:hover { box-shadow: var(--shadow-hover); color: var(--accent); }
+  .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  footer {
+    background: var(--header-bg); color: var(--header-text); opacity: 0.85;
+    text-align: center; padding: 22px 24px; font-size: 0.8rem; line-height: 1.6;
+  }
+  footer a { color: var(--accent2); }
+  [data-theme="dark"] footer a { color: var(--accent); }
+
+  @media print {
+    .topbar, .section-nav, .sidebar, .header-actions, .lesson-nav-bottom, .skip-link { display: none !important; }
+    .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+    body { background: #ffffff; color: #000000; }
+    .lesson-header { background: #ffffff; color: #000000; padding: 10px 0; }
+    .eyebrow, .tagline { color: #333333; }
+    .card, .overview-box, .activity-block, .analogy-box, .worked-example, .q-card, .sim-readout { box-shadow: none; border: 1px solid #999; }
+    footer { background: #ffffff; color: #000000; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="back-link">← Course Home</a>
+    <span class="topbar-inst">Maritime Operational Technology Security · Clark Ngo</span>
+  </div>
+</div>
+
+<header class="lesson-header">
+  <div class="header-inner">
+    <span class="eyebrow">MOT-101 · Day 2 · Lesson 4 · 4 Contact Hours</span>
+    <h1>IT Protocols Inside Shipboard &amp; Port Networks</h1>
+    <p class="tagline">Ethernet, TCP/IP, VLANs, DHCP, DNS, and NTP as they actually appear on a vessel LAN and in a port terminal network — and why satellite backhaul and GNSS-derived time change how these get used.</p>
+    <div class="meta-row">
+      <span class="meta-item">📊 Intermediate</span>
+      <span class="meta-item">⏱ 4 hours</span>
+      <span class="meta-item">🎯 5 objectives</span>
+      <div class="header-actions">
+        <button class="btn-header" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+        <button class="btn-header" onclick="window.print()">🖨 Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav" aria-label="Lesson sections">
+  <div class="section-nav-inner" id="sectionNav">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#s1" data-section="s1">Ethernet &amp; TCP/IP</a>
+    <a href="#s2" data-section="s2">VLAN Segmentation</a>
+    <a href="#s3" data-section="s3">DHCP &amp; DNS</a>
+    <a href="#s4" data-section="s4">NTP &amp; GNSS Time</a>
+    <a href="#s5" data-section="s5">VSAT Backhaul</a>
+    <a href="#activity" data-section="activity">Activity</a>
+    <a href="#simulation" data-section="simulation">Simulation</a>
+    <a href="#review" data-section="review">Review</a>
+  </div>
+</nav>
+
+<div class="layout">
+<main id="main">
+
+  <section id="overview" class="module">
+    <div class="overview-box">
+      <h2>Lesson Overview</h2>
+      <p>By the time a modern vessel leaves the yard, its bridge, engine room, cargo systems, and crew accommodation are almost certainly wired with the same physical technology as a shore-side office: switched <dfn id="def-ethernet">Ethernet</dfn> carrying <dfn id="def-tcpip">TCP/IP</dfn> traffic. That is, in one sense, unremarkable — Ethernet and IP won the networking wars decades ago, on land and now afloat. What is easy to miss is that these familiar protocols do not behave identically on a ship the way they do in a building with a stable power grid, a wired internet uplink, and IT staff down the hall. A vessel is a mobile facility that is sometimes offline, that relies on a single expensive and latency-heavy satellite link for anything beyond the ship itself, and that increasingly derives its sense of time from the same satellite constellation it uses for navigation.</p>
+      <p>This lesson takes four pieces of everyday IT infrastructure — <dfn>VLANs</dfn>, <dfn>DHCP</dfn>, <dfn>DNS</dfn>, and <dfn>NTP</dfn> — and asks how each one is actually configured and used aboard ship and inside a port terminal network, where the assumptions of an always-online office LAN quietly stop applying. It closes with the constraint that shapes nearly every other design decision on a vessel network: the bandwidth, latency, and cost of the <dfn id="def-vsat">VSAT</dfn> satellite link connecting that network to the rest of the world.</p>
+      <div class="analogy-box">
+        <span class="analogy-label">Anchoring analogy</span>
+        <p>A shore office's network assumes it can always reach the internet, always resolve any domain name, and always fetch a fresh IP address on demand — the way a house assumes the tap always has running water. A ship's network has to behave more like a boat with a fixed-size water tank: some things (DHCP leases, DNS lookups, patch downloads) that a shore network treats as free and unlimited have to be budgeted, cached, or done without for days at a time between refills.</p>
+      </div>
+      <h3 style="margin-top:22px;font-size:1.05rem;">Learning objectives</h3>
+      <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.85rem;">By the end of this lesson, you will be able to:</p>
+      <ul class="lo-display">
+        <li>Explain how Ethernet and TCP/IP underlie modern vessel and terminal networks, and where marine-specific standards like IEC 61162-450 fit alongside general IT networking.</li>
+        <li>Describe how VLAN segmentation is used (or should be used) aboard ship to separate navigation, engine control, cargo, and crew Wi-Fi traffic.</li>
+        <li>Explain how DHCP and DNS behave differently in an intermittently-connected vessel environment compared with a typical always-online office LAN.</li>
+        <li>Explain why accurate time synchronization matters aboard ship and how GNSS is commonly used as the master time source for NTP.</li>
+        <li>Describe VSAT satellite backhaul's bandwidth, latency, and cost constraints, and their security implications for patching, monitoring, and log shipping.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="part-banner">Part A · Foundations Lecture</div>
+
+  <section id="s1" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🔌</span>
+      <h2>Ethernet and TCP/IP arrive on the bridge</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Lesson 1 traced how marine electronics moved from point-to-point NMEA 0183 serial links onto shared Ethernet backbones under <dfn>IEC 61162-450</dfn>, the marine industry's own standard for carrying NMEA sentences as UDP multicast packets over standard switched Ethernet. What that lesson did not dwell on is that this shift meant the bridge's sensor network started running on <em>exactly the same underlying technology stack</em> — Ethernet at the physical/data-link layer, IP at the network layer, UDP or TCP at the transport layer — as the vessel's business LAN, its crew Wi-Fi, and, for that matter, the office network ashore. IEC 61162-450 did not invent a new kind of network; it defined how marine sensor data should ride on the network everyone else was already using.</p>
+    <p>That convergence at the protocol level is exactly why a modern newbuild's network diagram can look deceptively similar to an office building's: switches, routers, DHCP scopes, VLANs, and IP subnets, all speaking Ethernet and TCP/IP. The meaningful differences are not in the protocols themselves but in how they are configured — how tightly (or loosely) traffic is segmented, how addresses are assigned, and how much of the network design assumes the ship is reachable from shore at any given moment.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — flat vs. segmented newbuild network</span>
+      <p>Two sister vessels are delivered from the same yard in the same year. On Vessel A, the yard's integrator wired ECDIS, the engine alarm monitoring system, the cargo control system, and the crew Wi-Fi access points all onto one flat Ethernet network with no VLANs — every device can, in principle, address every other device, because nothing in the switch configuration says otherwise. On Vessel B, the same equipment sits behind a switch configured with separate VLANs per function, with routing between them restricted by an internal firewall. Both vessels are running identical Ethernet and TCP/IP hardware and protocols. The security-relevant difference is entirely in the segmentation choices layered on top — which is exactly the subject of Module 2.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Learners with an IT background often assume "it's just Ethernet and TCP/IP" means shipboard networking is basically solved. Use this module to set up the rest of the lesson: the protocols are familiar, but the physical environment (single point of shore connectivity, no always-on internet, a crew that is not IT staff) changes how those familiar protocols should be configured — which is a recurring theme through Modules 2 through 5.</p>
+    </div>
+  </section>
+
+  <section id="s2" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🧱</span>
+      <h2>VLANs as the first line of shipboard segmentation</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p>A <dfn id="def-vlan">VLAN (Virtual LAN)</dfn> is a way of dividing one physical switched network into several logically separate broadcast domains without running separate physical cabling for each one. A single switch chassis can carry navigation traffic, engine control traffic, cargo monitoring traffic, and crew Wi-Fi traffic on four different VLANs, each isolated from the others unless a router or firewall is deliberately configured to pass traffic between them. On a vessel where running fully separate physical networks to every deck would be expensive and heavy, VLANs are usually the first and cheapest segmentation tool available.</p>
+    <p>VLANs are not a substitute for a firewall — traffic within a VLAN is still fully open, and a misconfigured trunk port or an access port assigned to the wrong VLAN can undermine the whole scheme. But used correctly, a VLAN scheme gives a vessel network a documented, auditable answer to a basic security question: which systems are supposed to be able to reach which other systems, by design, before any firewall rule is even considered.</p>
+    <table class="compare-table">
+      <caption>A typical shipboard VLAN scheme</caption>
+      <thead>
+        <tr><th scope="col">VLAN ID</th><th scope="col">Purpose</th><th scope="col">Example devices</th><th scope="col">Trust level</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>VLAN 10</td><td>Bridge / navigation</td><td>ECDIS, radar/ARPA, autopilot, gyrocompass</td><td>High — safety-critical, tightly restricted</td></tr>
+        <tr><td>VLAN 20</td><td>Engine control &amp; machinery monitoring</td><td>Engine control room HMI, alarm monitoring system, machinery automation controllers</td><td>High — safety-critical, tightly restricted</td></tr>
+        <tr><td>VLAN 30</td><td>Cargo control</td><td>Cargo control room workstations, tank level and pressure monitoring</td><td>Medium-high — operationally critical, isolated from bridge/engine</td></tr>
+        <tr><td>VLAN 40</td><td>Crew welfare Wi-Fi</td><td>Personal phones, laptops, tablets</td><td>Low — untrusted, internet-facing</td></tr>
+        <tr><td>VLAN 50</td><td>Business / administrative LAN</td><td>Purser's office PC, crewing and payroll systems, print servers</td><td>Medium — office use, some shore connectivity</td></tr>
+      </tbody>
+    </table>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>A VLAN scheme is like a cruise ship deck plan that puts the bridge, the engine spaces, and the passenger decks on different levels connected only by controlled stairwells — everyone is still inside the same hull, but you cannot wander from the passenger deck straight onto the bridge without passing through a door someone has to deliberately open for you.</p>
+    </div>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example</span>
+      <p>A ferry operator discovers, during an audit, that its crew Wi-Fi access points are plugged into access ports configured for VLAN 10 — the bridge navigation VLAN — because the original installer ran out of ports on the switch reserved for VLAN 40 and used whatever was available. On paper, the vessel "has VLANs." In practice, any device joining crew Wi-Fi sits on the same broadcast domain as the ECDIS and autopilot. The lesson is not that VLANs failed; it is that a VLAN scheme is only as good as its ongoing configuration discipline.</p>
+    </div>
+  </section>
+
+  <section id="s3" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🌐</span>
+      <h2>DHCP and DNS in an intermittently-connected environment</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>In a typical office LAN, <dfn>DHCP</dfn> hands out IP addresses on demand and <dfn>DNS</dfn> resolves domain names by querying upstream servers over an always-available internet connection. Neither assumption holds unmodified aboard ship. Many OT devices — ECDIS units, radar processors, engine automation controllers — are configured with static IP addresses rather than DHCP-assigned ones. A static address means a device's address never changes unexpectedly, which matters when other systems, firewall rules, and documentation all reference that device by a fixed IP; the tradeoff is that reconfiguring a static address (moving a device to a new VLAN, for instance) is manual work rather than something DHCP would handle automatically.</p>
+    <p>DHCP still has a role aboard ship — it is the natural choice for the crew Wi-Fi VLAN, where transient personal devices join and leave constantly and predictability of any one address is not a design goal. DNS, meanwhile, often relies on local or cached resolution rather than live upstream queries, because a vessel can be entirely offline from the internet for stretches of a voyage — through a dead zone, a satellite outage, or simply because the ship's connectivity plan doesn't include always-on data. A shipboard network commonly runs its own internal DNS server (or relies on hosts-file style static entries) for names that must resolve locally regardless of whether the VSAT link is up.</p>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>Ask learners to imagine configuring a home office network that has to keep working correctly for three days if the internet modem is unplugged. Static addressing for anything that matters and local-only name resolution for critical services both start to look like obviously reasonable design choices rather than exotic maritime quirks once framed that way.</p>
+    </div>
+  </section>
+
+  <div class="part-banner">Part B · Applied Practice</div>
+
+  <section id="s4" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">⏱️</span>
+      <h2>NTP, GNSS, and why time matters</h2>
+      <span class="module-time">≈ 35 min</span>
+    </div>
+    <p><dfn id="def-ntp">NTP (Network Time Protocol)</dfn> synchronizes device clocks across a network so that every system agrees, to within a small tolerance, on what time it is. Aboard ship this matters for reasons that go well beyond convenience. Alarm sequencing depends on accurate timestamps to establish which alarm fired first in a cascading failure. Log correlation across the bridge, engine room, and cargo systems depends on every device's clock agreeing closely enough that events from different systems can be lined up in the right order during an investigation. The <dfn id="def-vdr">Voyage Data Recorder (VDR)</dfn> — the maritime equivalent of an aircraft's flight data recorder — depends on accurate timestamping to reconstruct the sequence of events before an incident.</p>
+    <p>Rather than relying on an internet-based NTP server that may be unreachable for days at a time, vessels commonly use a <dfn>GNSS</dfn> receiver as the master time source for shipboard NTP. GPS and other GNSS constellations broadcast an extremely accurate time signal as part of their normal operation — a signal the ship already receives continuously for navigation — so deriving network time from the same receiver is a natural and low-cost design choice that does not depend on the VSAT link being up. This convenience has a downside worth flagging now and returning to in Lesson 11: if the GNSS signal itself can be spoofed or jammed, the ship's entire sense of time — not just its position — is exposed to that same manipulation.</p>
+    <div class="worked-example">
+      <span class="worked-example-label">Worked example — a log correlation failure</span>
+      <p>During an incident investigation, analysts try to reconstruct the sequence of events leading to an engine trip. The bridge alarm log, sourced from a device syncing time from the ship's GNSS-derived NTP server, shows an alarm at 14:32:07. The engine control system's log, from a controller whose clock had drifted because its NTP client had silently failed months earlier, shows the same physical event at 14:29:41 — nearly three and a half minutes off. Investigators initially assume two separate events occurred, and lose time reconciling the timeline before realizing one clock was simply wrong. The underlying failure was not the alarm logic; it was an unmonitored clock drift that nobody had alerted on.</p>
+    </div>
+    <div class="teach-note">
+      <span class="teach-label">Teaching note</span>
+      <p>This is a good moment to preview Lesson 11's treatment of GNSS spoofing and time-sync integrity out loud: everything in this module assumes the GNSS time signal itself is trustworthy. That assumption is exactly what Lesson 11 challenges.</p>
+    </div>
+  </section>
+
+  <section id="s5" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">🛰️</span>
+      <h2>VSAT backhaul: bandwidth, latency, cost — and what that means for security</h2>
+      <span class="module-time">≈ 30 min</span>
+    </div>
+    <p>Nearly everything discussed so far — remote vendor patching, log shipping to a shore SOC, live dashboards, GNSS-independent NTP fallback — ultimately depends on the vessel's <dfn>VSAT</dfn> link, and that link is a much scarcer resource than most shore-side network designers assume. Depending on the plan and hardware, a vessel's total shared bandwidth might range from a few hundred kilobits per second up to a handful of megabits per second — shared across every system and every crew member aboard, all at once. Many plans also charge per megabyte transferred, which means a security control that silently ships large volumes of log data to shore can turn into an unexpectedly large invoice, not just a technical inconvenience.</p>
+    <p>Geostationary VSAT links also carry inherent latency: a signal traveling roughly 35,800 kilometers up to the satellite and back down, then the same distance in reverse for the reply, adds up to a round-trip time of 500 milliseconds or more before any processing delay is even counted. That latency does not just make a video call feel sluggish — it changes what "remote monitoring" or "remote diagnostics" can realistically mean. A shore-based analyst reacting to a live alarm feed over a half-second-plus delay is not operating in real time in the way an office-based IT helpdesk would assume.</p>
+    <div class="analogy-box">
+      <span class="analogy-label">Anchoring analogy</span>
+      <p>Think of a vessel's VSAT allocation the way you would think of a single household internet plan shared across every device in an entire apartment building — video streaming, video calls, downloads, and background updates all competing for the same modest pipe. On a ship, "the household" also includes the engine's telemetry upload, the OEM's remote diagnostic session, and the alarm log shipping to shore — all fighting the crew's Wi-Fi for the same limited, and often metered, connection.</p>
+    </div>
+    <p>The practical security implications follow directly from these constraints. Patch downloads have to be scheduled, batched, or delivered on removable media rather than pushed automatically the way an office IT team might push updates overnight. Remote monitoring and log shipping have to be designed around what fits in the available bandwidth budget without starving safety-critical traffic or blowing through a data cap — a design problem Module 5's simulation lets you experience directly.</p>
+  </section>
+
+  <section id="activity" class="module">
+    <div class="activity-block">
+      <div class="activity-head">
+        <span aria-hidden="true">🧩</span>
+        <h3>Activity: Match the Protocol Behavior to Its Shipboard Reality</h3>
+        <span class="activity-structure">Individual, then pair-share</span>
+        <span class="activity-time">≈ 20 min</span>
+      </div>
+      <div class="activity-body">
+        <p class="activity-instructions"><strong>Individual (10 min):</strong> For each protocol behavior below, select the shipboard reality that best matches it. <strong>Pair-share (10 min):</strong> Compare your answers with a neighbor and resolve any disagreements before checking.</p>
+        <div class="mapping-table-wrap">
+          <table class="mapping-table" id="mappingTable">
+            <thead>
+              <tr><th scope="col">Protocol behavior</th><th scope="col">Best-matching shipboard reality</th></tr>
+            </thead>
+            <tbody>
+              <tr class="map-row" data-answer="static">
+                <td>Static IP addressing on OT devices (ECDIS, radar, engine controllers)</td>
+                <td>
+                  <select aria-label="Shipboard reality for static IP addressing on OT devices">
+                    <option value="">— Select —</option>
+                    <option value="static">Predictable but hard to reconfigure</option>
+                    <option value="dhcp">Convenient onboarding for transient devices</option>
+                    <option value="gnss">Time sync dependent on satellite signal integrity</option>
+                    <option value="segmented">Isolated from bridge/navigation traffic</option>
+                    <option value="flat">Any device can reach any other</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="dhcp">
+                <td>DHCP on the crew Wi-Fi VLAN</td>
+                <td>
+                  <select aria-label="Shipboard reality for DHCP on the crew Wi-Fi VLAN">
+                    <option value="">— Select —</option>
+                    <option value="static">Predictable but hard to reconfigure</option>
+                    <option value="dhcp">Convenient onboarding for transient devices</option>
+                    <option value="gnss">Time sync dependent on satellite signal integrity</option>
+                    <option value="segmented">Isolated from bridge/navigation traffic</option>
+                    <option value="flat">Any device can reach any other</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="gnss">
+                <td>GNSS-sourced NTP for shipboard clock synchronization</td>
+                <td>
+                  <select aria-label="Shipboard reality for GNSS-sourced NTP">
+                    <option value="">— Select —</option>
+                    <option value="static">Predictable but hard to reconfigure</option>
+                    <option value="dhcp">Convenient onboarding for transient devices</option>
+                    <option value="gnss">Time sync dependent on satellite signal integrity</option>
+                    <option value="segmented">Isolated from bridge/navigation traffic</option>
+                    <option value="flat">Any device can reach any other</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="segmented">
+                <td>VLAN-segmented cargo control network</td>
+                <td>
+                  <select aria-label="Shipboard reality for VLAN-segmented cargo network">
+                    <option value="">— Select —</option>
+                    <option value="static">Predictable but hard to reconfigure</option>
+                    <option value="dhcp">Convenient onboarding for transient devices</option>
+                    <option value="gnss">Time sync dependent on satellite signal integrity</option>
+                    <option value="segmented">Isolated from bridge/navigation traffic</option>
+                    <option value="flat">Any device can reach any other</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class="map-row" data-answer="flat">
+                <td>Unsegmented flat legacy network with no VLANs</td>
+                <td>
+                  <select aria-label="Shipboard reality for unsegmented flat legacy network">
+                    <option value="">— Select —</option>
+                    <option value="static">Predictable but hard to reconfigure</option>
+                    <option value="dhcp">Convenient onboarding for transient devices</option>
+                    <option value="gnss">Time sync dependent on satellite signal integrity</option>
+                    <option value="segmented">Isolated from bridge/navigation traffic</option>
+                    <option value="flat">Any device can reach any other</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mapping-actions">
+          <button class="btn" id="checkMapping">Check My Mapping</button>
+          <button class="btn secondary" id="resetMapping">Reset</button>
+          <span class="mapping-result" id="mappingResult" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulation" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📡</span>
+      <h2>Simulation: VSAT Bandwidth Budget Simulator</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <span class="safety-flag">⚠ Simulation only — no live equipment</span>
+    <p>Click each competing bandwidth user below, in any order, to see how the ship's limited VSAT pipe gets divided — and what gets starved as demand grows. Nothing here touches a real network — this is a model of a shared, limited resource, not a live bandwidth test.</p>
+    <div class="activity-block">
+      <div class="activity-body">
+        <div class="sim-controls" role="group" aria-label="Competing bandwidth users">
+          <button type="button" class="sim-toggle" data-conn="streaming" aria-pressed="false">Crew Wi-Fi streaming</button>
+          <button type="button" class="sim-toggle" data-conn="telemetry" aria-pressed="false">Engine telemetry upload</button>
+          <button type="button" class="sim-toggle" data-conn="oem" aria-pressed="false">Remote OEM diagnostic session</button>
+          <button type="button" class="sim-toggle" data-conn="patch" aria-pressed="false">Software patch download</button>
+        </div>
+        <div class="sim-meter-wrap">
+          <div class="sim-meter-label"><span>Available bandwidth</span><span id="simMeterValue">100%</span></div>
+          <div class="sim-meter-track"><div class="sim-meter-fill" id="simMeterFill" style="width:100%;"></div></div>
+        </div>
+        <div class="sim-readout" id="simReadout" aria-live="polite">
+          <strong>Starting state:</strong> the VSAT link is idle and the full bandwidth budget is available. Select a bandwidth user above to see what it costs.
+        </div>
+        <div class="mapping-actions">
+          <button class="btn secondary" id="simReset">Reset Simulation</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">✅</span>
+      <h2>Review &amp; Knowledge Check</h2>
+      <span class="module-time">≈ 15 min</span>
+    </div>
+    <p>Five questions covering the lesson's key distinctions. Answer each, then select <strong>Grade My Quiz</strong> to see your score and an explanation for every item.</p>
+    <div class="quiz-block" id="quizBlock">
+
+      <div class="q-card" data-answer="b">
+        <div class="q-stem"><span class="q-num">Q1.</span>What did IEC 61162-450 actually change about shipboard networking?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q1" value="a"> It replaced Ethernet and TCP/IP with a new marine-specific protocol stack.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="b"> It defined how NMEA sentences could ride over standard Ethernet and UDP multicast, putting bridge sensor data on the same underlying stack as the ship's business LAN.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="c"> It required every OT device aboard ship to use DHCP instead of static addressing.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q1" value="d"> It mandated satellite connectivity for all commercial vessels.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb1"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q2.</span>Why do shipboard network designers use VLANs to separate navigation, engine control, cargo, and crew Wi-Fi traffic?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q2" value="a"> VLANs are required to make Ethernet function correctly aboard ship.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="b"> VLANs eliminate the need for any firewall between segments.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="c"> VLANs give a documented, logical separation of traffic on shared physical switches without the cost of running fully separate cabling.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q2" value="d"> VLANs are only used on the crew Wi-Fi network, never on OT segments.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb2"></div>
+      </div>
+
+      <div class="q-card" data-answer="a">
+        <div class="q-stem"><span class="q-num">Q3.</span>Why do many OT devices aboard ship use static IP addressing rather than DHCP?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q3" value="a"> Static addressing gives predictable, unchanging addresses that other systems and documentation can reliably reference, at the cost of manual reconfiguration.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="b"> OT devices are technically incapable of running a DHCP client.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="c"> DHCP is prohibited by IMO regulation on all vessel networks.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q3" value="d"> Static addressing is required for any device connected to crew Wi-Fi.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb3"></div>
+      </div>
+
+      <div class="q-card" data-answer="d">
+        <div class="q-stem"><span class="q-num">Q4.</span>Why is GNSS commonly used as the master time source for shipboard NTP?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q4" value="a"> GNSS receivers are more accurate than any internet-based NTP server under all conditions.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="b"> IMO regulation requires GNSS to be the only permitted time source aboard ship.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="c"> GNSS eliminates the possibility of clock drift entirely.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q4" value="d"> The ship already receives a continuous, accurate GNSS time signal for navigation, making it a natural and low-cost source that doesn't depend on the VSAT link being up.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb4"></div>
+      </div>
+
+      <div class="q-card" data-answer="c">
+        <div class="q-stem"><span class="q-num">Q5.</span>How do VSAT's bandwidth, latency, and cost constraints typically shape security design decisions aboard ship?</div>
+        <ul class="q-opts">
+          <li class="q-opt"><label><input type="radio" name="q5" value="a"> They have no practical effect, since VSAT bandwidth is effectively unlimited on modern vessels.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="b"> They mean patching and log shipping should always happen continuously and automatically, exactly as in a shore office.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="c"> They mean patch downloads, log shipping, and remote monitoring have to be scheduled, batched, or otherwise designed around a limited, shared, and sometimes metered link with 500ms+ round-trip latency.</label></li>
+          <li class="q-opt"><label><input type="radio" name="q5" value="d"> They only affect crew Wi-Fi and have no bearing on OT security design.</label></li>
+        </ul>
+        <div class="q-feedback" id="fb5"></div>
+      </div>
+
+    </div>
+    <div class="mapping-actions">
+      <button class="btn" id="gradeQuiz">Grade My Quiz</button>
+      <button class="btn secondary" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <div class="quiz-score" id="quizScore">
+      <span class="quiz-score-big" id="quizScoreBig">0 / 5</span>
+      <span id="quizScoreText"></span>
+    </div>
+
+    <div class="teach-note" style="margin-top:26px;">
+      <span class="teach-label">Suggested assessment artifact</span>
+      <p>Have each learner sketch a five-VLAN scheme for a hypothetical vessel of their choosing (a tanker, a ferry, a container ship), naming each VLAN's purpose and justifying which segments should — and should not — be able to route to each other. This is a low-stakes way to confirm the segmentation vocabulary transferred before Lesson 5 builds protocol detail on top of it.</p>
+    </div>
+  </section>
+
+  <section id="further-reading" class="module">
+    <div class="module-head">
+      <span class="module-icon" aria-hidden="true">📚</span>
+      <h2>Further Reading</h2>
+    </div>
+    <ul class="resource-list">
+      <li><a href="https://csrc.nist.gov/pubs/sp/800/82/r3/final" target="_blank" rel="noopener noreferrer">NIST SP 800-82 Rev. 3: Guide to Operational Technology (OT) Security</a> — the standard federal reference for network segmentation, addressing, and time-synchronization guidance applicable to shipboard OT networks.</li>
+      <li><a href="https://www.bimco.org/about-us-and-our-members/publications/the-guidelines-on-cyber-security-onboard-ships" target="_blank" rel="noopener noreferrer">BIMCO — The Guidelines on Cyber Security Onboard Ships</a> — industry guidance covering network architecture, segmentation, and connectivity practices referenced throughout this lesson.</li>
+    </ul>
+  </section>
+
+  <nav class="lesson-nav-bottom" aria-label="Lesson navigation">
+    <a class="nav-btn" href="lesson03.html">← Lesson 3: Maritime OT Technologies &amp; Field Devices</a>
+    <a class="nav-btn" href="lesson05.html">Lesson 5: Maritime &amp; Industrial Communication Protocols →</a>
+  </nav>
+
+</main>
+
+<aside class="sidebar" aria-label="Lesson tools">
+
+  <div class="card">
+    <div class="sidebar-title">On This Page</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Lesson Overview</a></li>
+      <li><a href="#s1">1. Ethernet &amp; TCP/IP</a></li>
+      <li><a href="#s2">2. VLAN Segmentation</a></li>
+      <li><a href="#s3">3. DHCP &amp; DNS</a></li>
+      <li><a href="#s4">4. NTP &amp; GNSS Time</a></li>
+      <li><a href="#s5">5. VSAT Backhaul</a></li>
+      <li><a href="#activity">Activity: Mapping Exercise</a></li>
+      <li><a href="#simulation">Simulation: Bandwidth Budget</a></li>
+      <li><a href="#review">Review &amp; Knowledge Check</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Objectives Progress</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 5 checked off</div>
+    <ul class="lo-list" id="loList" role="group" aria-label="Learning objectives checklist">
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo1"><label for="lo1">Explain how Ethernet/TCP-IP underlie vessel and terminal networks</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo2"><label for="lo2">Describe shipboard VLAN segmentation practice</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo3"><label for="lo3">Explain DHCP/DNS behavior when intermittently connected</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo4"><label for="lo4">Explain NTP/GNSS time sync and its importance</label></li>
+      <li class="lo-item"><input type="checkbox" class="lo-check" id="lo5"><label for="lo5">Describe VSAT constraints and their security implications</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Key Terms</div>
+    <ul class="glossary-list">
+      <li><a href="#s2"><span class="glossary-term">VLAN</span></a><span class="glossary-def">Virtual LAN — a logical segmentation of a physical switched network into separate broadcast domains, such as navigation, engine, cargo, and crew Wi-Fi, without requiring separate physical cabling.</span></li>
+      <li><a href="#s3"><span class="glossary-term">DHCP</span></a><span class="glossary-def">Dynamic Host Configuration Protocol — automatically assigns IP addresses to devices joining a network; common for crew Wi-Fi, less common for OT devices that favor static addressing.</span></li>
+      <li><a href="#s4"><span class="glossary-term">NTP</span></a><span class="glossary-def">Network Time Protocol — synchronizes device clocks across a network; aboard ship, often sourced from a GNSS receiver to keep logs, alarms, and the VDR aligned to one accurate reference time.</span></li>
+      <li><a href="#s5"><span class="glossary-term">VSAT</span></a><span class="glossary-def">Very Small Aperture Terminal — the satellite dish and modem providing a vessel's primary broadband link to shore, typically constrained by limited bandwidth, high per-MB cost, and geostationary latency.</span></li>
+      <li><a href="#s2"><span class="glossary-term">Segmentation</span></a><span class="glossary-def">The practice of dividing a network into isolated zones, such as by VLAN, so that a compromise or fault in one zone does not automatically propagate to another.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="sidebar-title">Lesson Navigation</div>
+    <div class="prevnext-links">
+      <a href="lesson03.html">← Previous: Lesson 3 — Maritime OT Technologies &amp; Field Devices</a>
+      <a href="lesson05.html">Next: Lesson 5 — Maritime &amp; Industrial Communication Protocols →</a>
+    </div>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Lesson 4 · Day 2 · IT Protocols Inside Shipboard &amp; Port Networks<br>
+  Maritime Operational Technology Security &nbsp;|&nbsp; Curriculum by Clark Ngo<br>
+  Educational use only — all activities are simulation-based and defensive in scope.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    try { localStorage.setItem('mot-theme', theme); } catch (e) { /* storage unavailable */ }
+  }
+  window.toggleTheme = function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('mot-theme'); } catch (e) { /* storage unavailable */ }
+    applyTheme(saved === 'dark' ? 'dark' : 'light');
+  })();
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#sectionNav a'));
+  var sections = navLinks.map(function (a) {
+    return document.getElementById(a.getAttribute('data-section'));
+  }).filter(Boolean);
+
+  function updateActiveSection() {
+    var scrollPos = window.scrollY + 120;
+    var activeIdx = 0;
+    sections.forEach(function (sec, i) {
+      if (sec.offsetTop <= scrollPos) activeIdx = i;
+    });
+    navLinks.forEach(function (a, i) {
+      a.classList.toggle('active', i === activeIdx);
+    });
+  }
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  updateActiveSection();
+
+  var loChecks = Array.prototype.slice.call(document.querySelectorAll('.lo-check'));
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress() {
+    var checkedCount = loChecks.filter(function (c) { return c.checked; }).length;
+    var pct = Math.round((checkedCount / loChecks.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = checkedCount + ' of ' + loChecks.length + ' checked off';
+    loChecks.forEach(function (c) {
+      c.closest('.lo-item').classList.toggle('done', c.checked);
+      c.setAttribute('aria-checked', c.checked ? 'true' : 'false');
+    });
+  }
+  loChecks.forEach(function (c) {
+    c.setAttribute('role', 'checkbox');
+    c.addEventListener('change', updateProgress);
+  });
+  updateProgress();
+
+  var mappingRows = Array.prototype.slice.call(document.querySelectorAll('#mappingTable .map-row'));
+  var mappingResult = document.getElementById('mappingResult');
+
+  document.getElementById('checkMapping').addEventListener('click', function () {
+    var correctCount = 0;
+    var totalAnswered = 0;
+    mappingRows.forEach(function (row) {
+      var select = row.querySelector('select');
+      var correctVal = row.getAttribute('data-answer');
+      row.classList.remove('correct', 'incorrect');
+      if (!select.value) return;
+      totalAnswered++;
+      if (select.value === correctVal) {
+        row.classList.add('correct');
+        correctCount++;
+      } else {
+        row.classList.add('incorrect');
+      }
+    });
+    mappingResult.textContent = correctCount + ' of ' + mappingRows.length + ' correct'
+      + (totalAnswered < mappingRows.length ? ' (some rows left unanswered)' : '');
+  });
+
+  document.getElementById('resetMapping').addEventListener('click', function () {
+    mappingRows.forEach(function (row) {
+      row.querySelector('select').value = '';
+      row.classList.remove('correct', 'incorrect');
+    });
+    mappingResult.textContent = '';
+  });
+
+  var simState = { streaming: false, telemetry: false, oem: false, patch: false };
+  var simMessages = {
+    streaming: "Crew Wi-Fi streaming: video and music streaming from personal devices starts consuming a steady share of the shared VSAT pipe. Individually modest, but it competes directly with every operational use of the same link.",
+    telemetry: "Engine telemetry upload: continuous vibration, temperature, and cycle-count data streams out to the OEM's predictive-maintenance platform ashore. Valuable for maintenance planning, but it is now a standing background load on the same limited link.",
+    oem: "Remote OEM diagnostic session: a vendor technician ashore opens an interactive session to diagnose a control system fault. Interactive sessions are latency-sensitive and bandwidth-hungry at the same time — a difficult combination on a geostationary VSAT link.",
+    patch: "Software patch download: a multi-megabyte security patch begins downloading in the background. On a metered plan this is also a direct cost, and on a shared pipe it can silently starve everything else running at the same time."
+  };
+  var simMeterFill = document.getElementById('simMeterFill');
+  var simMeterValue = document.getElementById('simMeterValue');
+  var simReadout = document.getElementById('simReadout');
+
+  function updateSim() {
+    var activeCount = Object.keys(simState).filter(function (k) { return simState[k]; }).length;
+    var pct = 100 - (activeCount * 25);
+    simMeterFill.style.width = pct + '%';
+    simMeterValue.textContent = pct + '%';
+    simMeterFill.style.background = pct >= 75 ? 'var(--ok)' : (pct >= 50 ? 'var(--accent)' : 'var(--bad)');
+
+    if (activeCount === 0) {
+      simReadout.innerHTML = '<strong>Starting state:</strong> the VSAT link is idle and the full bandwidth budget is available. Select a bandwidth user above to see what it costs.';
+    } else {
+      var lastKey = Object.keys(simState).filter(function (k) { return simState[k]; }).slice(-1)[0];
+      var html = '<strong>Just started:</strong> ' + simMessages[lastKey];
+      if (activeCount === 4) {
+        html += '<br><br><strong>Result:</strong> all four demands are now active and the bandwidth budget is exhausted. Low-priority background tasks — most likely the alarm log upload to shore — start falling behind, queuing up rather than failing outright, and may not catch up until crew streaming or the patch download finishes. This is exactly the kind of contention a bandwidth-aware monitoring design has to anticipate rather than discover during an incident.';
+      }
+      simReadout.innerHTML = html;
+    }
+  }
+
+  document.querySelectorAll('.sim-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-conn');
+      simState[key] = !simState[key];
+      btn.setAttribute('aria-pressed', simState[key] ? 'true' : 'false');
+      updateSim();
+    });
+  });
+  document.getElementById('simReset').addEventListener('click', function () {
+    Object.keys(simState).forEach(function (k) { simState[k] = false; });
+    document.querySelectorAll('.sim-toggle').forEach(function (btn) { btn.setAttribute('aria-pressed', 'false'); });
+    updateSim();
+  });
+  updateSim();
+
+  var quizCards = Array.prototype.slice.call(document.querySelectorAll('#quizBlock .q-card'));
+  var quizFeedback = {
+    1: { correct: "Correct. IEC 61162-450 defined how NMEA sentences ride over standard Ethernet and UDP multicast — putting bridge sensor data on the same underlying stack as the rest of the ship's network.", incorrect: "Not quite. IEC 61162-450 didn't replace Ethernet/TCP-IP, mandate DHCP, or require satellite connectivity — it defined how marine sensor data could ride on the same Ethernet/IP stack everyone else already used." },
+    2: { correct: "Correct. VLANs give a documented, logical separation of traffic on shared physical switches without the cost of separate cabling for every function.", incorrect: "Not quite. VLANs aren't required for Ethernet to function, don't eliminate the need for firewalls, and are used on OT segments as much as (or more than) crew Wi-Fi." },
+    3: { correct: "Correct. Static addressing trades manual reconfiguration effort for predictable, unchanging addresses that other systems and documentation can rely on.", incorrect: "Not quite. OT devices can run DHCP clients, and there's no such IMO or Wi-Fi-specific rule — the driver is predictability for systems where address stability matters." },
+    4: { correct: "Correct. GNSS is already received continuously for navigation, making it a natural, low-cost time source that doesn't depend on the VSAT link — though that also means GNSS spoofing threatens time sync, not just position (previewed further in Lesson 11).", incorrect: "Not quite. GNSS doesn't eliminate clock drift risk and isn't mandated as the only source by regulation — it's chosen because it's already present and doesn't require internet connectivity." },
+    5: { correct: "Correct. Limited, shared, and often metered bandwidth with 500ms+ latency means patching, log shipping, and monitoring all have to be deliberately scheduled or batched rather than run continuously as in a shore office.", incorrect: "Not quite. VSAT bandwidth is a genuinely scarce, often costly resource — treating it as unlimited or shore-office-equivalent is exactly the assumption that causes problems." }
+  };
+
+  document.getElementById('gradeQuiz').addEventListener('click', function () {
+    var correctCount = 0;
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      var name = 'q' + qNum;
+      var selected = card.querySelector('input[name="' + name + '"]:checked');
+      var fb = document.getElementById('fb' + qNum);
+      var correctVal = card.getAttribute('data-answer');
+      fb.className = 'q-feedback show';
+      if (!selected) {
+        fb.classList.add('unanswered');
+        fb.textContent = 'Not answered — select an option above, then grade again.';
+        return;
+      }
+      if (selected.value === correctVal) {
+        fb.classList.add('correct');
+        fb.textContent = '✓ Correct — ' + quizFeedback[qNum].correct;
+        correctCount++;
+      } else {
+        fb.classList.add('incorrect');
+        fb.textContent = '✗ Not quite — ' + quizFeedback[qNum].incorrect;
+      }
+    });
+    var scoreBox = document.getElementById('quizScore');
+    var scoreBig = document.getElementById('quizScoreBig');
+    var scoreText = document.getElementById('quizScoreText');
+    scoreBox.classList.add('show');
+    scoreBig.textContent = correctCount + ' / ' + quizCards.length;
+    scoreText.textContent = correctCount === quizCards.length
+      ? 'All five — you are ready for Lesson 5.'
+      : (correctCount >= 3 ? 'Solid grasp — review the items you missed before Lesson 5.' : 'Worth a re-read of the sections above before moving on.');
+  });
+
+  document.getElementById('resetQuiz').addEventListener('click', function () {
+    quizCards.forEach(function (card, i) {
+      var qNum = i + 1;
+      card.querySelectorAll('input[type="radio"]').forEach(function (r) { r.checked = false; });
+      var fb = document.getElementById('fb' + qNum);
+      fb.className = 'q-feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('quizScore').classList.remove('show');
+  });
+
+})();
+</script>
+</body>
+</html>
